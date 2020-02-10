@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <View
+        android:id="@+id/indenter"
+        android:layout_width="1dp"
+        android:layout_height="0dp"
+        android:background="@color/sub_text"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@id/indenter"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Jamie" />
+
+    <TextView
+        android:id="@+id/time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="4h" />
+
+    <TextView
+        android:id="@+id/comment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@id/indenter"
+        app:layout_constraintTop_toBottomOf="@id/name"
+        tools:text="Efficiency in desalination is measured by comparing the energy expenditure to the enthalpy of vaporization of water (basically the energy required to distill water by boiling it). The current state of the art reverse osmosis desalination plants use about 3.2 KWh of electricity per cubic meter of fresh water (https://pdfs.semanticscholar.org/d4d7/821d585699719289dddd10...). This technology uses about 173 KWh of solar energy per cubic meter of fresh water. The advantage of this method is lower capital costs and not having to convert solar energy to electricity. For large-scale desalination, however, it is almost certainly more cost-effective to use solar panels, batteries, and large scale reverse osmosis systems. This is still a useful project for making drinking water in remote locations, though." />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

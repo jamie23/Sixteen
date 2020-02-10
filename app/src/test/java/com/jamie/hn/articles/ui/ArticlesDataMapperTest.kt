@@ -1,8 +1,6 @@
-package com.jamie.hn.articles
+package com.jamie.hn.articles.ui
 
 import com.jamie.hn.articles.domain.Article
-import com.jamie.hn.articles.ui.ArticleDataMapper
-import com.jamie.hn.articles.ui.ArticleResourceProvider
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK

@@ -1,5 +1,6 @@
 package com.jamie.hn.articles.di
 
+import com.jamie.hn.articles.domain.ArticlesUseCase
 import com.jamie.hn.articles.net.ArticlesRepository
 import com.jamie.hn.articles.ui.ArticleDataMapper
 import com.jamie.hn.articles.ui.ArticleListViewModel
@@ -13,4 +14,5 @@ val articlesModule =
         single { ArticlesRepository(get()) }
         single { ArticleDataMapper(get()) }
         single { ArticleResourceProvider(get()) }
+        single { ArticlesUseCase(get()) }
     }

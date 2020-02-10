@@ -4,13 +4,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jamie.hn.articles.domain.Article
-import com.jamie.hn.articles.net.ArticlesRepository
+import com.jamie.hn.articles.domain.ArticlesUseCase
 import kotlinx.coroutines.*
 
 class ArticleListViewModel(
-    private val articlesRepository: ArticlesRepository,
-    private val articleDataMapper: ArticleDataMapper
+    private val articleDataMapper: ArticleDataMapper,
+    private val articlesUseCase: ArticlesUseCase
 ) : ViewModel() {
 
     private val articles = MutableLiveData<List<ArticleViewItem>>()
@@ -19,20 +18,7 @@ class ArticleListViewModel(
     fun init() {
         viewModelScope.launch {
             try {
-                val storyIds = articlesRepository.topStories()
-                val listStories = mutableListOf<Deferred<Article>>()
-
-                storyIds.forEach {
-                    listStories.add(
-                        async {
-                            println("Jamie id: $it")
-                            articlesRepository.story(it)
-                        }
-                    )
-                }
-
-                val results = listStories.awaitAll()
-
+                val results = articlesUseCase.getArticles()
                 articles.value = results.map { articleDataMapper.toArticleViewItem(it) }
             } catch (e: Exception) {
                 println(e)
