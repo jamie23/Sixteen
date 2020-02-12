@@ -13,7 +13,7 @@ import kotlinx.android.synthetic.main.article_list_fragment.view.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class ArticleListFragment : Fragment() {
-    private val viewModel: ArticleListViewModel by viewModel()
+    private val viewModel: ArticlesListViewModel by viewModel()
 
     private lateinit var articleListAdapter: ArticleListAdapter
 

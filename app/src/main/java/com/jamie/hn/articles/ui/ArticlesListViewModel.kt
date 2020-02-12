@@ -7,7 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.jamie.hn.articles.domain.ArticlesUseCase
 import kotlinx.coroutines.*
 
-class ArticleListViewModel(
+class ArticlesListViewModel(
     private val articleDataMapper: ArticleDataMapper,
     private val articlesUseCase: ArticlesUseCase
 ) : ViewModel() {
