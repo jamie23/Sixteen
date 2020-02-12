@@ -5,7 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jamie.hn.articles.domain.ArticlesUseCase
-import kotlinx.coroutines.*
+import kotlinx.coroutines.launch
 
 class ArticlesListViewModel(
     private val articleDataMapper: ArticleDataMapper,

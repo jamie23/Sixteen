@@ -1,7 +1,11 @@
 package com.jamie.hn.articles.domain
 
 import com.jamie.hn.articles.net.ArticlesRepository
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.withContext
 
 class ArticlesUseCase(
     private val articlesRepository: ArticlesRepository

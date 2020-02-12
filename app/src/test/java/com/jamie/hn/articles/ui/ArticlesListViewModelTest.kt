@@ -5,9 +5,12 @@ import com.jamie.hn.articles.domain.Article
 import com.jamie.hn.articles.domain.ArticlesUseCase
 import com.jamie.hn.core.BaseTest
 import com.jamie.hn.core.InstantExecutorExtension
-import io.mockk.*
+import io.mockk.MockKAnnotations
+import io.mockk.coEvery
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
+import io.mockk.mockk
+import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -15,7 +18,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import java.lang.Exception
 
 @ExtendWith(InstantExecutorExtension::class)
-class ArticlesListViewModelTest: BaseTest() {
+class ArticlesListViewModelTest : BaseTest() {
     @RelaxedMockK
     private lateinit var articlesDataMapper: ArticleDataMapper
     @MockK

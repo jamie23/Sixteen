@@ -1,7 +1,10 @@
 package com.jamie.hn.articles.ui
 
 import com.jamie.hn.articles.domain.Article
-import java.time.*
+import java.time.Duration
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
 
 class ArticleDataMapper(
     private val resourceProvider: ArticleResourceProvider
@@ -61,6 +64,4 @@ class ArticleDataMapper(
 
         return url.substring(4, url.length)
     }
-
-    private fun showLink(url: String) = url != ""
 }

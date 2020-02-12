@@ -12,20 +12,20 @@ import org.junit.jupiter.api.Test
 class ArticlesUseCaseTest {
 
     private lateinit var articlesUseCase: ArticlesUseCase
-    
+
     @RelaxedMockK
     private lateinit var articlesRepository: ArticlesRepository
-    
+
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
-        
-        articlesUseCase = ArticlesUseCase(articlesRepository)    
+
+        articlesUseCase = ArticlesUseCase(articlesRepository)
     }
-    
+
     @Test
     fun `when story ids are returned from the repository then get each individual story from the repository`() {
-        coEvery { articlesRepository.topStories()} returns listOf(1, 2, 3)
+        coEvery { articlesRepository.topStories() } returns listOf(1, 2, 3)
 
         runBlocking {
             articlesUseCase.getArticles()
