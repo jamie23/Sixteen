@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jamie.hn.articles.domain.ArticlesUseCase
+import com.jamie.hn.core.Event
 import kotlinx.coroutines.launch
 
 class ArticlesListViewModel(
@@ -15,6 +16,8 @@ class ArticlesListViewModel(
     private val articles = MutableLiveData<List<ArticleViewItem>>()
     fun articles(): LiveData<List<ArticleViewItem>> = articles
 
+    private val navigateToComments = MutableLiveData<Event<Long>>()
+    fun navigateToComments(): LiveData<Event<Long>> = navigateToComments
 
     fun init() {
         viewModelScope.launch {
@@ -29,6 +32,6 @@ class ArticlesListViewModel(
     }
 
     private fun comments(id: Long) {
-
+        navigateToComments.value = Event(id)
     }
 }

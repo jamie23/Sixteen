@@ -1,4 +1,4 @@
-package com.jamie.hn.core.web
+package com.jamie.hn.core.net
 
 import com.jamie.hn.articles.domain.Article
 import com.jamie.hn.comments.Comment

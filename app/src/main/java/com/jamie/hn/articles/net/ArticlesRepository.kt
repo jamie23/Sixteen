@@ -1,8 +1,8 @@
 package com.jamie.hn.articles.net
 
 import com.jamie.hn.articles.domain.Article
-import com.jamie.hn.core.web.HackerNewsService
-import com.jamie.hn.core.web.IconService
+import com.jamie.hn.core.net.HackerNewsService
+import com.jamie.hn.core.net.IconService
 
 class ArticlesRepository(
     private val hnService: HackerNewsService,

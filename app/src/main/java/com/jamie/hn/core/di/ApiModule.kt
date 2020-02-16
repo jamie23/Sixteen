@@ -1,7 +1,7 @@
 package com.jamie.hn.core.di
 
-import com.jamie.hn.core.web.HackerNewsService
-import com.jamie.hn.core.web.IconService
+import com.jamie.hn.core.net.HackerNewsService
+import com.jamie.hn.core.net.IconService
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory

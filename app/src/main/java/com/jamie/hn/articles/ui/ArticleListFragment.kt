@@ -39,5 +39,11 @@ class ArticleListFragment : Fragment() {
         viewModel.articles().observe(viewLifecycleOwner, Observer {
             articleListAdapter.data(it)
         })
+
+        viewModel.navigateToComments().observe(viewLifecycleOwner, Observer {
+           it.getContentIfNotHandled()?.let {
+                println(it)
+           }
+        })
     }
 }
