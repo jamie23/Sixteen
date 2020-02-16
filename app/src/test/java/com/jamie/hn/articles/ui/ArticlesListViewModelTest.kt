@@ -49,7 +49,7 @@ class ArticlesListViewModelTest : BaseTest() {
 
             articlesListViewModel.init()
 
-            verify(exactly = 3) { articlesDataMapper.toArticleViewItem(any()) }
+            verify(exactly = 3) { articlesDataMapper.toArticleViewItem(any(), any()) }
             verify(exactly = 1) { observer.onChanged(any()) }
         }
 
@@ -62,7 +62,7 @@ class ArticlesListViewModelTest : BaseTest() {
 
             articlesListViewModel.init()
 
-            verify(exactly = 0) { articlesDataMapper.toArticleViewItem(any()) }
+            verify(exactly = 0) { articlesDataMapper.toArticleViewItem(any(), any()) }
             verify(exactly = 0) { observer.onChanged(any()) }
         }
     }

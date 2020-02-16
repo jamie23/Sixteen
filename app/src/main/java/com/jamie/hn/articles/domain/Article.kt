@@ -8,5 +8,5 @@ data class Article(
     val time: Long = 0,
     val title: String = "",
     val url: String = "",
-    val iconUrl: String
+    val kids: List<Int> = emptyList()
 )

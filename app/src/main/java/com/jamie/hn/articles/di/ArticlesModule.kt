@@ -10,7 +10,7 @@ import org.koin.dsl.module
 
 val articlesModule =
     module {
-        viewModel { ArticlesListViewModel(get(), get(), get()) }
+        viewModel { ArticlesListViewModel(get(), get()) }
         single { ArticlesRepository(get(), get()) }
         single { ArticleDataMapper(get()) }
         single { ArticleResourceProvider(get()) }
