@@ -10,14 +10,16 @@ class ArticleDataMapper(
     private val resourceProvider: ArticleResourceProvider
 ) {
 
-    fun toArticleViewItem(article: Article): ArticleViewItem {
+    fun toArticleViewItem(article: Article, commentsCallback: (Long) -> Unit): ArticleViewItem {
         return ArticleViewItem(
+            article.id,
             article.by,
             comments(article.descendants),
             article.score.toString(),
             time(article.time),
             article.title,
-            url(article.url)
+            url(article.url),
+            commentsCallback
         )
     }
 

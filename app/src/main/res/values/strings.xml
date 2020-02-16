@@ -6,6 +6,7 @@
     <string name="hours">h</string>
     <string name="minutes">m</string>
 
+    <string name="icon_description">Icon for website</string>
     <plurals name="comments_plural">
         <item quantity="one">%d comment</item>
         <item quantity="other">%d comments</item>

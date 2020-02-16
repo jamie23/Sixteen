@@ -14,16 +14,17 @@ class ArticlesUseCase(
     suspend fun getArticles(): List<Article> {
         val storyIds = articlesRepository.topStories()
 
-        val listStories = mutableListOf<Deferred<Article>>()
+        val listArticles = mutableListOf<Deferred<Article>>()
 
         withContext(Dispatchers.IO) {
             storyIds.forEach {
-                listStories.add(
+                listArticles.add(
                     async {
                         articlesRepository.story(it)
                     })
             }
         }
-        return listStories.awaitAll()
+
+        return listArticles.awaitAll()
     }
 }

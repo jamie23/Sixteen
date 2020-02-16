@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import coil.api.load
 import com.jamie.hn.R
 import kotlinx.android.synthetic.main.article_item.view.*
 
@@ -34,5 +35,10 @@ class ArticleListAdapter : RecyclerView.Adapter<ArticleListAdapter.ArticleListHo
         holder.itemView.time.text = data[position].time
         holder.itemView.title.text = data[position].title
         holder.itemView.url.text = data[position].url
+        holder.itemView.setOnClickListener {
+            data[position].apply {
+                commentsCallback(id)
+            }
+        }
     }
 }
