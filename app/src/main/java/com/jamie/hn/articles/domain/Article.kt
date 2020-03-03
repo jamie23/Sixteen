@@ -7,6 +7,6 @@ data class Article(
     val score: Int = 0,
     val time: Long = 0,
     val title: String = "",
-    val url: String = "",
+    val url: String? = "",
     val kids: List<Int> = emptyList()
 )

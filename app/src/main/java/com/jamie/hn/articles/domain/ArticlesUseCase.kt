@@ -12,19 +12,24 @@ class ArticlesUseCase(
 ) {
 
     suspend fun getArticles(): List<Article> {
-        val storyIds = articlesRepository.topStories()
+        try {
+            val storyIds = articlesRepository.topStories()
+            val listArticles = mutableListOf<Deferred<Article>>()
 
-        val listArticles = mutableListOf<Deferred<Article>>()
-
-        withContext(Dispatchers.IO) {
-            storyIds.forEach {
-                listArticles.add(
-                    async {
-                        articlesRepository.story(it)
-                    })
+            withContext(Dispatchers.IO) {
+                storyIds.forEach {
+                    listArticles.add(
+                        async {
+                            articlesRepository.story(it)
+                        })
+                }
             }
+
+            return listArticles.awaitAll()
+        } catch (e: Exception) {
+            println(e)
         }
 
-        return listArticles.awaitAll()
+        return emptyList()
     }
 }

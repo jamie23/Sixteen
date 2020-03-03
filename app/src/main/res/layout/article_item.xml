@@ -87,9 +87,10 @@
 
         <ImageView
             android:id="@+id/icon"
-            android:layout_width="50dp"
+            android:layout_width="56dp"
             android:layout_height="50dp"
             android:contentDescription="@string/icon_description"
+            android:visibility="invisible"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/time"
             app:layout_constraintBottom_toBottomOf="@id/comments"

@@ -38,8 +38,8 @@ class ArticleDataMapper(
         return ""
     }
 
-    private fun url(url: String): String {
-        if (url.isEmpty()) return ""
+    private fun url(url: String?): String {
+        if (url.isNullOrEmpty()) return ""
 
         return removeWWW(removePath(removeProtocol(url)))
     }

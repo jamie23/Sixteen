@@ -1,5 +1,6 @@
 package com.jamie.hn.articles.ui
 
+import android.graphics.drawable.Drawable
 import com.jamie.hn.articles.domain.Article
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -15,7 +16,6 @@ class ArticlesDataMapperTest {
 
     @MockK
     private lateinit var articleResourceProvider: ArticleResourceProvider
-
     private lateinit var articleDataMapper: ArticleDataMapper
 
     @BeforeEach
@@ -111,6 +111,14 @@ class ArticlesDataMapperTest {
 
         @Test
         fun `when url is empty then return empty string`() {
+            val article = Article(url = "")
+
+            val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback)
+            assertEquals("", item.url)
+        }
+
+        @Test
+        fun `when url is null then return empty string`() {
             val article = Article(url = "")
 
             val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback)

@@ -41,8 +41,8 @@ class ArticleListFragment : Fragment() {
         })
 
         viewModel.navigateToComments().observe(viewLifecycleOwner, Observer {
-           it.getContentIfNotHandled()?.let {
-                println(it)
+           it.getContentIfNotHandled()?.let { id ->
+                println(id)
            }
         })
     }

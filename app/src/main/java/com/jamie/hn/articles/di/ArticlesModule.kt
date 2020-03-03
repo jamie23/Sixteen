@@ -11,7 +11,7 @@ import org.koin.dsl.module
 val articlesModule =
     module {
         viewModel { ArticlesListViewModel(get(), get()) }
-        single { ArticlesRepository(get(), get()) }
+        single { ArticlesRepository(get()) }
         single { ArticleDataMapper(get()) }
         single { ArticleResourceProvider(get()) }
         single { ArticlesUseCase(get()) }
