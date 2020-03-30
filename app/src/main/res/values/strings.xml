@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">HN</string>
-    <string name="articles_title">Articles</string>
 
+    <!-- Articles -->
+    <string name="articles_title">Articles</string>
     <string name="days">d</string>
     <string name="hours">h</string>
     <string name="minutes">m</string>
@@ -11,4 +12,7 @@
         <item quantity="one">%d comment</item>
         <item quantity="other">%d comments</item>
     </plurals>
+
+    <!-- Comments -->
+    <string name="comments_title">Comments</string>
 </resources>

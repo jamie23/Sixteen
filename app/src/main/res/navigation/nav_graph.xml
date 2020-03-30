@@ -9,5 +9,21 @@
         android:id="@+id/articleListFragment"
         android:name="com.jamie.hn.articles.ui.ArticleListFragment"
         android:label="@string/articles_title"
-        tools:layout="@layout/article_list_fragment" />
+        tools:layout="@layout/article_list_fragment">
+        <action
+            android:id="@+id/action_articlesList_to_commentsList"
+            app:destination="@id/commentsFragment">
+            <argument
+                android:name="article"
+                android:defaultValue="@null"
+                app:argType="com.jamie.hn.articles.domain.Article"
+                app:nullable="true" />
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/commentsFragment"
+        android:name="com.jamie.hn.comments.ui.CommentsFragment"
+        android:label="@string/comments_title"
+        tools:layout="@layout/comment_list_fragment" />
 </navigation>

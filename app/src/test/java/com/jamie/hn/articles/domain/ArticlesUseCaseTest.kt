@@ -1,6 +1,6 @@
 package com.jamie.hn.articles.domain
 
-import com.jamie.hn.articles.net.ArticlesRepository
+import com.jamie.hn.articles.repository.ArticlesRepository
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerifyOrder

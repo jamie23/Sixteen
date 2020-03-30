@@ -1,6 +1,7 @@
-package com.jamie.hn.articles.net
+package com.jamie.hn.articles.repository.net
 
 import com.jamie.hn.articles.domain.Article
+import com.jamie.hn.articles.repository.ArticlesRepository
 import com.jamie.hn.core.net.HackerNewsService
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
@@ -20,7 +21,8 @@ class ArticlesRepositoryTest {
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
-        articlesRepository = ArticlesRepository(hnService)
+        articlesRepository =
+            ArticlesRepository(hnService)
     }
 
     @Test

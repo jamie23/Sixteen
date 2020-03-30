@@ -1,6 +1,6 @@
 package com.jamie.hn.articles.domain
 
-import com.jamie.hn.articles.net.ArticlesRepository
+import com.jamie.hn.articles.repository.ArticlesRepository
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -32,4 +32,7 @@ class ArticlesUseCase(
 
         return emptyList()
     }
+
+    suspend fun getArticle(id: Long) =
+        articlesRepository.story(id)
 }

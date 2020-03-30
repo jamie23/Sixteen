@@ -1,6 +1,5 @@
 package com.jamie.hn.articles.ui
 
-import android.graphics.drawable.Drawable
 import com.jamie.hn.articles.domain.Article
 import io.mockk.MockKAnnotations
 import io.mockk.every
