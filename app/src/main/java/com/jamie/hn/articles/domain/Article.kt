@@ -1,6 +1,7 @@
 package com.jamie.hn.articles.domain
 
 import android.os.Parcelable
+import com.google.gson.annotations.SerializedName
 import com.jamie.hn.core.Item
 import kotlinx.android.parcel.Parcelize
 
@@ -13,5 +14,6 @@ data class Article(
     val time: Long = 0,
     val title: String = "",
     val url: String? = "",
-    override val kids: List<Long> = emptyList()
+    @SerializedName("kids")
+    override val childrenIds: List<Long> = emptyList()
 ) : Item, Parcelable
