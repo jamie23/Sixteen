@@ -13,7 +13,7 @@ val articlesModule =
     module {
         viewModel { ArticlesListViewModel(get(), get()) }
         single { ArticlesRepository(get(), get()) }
-        single { ArticleDataMapper(get()) }
+        single { ArticleDataMapper(get(), get()) }
         single { ArticleResourceProvider(get()) }
         single { ArticlesUseCase(get()) }
         single { LocalStorage() }

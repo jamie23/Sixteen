@@ -1,9 +1,11 @@
 package com.jamie.hn.articles.ui
 
 import com.jamie.hn.articles.domain.Article
+import com.jamie.hn.core.ui.CoreDataMapper
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -15,18 +17,18 @@ class ArticlesDataMapperTest {
 
     @MockK
     private lateinit var articleResourceProvider: ArticleResourceProvider
+    @MockK
+    private lateinit var coreDataMapper: CoreDataMapper
+
     private lateinit var articleDataMapper: ArticleDataMapper
 
     @BeforeEach
     private fun setup() {
         MockKAnnotations.init(this)
 
-        every { articleResourceProvider.days } returns "d"
-        every { articleResourceProvider.hours } returns "h"
-        every { articleResourceProvider.minutes } returns "m"
         every { articleResourceProvider.comments(any()) } returns "1 comment"
-
-        articleDataMapper = ArticleDataMapper(articleResourceProvider)
+        every { coreDataMapper.time(any()) } returns "1d"
+        articleDataMapper = ArticleDataMapper(coreDataMapper, articleResourceProvider)
     }
 
     @Test
@@ -65,44 +67,15 @@ class ArticlesDataMapperTest {
         assertEquals("Jamie", item.title)
     }
 
-    @Nested
-    inner class Time {
+    @Test
+    fun `when time is populated then use coreDataMapper time`() {
+        val dateYesterday = LocalDateTime.now().minusDays(1).toEpochSecond(ZoneOffset.UTC)
+        val article = Article(time = dateYesterday)
 
-        @Test
-        fun `when time is yesterday then use days`() {
-            val dateYesterday = LocalDateTime.now().minusDays(1).toEpochSecond(ZoneOffset.UTC)
-            val article = Article(time = dateYesterday)
+        val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback)
 
-            val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback)
-            assertEquals("1d", item.time)
-        }
-
-        @Test
-        fun `when time is hour ago then use hours`() {
-            val dateHour = LocalDateTime.now().minusHours(1).toEpochSecond(ZoneOffset.UTC)
-            val article = Article(time = dateHour)
-
-            val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback)
-            assertEquals("1h", item.time)
-        }
-
-        @Test
-        fun `when time is minutes ago then use minutes`() {
-            val dateMinute = LocalDateTime.now().minusMinutes(1).toEpochSecond(ZoneOffset.UTC)
-            val article = Article(time = dateMinute)
-
-            val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback)
-            assertEquals("1m", item.time)
-        }
-
-        @Test
-        fun `when time is outside of checked range then use empty string`() {
-            val dateNow = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
-            val article = Article(time = dateNow)
-
-            val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback)
-            assertEquals("", item.time)
-        }
+        verify { coreDataMapper.time(dateYesterday) }
+        assertEquals("1d", item.time)
     }
 
     @Nested

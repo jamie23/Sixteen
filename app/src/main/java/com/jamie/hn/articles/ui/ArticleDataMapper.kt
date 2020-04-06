@@ -1,12 +1,10 @@
 package com.jamie.hn.articles.ui
 
 import com.jamie.hn.articles.domain.Article
-import java.time.Duration
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
+import com.jamie.hn.core.ui.CoreDataMapper
 
 class ArticleDataMapper(
+    private val coreDataMapper: CoreDataMapper,
     private val resourceProvider: ArticleResourceProvider
 ) {
 
@@ -16,7 +14,7 @@ class ArticleDataMapper(
             article.by,
             comments(article.descendants),
             article.score.toString(),
-            time(article.time),
+            coreDataMapper.time(article.time),
             article.title,
             url(article.url),
             commentsCallback
@@ -24,19 +22,6 @@ class ArticleDataMapper(
     }
 
     private fun comments(numComments: Int) = resourceProvider.comments(numComments)
-
-    private fun time(time: Long): String {
-        val timePost = LocalDateTime.ofInstant(Instant.ofEpochSecond(time), ZoneId.systemDefault())
-        val timeNow = LocalDateTime.now()
-
-        val timeBetween = Duration.between(timePost, timeNow)
-
-        if (timeBetween.toDays() > 0) return "${timeBetween.toDays()}${resourceProvider.days}"
-        if (timeBetween.toHours() > 0L) return "${timeBetween.toHours()}${resourceProvider.hours}"
-        if (timeBetween.toMinutes() > 0L) return "${timeBetween.toMinutes()}${resourceProvider.minutes}"
-
-        return ""
-    }
 
     private fun url(url: String?): String {
         if (url.isNullOrEmpty()) return ""

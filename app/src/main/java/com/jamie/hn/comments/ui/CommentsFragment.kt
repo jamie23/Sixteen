@@ -3,6 +3,7 @@ package com.jamie.hn.comments.ui
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.jamie.hn.R
@@ -31,5 +32,8 @@ class CommentsFragment : Fragment(R.layout.comment_list_fragment) {
         }
 
         viewModel.init()
+        viewModel.comments().observe(viewLifecycleOwner, Observer {
+            commentListAdapter.data(it)
+        })
     }
 }

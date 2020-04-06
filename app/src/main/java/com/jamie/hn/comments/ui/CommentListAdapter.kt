@@ -12,7 +12,12 @@ import kotlinx.android.synthetic.main.comment_item.view.*
 class CommentListAdapter : RecyclerView.Adapter<CommentListAdapter.CommentListHolder>() {
     class CommentListHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
-    private var data = listOf<CommentListItem>()
+    private var data = listOf<CommentViewItem>()
+
+    fun data(newData: List<CommentViewItem>) {
+        this.data = newData
+        notifyDataSetChanged()
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommentListHolder {
         val view = LayoutInflater.from(parent.context)

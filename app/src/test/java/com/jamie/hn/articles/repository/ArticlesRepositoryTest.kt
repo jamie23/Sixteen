@@ -1,7 +1,8 @@
-package com.jamie.hn.articles.repository.net
+package com.jamie.hn.articles.repository
 
 import com.jamie.hn.articles.domain.Article
 import com.jamie.hn.articles.repository.ArticlesRepository
+import com.jamie.hn.articles.repository.local.LocalStorage
 import com.jamie.hn.core.net.HackerNewsService
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
@@ -16,13 +17,16 @@ class ArticlesRepositoryTest {
     @MockK
     private lateinit var hnService: HackerNewsService
 
+    @MockK
+    private lateinit var localStorage: LocalStorage
+
     private lateinit var articlesRepository: ArticlesRepository
 
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
         articlesRepository =
-            ArticlesRepository(hnService)
+            ArticlesRepository(hnService, localStorage)
     }
 
     @Test
