@@ -1,4 +1,4 @@
-package com.jamie.hn.comments
+package com.jamie.hn.comments.domain
 
 import com.google.gson.annotations.SerializedName
 import com.jamie.hn.core.Item

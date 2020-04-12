@@ -1,4 +1,4 @@
-package com.jamie.hn.comments
+package com.jamie.hn.comments.domain
 
 import com.jamie.hn.comments.net.CommentsRepository
 import com.jamie.hn.core.Item
@@ -36,12 +36,10 @@ class CommentsUseCase(
 
     private suspend fun getComment(id: Long): Comment {
         val comment = commentsRepository.comment(id)
-        if (comment.childrenIds.isEmpty()) {
-            println("Jamie 2: ${comment.by} is empty")
-            return comment
-        }
+
+        if (comment.childrenIds.isEmpty()) return comment
+
         comment.listChildComments = getComments(comment)
-        println("Jamie 1: returned: ${comment.listChildComments}" )
         return comment
     }
 }

@@ -1,16 +1,19 @@
 package com.jamie.hn.comments.ui
 
-import com.jamie.hn.comments.Comment
+import androidx.core.text.HtmlCompat
+import androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY
+import com.jamie.hn.comments.domain.CommentWithDepth
 import com.jamie.hn.core.ui.CoreDataMapper
 
 class CommentDataMapper(
     private val coreDataMapper: CoreDataMapper
 ) {
 
-    fun toCommentViewItem(comment: Comment) =
+    fun toCommentViewItem(wrapper: CommentWithDepth) =
         CommentViewItem(
-            comment.by,
-            comment.text,
-            coreDataMapper.time(comment.time)
+            wrapper.comment.by,
+            HtmlCompat.fromHtml(wrapper.comment.text, FROM_HTML_MODE_LEGACY).toString(),
+            coreDataMapper.time(wrapper.comment.time),
+            wrapper.depth
         )
 }

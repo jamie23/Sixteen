@@ -33,6 +33,7 @@ class CommentListAdapter : RecyclerView.Adapter<CommentListAdapter.CommentListHo
             author.text = data[position].author
             time.text = data[position].time
             text.text = data[position].text
+
         }
     }
 }

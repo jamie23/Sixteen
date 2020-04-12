@@ -1,7 +1,7 @@
 package com.jamie.hn.core.net
 
 import com.jamie.hn.articles.domain.Article
-import com.jamie.hn.comments.Comment
+import com.jamie.hn.comments.domain.Comment
 import retrofit2.http.GET
 import retrofit2.http.Path
 
