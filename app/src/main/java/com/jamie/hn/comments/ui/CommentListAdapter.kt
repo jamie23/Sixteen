@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.jamie.hn.R
+import com.jamie.hn.core.extensions.visible
 import kotlinx.android.synthetic.main.article_item.view.author
 import kotlinx.android.synthetic.main.article_item.view.time
 import kotlinx.android.synthetic.main.comment_item.view.*
@@ -33,7 +34,7 @@ class CommentListAdapter : RecyclerView.Adapter<CommentListAdapter.CommentListHo
             author.text = data[position].author
             time.text = data[position].time
             text.text = data[position].text
-
+            divider.visible(data[position].showTopDivider)
         }
     }
 }

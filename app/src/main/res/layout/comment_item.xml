@@ -3,33 +3,66 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="8dp">
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/contentTop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_begin="8dp" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/contentStart"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="8dp" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/contentEnd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_end="8dp" />
+
+    <View
+        android:id="@+id/divider"
+        android:layout_width="wrap_content"
+        android:layout_height="1dp"
+        android:background="@color/divider"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/author"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textColor="@color/orange"
+        android:layout_marginBottom="2dp"
         android:textSize="12sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@id/contentStart"
+        app:layout_constraintTop_toTopOf="@id/contentTop"
         tools:text="Jamie" />
 
     <TextView
         android:id="@+id/time"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textColor="@color/sub_text"
         android:textSize="12sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/contentEnd"
+        app:layout_constraintTop_toTopOf="@id/contentTop"
         tools:text="4h" />
 
     <TextView
         android:id="@+id/text"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/contentEnd"
+        app:layout_constraintStart_toEndOf="@id/contentStart"
         app:layout_constraintTop_toBottomOf="@id/author"
         tools:text="Efficiency in desalination is measured by comparing the energy expenditure to the enthalpy of vaporization of water (basically the energy required to distill water by boiling it). The current state of the art reverse osmosis desalination plants use about 3.2 KWh of electricity per cubic meter of fresh water (https://pdfs.semanticscholar.org/d4d7/821d585699719289dddd10...). This technology uses about 173 KWh of solar energy per cubic meter of fresh water. The advantage of this method is lower capital costs and not having to convert solar energy to electricity. For large-scale desalination, however, it is almost certainly more cost-effective to use solar panels, batteries, and large scale reverse osmosis systems. This is still a useful project for making drinking water in remote locations, though." />
 

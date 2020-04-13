@@ -5,5 +5,6 @@
     <color name="colorAccent">#D81B60</color>
 
     <color name="sub_text">#ff9E9E9E</color>
+    <color name="divider">#E2E2E2</color>
     <color name="orange">#FF6600</color>
 </resources>

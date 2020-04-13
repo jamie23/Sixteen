@@ -4,5 +4,6 @@ data class CommentViewItem(
     val author: String,
     val text: String,
     val time: String,
-    val depth: Int
+    val depth: Int,
+    val showTopDivider: Boolean
 )
