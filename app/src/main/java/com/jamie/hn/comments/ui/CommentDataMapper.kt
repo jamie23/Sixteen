@@ -20,7 +20,7 @@ class CommentDataMapper(
         )
 
     private fun String.removeAppendedNewLines() =
-        if (this[this.length - 1] == '\n') {
+        if (this.isNotEmpty() && this[this.length - 1] == '\n') {
             this.subSequence(0, this.length - 2).toString()
         } else {
             this

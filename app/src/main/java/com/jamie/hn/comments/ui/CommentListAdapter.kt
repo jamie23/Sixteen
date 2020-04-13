@@ -1,8 +1,12 @@
 package com.jamie.hn.comments.ui
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
 import androidx.recyclerview.widget.RecyclerView
 import com.jamie.hn.R
 import com.jamie.hn.core.extensions.visible
@@ -36,5 +40,28 @@ class CommentListAdapter : RecyclerView.Adapter<CommentListAdapter.CommentListHo
             text.text = data[position].text
             divider.visible(data[position].showTopDivider)
         }
+        addDepthMargins(data[position].depth, holder.itemView.context, holder.itemView)
+    }
+
+    private fun addDepthMargins(depth: Int, context: Context, view: View) {
+        val layout = view.findViewById<ConstraintLayout>(R.id.commentItem)
+        val set = ConstraintSet()
+
+//        var margin = View(holder.itemView.context)
+        var margin = TextView(context)
+
+        margin.text = "Hello World"
+        margin.background = context.getDrawable(R.color.divider)
+//        margin.layoutParams = ConstraintLayout.LayoutParams(1, ConstraintLayout.LayoutParams.MATCH_CONSTRAINT)
+        margin.layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.MATCH_CONSTRAINT)
+        margin.id = View.generateViewId()
+
+        layout.addView(margin)
+
+        set.clone(layout)
+        set.connect(margin.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
+        set.connect(margin.id, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
+
+        set.applyTo(layout)
     }
 }
