@@ -25,9 +25,11 @@ class CommentsListViewModel(
 
             val listAllComments = mutableListOf<CommentWithDepth>()
 
-            results.forEach {
-                listAllComments.addAll(it.allCommentsInChain())
-            }
+            results
+                .filter { !it.deleted }
+                .forEach {
+                    listAllComments.addAll(it.allCommentsInChain())
+                }
 
             comments.postValue(listAllComments.map { commentDataMapper.toCommentViewItem(it) })
         }
@@ -40,9 +42,11 @@ class CommentsListViewModel(
 
         listComments.add(CommentWithDepth(this, depth))
 
-        this.listChildComments.forEach {
-            listComments.addAll(it.allCommentsInChain(depth + 1))
-        }
+        this.listChildComments
+            .filter { !it.deleted }
+            .forEach {
+                listComments.addAll(it.allCommentsInChain(depth + 1))
+            }
 
         return listComments
     }

@@ -10,5 +10,6 @@ data class Comment(
     override val childrenIds: List<Long> = listOf(),
     val text: String = "",
     val time: Long = 0,
-    var listChildComments: List<Comment> = listOf()
+    var listChildComments: List<Comment> = listOf(),
+    val deleted: Boolean = false
 ) : Item

@@ -4,12 +4,12 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.recyclerview.widget.RecyclerView
 import com.jamie.hn.R
 import com.jamie.hn.core.extensions.visible
+import com.jamie.hn.core.ui.convertDpToPixels
 import kotlinx.android.synthetic.main.article_item.view.author
 import kotlinx.android.synthetic.main.article_item.view.time
 import kotlinx.android.synthetic.main.comment_item.view.*
@@ -34,34 +34,66 @@ class CommentListAdapter : RecyclerView.Adapter<CommentListAdapter.CommentListHo
     override fun getItemCount() = data.size
 
     override fun onBindViewHolder(holder: CommentListHolder, position: Int) {
+        holder.setIsRecyclable(false)
+
         holder.itemView.run {
             author.text = data[position].author
             time.text = data[position].time
             text.text = data[position].text
             divider.visible(data[position].showTopDivider)
         }
-        addDepthMargins(data[position].depth, holder.itemView.context, holder.itemView)
+
+        addDepthMargins(data[position].depth, holder.itemView.context, holder.itemView, data[position].author, data[position].text)
     }
 
-    private fun addDepthMargins(depth: Int, context: Context, view: View) {
+    private fun addDepthMargins(depth: Int, context: Context, view: View, author: String, text: String) {
         val layout = view.findViewById<ConstraintLayout>(R.id.commentItem)
         val set = ConstraintSet()
+        val marginIds = mutableListOf<Int>()
 
-//        var margin = View(holder.itemView.context)
-        var margin = TextView(context)
+        for (i in 1..depth) {
+            val margin = View(context)
 
-        margin.text = "Hello World"
-        margin.background = context.getDrawable(R.color.divider)
-//        margin.layoutParams = ConstraintLayout.LayoutParams(1, ConstraintLayout.LayoutParams.MATCH_CONSTRAINT)
-        margin.layoutParams = ConstraintLayout.LayoutParams(ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.MATCH_CONSTRAINT)
-        margin.id = View.generateViewId()
+            margin.id = View.generateViewId()
+            margin.background = context.getDrawable(R.color.divider)
+            margin.layoutParams = ConstraintLayout.LayoutParams(2, 0)
 
-        layout.addView(margin)
+            layout.addView(margin)
 
-        set.clone(layout)
-        set.connect(margin.id, ConstraintSet.END, ConstraintSet.PARENT_ID, ConstraintSet.END)
-        set.connect(margin.id, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
+            set.clone(layout)
 
-        set.applyTo(layout)
+            set.connect(margin.id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START, convertDpToPixels(12f, margin.context).toInt())
+            set.connect(margin.id, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
+            set.connect(margin.id, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
+
+            if (i == 1) {
+                set.connect(
+                    R.id.text,
+                    ConstraintSet.START,
+                    margin.id,
+                    ConstraintSet.END,
+                    convertDpToPixels(12f, margin.context).toInt()
+                )
+                set.connect(
+                    R.id.author,
+                    ConstraintSet.START,
+                    margin.id,
+                    ConstraintSet.END,
+                    convertDpToPixels(12f, margin.context).toInt()
+                )
+            } else {
+                set.connect(
+                    marginIds[i - 2],
+                    ConstraintSet.START,
+                    margin.id,
+                    ConstraintSet.END,
+                    convertDpToPixels(12f, margin.context).toInt()
+                )
+            }
+
+            set.applyTo(layout)
+
+            marginIds.add(margin.id)
+        }
     }
 }
