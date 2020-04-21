@@ -9,4 +9,3 @@ fun convertDpToPixels(dp: Float, context: Context) =
         dp,
         context.resources.displayMetrics
     )
-

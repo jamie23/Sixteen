@@ -1,7 +1,6 @@
 package com.jamie.hn.articles.repository
 
 import com.jamie.hn.articles.domain.Article
-import com.jamie.hn.articles.repository.ArticlesRepository
 import com.jamie.hn.articles.repository.local.LocalStorage
 import com.jamie.hn.core.net.HackerNewsService
 import io.mockk.MockKAnnotations

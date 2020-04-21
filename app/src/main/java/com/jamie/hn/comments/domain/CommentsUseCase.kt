@@ -30,7 +30,6 @@ class CommentsUseCase(
             println(e)
         }
 
-
         return deferredList.awaitAll()
     }
 
