@@ -8,3 +8,10 @@ fun View.visible(visible: Boolean) {
         false -> View.INVISIBLE
     }
 }
+
+fun View.visibleOrGone(visible: Boolean) {
+    visibility = when (visible) {
+        true -> View.VISIBLE
+        false -> View.GONE
+    }
+}

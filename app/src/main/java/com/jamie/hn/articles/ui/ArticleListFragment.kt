@@ -2,12 +2,15 @@ package com.jamie.hn.articles.ui
 
 import android.os.Bundle
 import android.view.View
+import android.view.View.GONE
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.jamie.hn.R
+import com.jamie.hn.core.extensions.visibleOrGone
+import kotlinx.android.synthetic.main.article_list_fragment.*
 import kotlinx.android.synthetic.main.article_list_fragment.view.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -29,9 +32,19 @@ class ArticleListFragment : Fragment(R.layout.article_list_fragment) {
 
         viewModel.init()
 
-        viewModel.articles().observe(viewLifecycleOwner, Observer {
-            articleListAdapter.data(it)
+        viewModel.articleViewState().observe(viewLifecycleOwner, Observer {
+            progressBar.visibleOrGone(it.visible)
+            articleListAdapter.data(it.articles)
         })
+
+        viewModel.refreshing().observe(viewLifecycleOwner, Observer {
+            articleSwipeLayout.isRefreshing = it
+            progressBar.visibleOrGone(it)
+        })
+
+        articleSwipeLayout.setOnRefreshListener {
+            viewModel.refreshList()
+        }
 
         viewModel.navigateToComments().observe(viewLifecycleOwner, Observer {
             it.getContentIfNotHandled()?.let { article ->

@@ -45,7 +45,7 @@ class ArticlesListViewModelTest : BaseTest() {
             )
 
             val observer = mockk<Observer<List<ArticleViewItem>>>(relaxed = true)
-            articlesListViewModel.articles().observeForever(observer)
+            articlesListViewModel.articleViewState().observeForever(observer)
 
             articlesListViewModel.init()
 
@@ -58,7 +58,7 @@ class ArticlesListViewModelTest : BaseTest() {
             coEvery { articlesUseCase.getArticles() } throws Exception()
 
             val observer = mockk<Observer<List<ArticleViewItem>>>()
-            articlesListViewModel.articles().observeForever(observer)
+            articlesListViewModel.articleViewState().observeForever(observer)
 
             articlesListViewModel.init()
 

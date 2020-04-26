@@ -43,7 +43,13 @@ class CommentListAdapter : RecyclerView.Adapter<CommentListAdapter.CommentListHo
             divider.visible(data[position].showTopDivider)
         }
 
-        addDepthMargins(data[position].depth, holder.itemView.context, holder.itemView, data[position].author, data[position].text)
+        addDepthMargins(
+            data[position].depth,
+            holder.itemView.context,
+            holder.itemView,
+            data[position].author,
+            data[position].text
+        )
     }
 
     private fun addDepthMargins(depth: Int, context: Context, view: View, author: String, text: String) {
