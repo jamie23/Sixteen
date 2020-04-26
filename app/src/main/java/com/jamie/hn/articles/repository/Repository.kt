@@ -4,5 +4,5 @@ import com.jamie.hn.articles.domain.Article
 
 interface Repository {
     suspend fun topStories(): List<Long>
-    suspend fun story(id: Long): Article
+    suspend fun story(id: Long, userCachedVersion: Boolean): Article
 }

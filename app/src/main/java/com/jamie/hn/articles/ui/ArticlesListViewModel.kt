@@ -35,7 +35,7 @@ class ArticlesListViewModel(
             try {
                 val results = articlesUseCase.getArticles()
                 articleViewState.value = ArticlesViewState(
-                    results.map { articleDataMapper.toArticleViewItem(it, ::comments) },
+                    results.map { articleDataMapper.toArticleViewItem(it, ::getArticle) },
                     true
                 )
             } catch (e: Exception) {
@@ -46,7 +46,7 @@ class ArticlesListViewModel(
         }
     }
 
-    private fun comments(id: Long) {
+    private fun getArticle(id: Long) {
         viewModelScope.launch {
             navigateToComments.value = Event(articlesUseCase.getArticle(id))
         }

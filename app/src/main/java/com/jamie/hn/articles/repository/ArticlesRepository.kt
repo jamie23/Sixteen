@@ -11,9 +11,12 @@ class ArticlesRepository(
 
     override suspend fun topStories() = webStorage.topStories().take(20)
 
-    override suspend fun story(id: Long): Article {
-        val localCopy = localStorage.listArticles[id]
-        if (localCopy != null) return localCopy
+    override suspend fun story(id: Long, useCachedVersion: Boolean): Article {
+
+        if (useCachedVersion) {
+            val localCopy = localStorage.listArticles[id]
+            if (localCopy != null) return localCopy
+        }
 
         val newCopy = webStorage.getArticle(id)
         localStorage.listArticles[newCopy.id] = newCopy

@@ -20,7 +20,7 @@ class ArticlesUseCase(
                 storyIds.forEach {
                     listArticles.add(
                         async {
-                            articlesRepository.story(it)
+                            articlesRepository.story(it, false)
                         })
                 }
             }
@@ -34,5 +34,5 @@ class ArticlesUseCase(
     }
 
     suspend fun getArticle(id: Long) =
-        articlesRepository.story(id)
+        articlesRepository.story(id, true)
 }
