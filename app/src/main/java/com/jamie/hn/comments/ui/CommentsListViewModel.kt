@@ -16,24 +16,54 @@ class CommentsListViewModel(
     private val commentDataMapper: CommentDataMapper
 ) : ViewModel() {
 
-    private val comments = MutableLiveData<List<CommentViewItem>>()
-    fun comments(): LiveData<List<CommentViewItem>> = comments
+    private val commentsViewState = MutableLiveData<CommentsViewState>()
+    fun commentsViewState(): LiveData<CommentsViewState> = commentsViewState
 
     fun init() {
+        refreshList()
+    }
+
+    fun refreshList() {
         viewModelScope.launch {
-            val results = commentsUseCase.getComments(article)
+            commentsViewState.value = CommentsViewState(
+                comments = emptyList(),
+                refreshing = true
+            )
 
-            val listAllComments = mutableListOf<CommentWithDepth>()
+            try {
+                val results = commentsUseCase.getComments(article)
 
-            results
-                .filter { !it.deleted }
-                .forEach {
-                    listAllComments.addAll(it.allCommentsInChain())
-                }
+                val listAllComments = mutableListOf<CommentWithDepth>()
 
-            comments.postValue(listAllComments.map { commentDataMapper.toCommentViewItem(it) })
+                results
+                    .filter { !it.deleted }
+                    .forEach {
+                        listAllComments.addAll(it.allCommentsInChain())
+                    }
+
+                commentsViewState.postValue(
+                    CommentsViewState(
+                        comments = commentsToViewItems(listAllComments),
+                        refreshing = false
+                    )
+                )
+            } catch (e: Exception) {
+                println(e)
+                commentsViewState.postValue(
+                    CommentsViewState(
+                        comments = emptyList(),
+                        refreshing = false
+                    )
+                )
+            }
         }
     }
+
+    private fun commentsToViewItems(comments: List<CommentWithDepth>) = comments.map {
+            commentDataMapper.toCommentViewItem(
+                it
+            )
+        }
 
     private fun Comment.allCommentsInChain(depth: Int = 0): List<CommentWithDepth> {
         if (this.listChildComments.isEmpty()) return listOf(CommentWithDepth(this, depth))
@@ -50,4 +80,9 @@ class CommentsListViewModel(
 
         return listComments
     }
+
+    data class CommentsViewState(
+        val comments: List<CommentViewItem>,
+        val refreshing: Boolean
+    )
 }

@@ -32,13 +32,10 @@ class ArticleListFragment : Fragment(R.layout.article_list_fragment) {
         viewModel.init()
 
         viewModel.articleViewState().observe(viewLifecycleOwner, Observer {
-            progressBar.visibleOrGone(it.visible)
+            progressBar.visibleOrGone(it.refreshing)
+            articleSwipeLayout.isRefreshing = it.refreshing
+            articleList.visibleOrGone(!it.refreshing)
             articleListAdapter.data(it.articles)
-        })
-
-        viewModel.refreshing().observe(viewLifecycleOwner, Observer {
-            articleSwipeLayout.isRefreshing = it
-            progressBar.visibleOrGone(it)
         })
 
         articleSwipeLayout.setOnRefreshListener {

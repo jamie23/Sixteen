@@ -20,28 +20,34 @@ class ArticlesListViewModel(
     private val navigateToComments = MutableLiveData<Event<Article>>()
     fun navigateToComments(): LiveData<Event<Article>> = navigateToComments
 
-    private val refreshing = MutableLiveData<Boolean>()
-    fun refreshing(): LiveData<Boolean> = refreshing
-
     fun init() {
         refreshList()
     }
 
     fun refreshList() {
-        refreshing.value = true
-        articleViewState.value = ArticlesViewState(emptyList(), false)
+        articleViewState.value = ArticlesViewState(
+            articles = emptyList(),
+            refreshing = true
+        )
 
         viewModelScope.launch {
             try {
                 val results = articlesUseCase.getArticles()
                 articleViewState.value = ArticlesViewState(
-                    results.map { articleDataMapper.toArticleViewItem(it, ::getArticle) },
-                    true
+                    articles = results.map {
+                        articleDataMapper.toArticleViewItem(
+                            it,
+                            ::getArticle
+                        )
+                    },
+                    refreshing = false
                 )
             } catch (e: Exception) {
                 println(e)
-            } finally {
-                refreshing.value = false
+                articleViewState.value = ArticlesViewState(
+                    articles = emptyList(),
+                    refreshing = false
+                )
             }
         }
     }
@@ -54,6 +60,6 @@ class ArticlesListViewModel(
 
     data class ArticlesViewState(
         val articles: List<ArticleViewItem>,
-        val visible: Boolean
+        val refreshing: Boolean
     )
 }

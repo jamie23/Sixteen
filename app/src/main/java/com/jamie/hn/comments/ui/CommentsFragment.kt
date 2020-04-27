@@ -8,6 +8,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.jamie.hn.R
 import com.jamie.hn.articles.domain.Article
+import com.jamie.hn.core.extensions.visibleOrGone
+import kotlinx.android.synthetic.main.comment_list_fragment.*
 import kotlinx.android.synthetic.main.comment_list_fragment.view.*
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
@@ -32,8 +34,15 @@ class CommentsFragment : Fragment(R.layout.comment_list_fragment) {
         }
 
         viewModel.init()
-        viewModel.comments().observe(viewLifecycleOwner, Observer {
-            commentListAdapter.data(it)
+        viewModel.commentsViewState().observe(viewLifecycleOwner, Observer {
+            progressBar.visibleOrGone(it.refreshing)
+            commentSwipeLayout.isRefreshing = it.refreshing
+            commentsList.visibleOrGone(!it.refreshing)
+            commentListAdapter.data(it.comments)
         })
+
+        commentSwipeLayout.setOnRefreshListener {
+            viewModel.refreshList()
+        }
     }
 }
