@@ -19,6 +19,15 @@
                 app:argType="com.jamie.hn.articles.domain.Article"
                 app:nullable="true" />
         </action>
+        <action
+            android:id="@+id/action_articlesList_to_articleViewer"
+            app:destination="@id/articleViewerFragment">
+            <argument
+                android:name="url"
+                android:defaultValue="@null"
+                app:argType="string"
+                app:nullable="true" />
+        </action>
     </fragment>
 
     <fragment
@@ -26,4 +35,11 @@
         android:name="com.jamie.hn.comments.ui.CommentsFragment"
         android:label="@string/comments_title"
         tools:layout="@layout/comment_list_fragment" />
+
+    <fragment
+        android:id="@+id/articleViewerFragment"
+        android:name="com.jamie.hn.articleviewer.ui.ArticleViewerFragment"
+        android:label="@string/article_viewer_title"
+        tools:layout="@layout/article_viewer_fragment" />
+
 </navigation>

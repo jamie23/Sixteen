@@ -8,7 +8,7 @@ class ArticleDataMapper(
     private val resourceProvider: ArticleResourceProvider
 ) {
 
-    fun toArticleViewItem(article: Article, commentsCallback: (Long) -> Unit): ArticleViewItem {
+    fun toArticleViewItem(article: Article, commentsCallback: (Long) -> Unit, articleViewerCallback: (Long) -> Unit): ArticleViewItem {
         return ArticleViewItem(
             article.id,
             article.by,
@@ -17,7 +17,8 @@ class ArticleDataMapper(
             coreDataMapper.time(article.time),
             article.title,
             url(article.url),
-            commentsCallback
+            commentsCallback,
+            articleViewerCallback
         )
     }
 

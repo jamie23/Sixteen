@@ -48,5 +48,12 @@ class ArticleListFragment : Fragment(R.layout.article_list_fragment) {
                 view.findNavController().navigate(action)
             }
         })
+
+        viewModel.navigateToArticle().observe(viewLifecycleOwner, Observer {
+            it.getContentIfNotHandled()?.let { url ->
+                val action = ArticleListFragmentDirections.actionArticlesListToArticleViewer(url)
+                view.findNavController().navigate(action)
+            }
+        })
     }
 }

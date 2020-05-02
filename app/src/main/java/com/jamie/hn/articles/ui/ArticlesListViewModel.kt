@@ -20,6 +20,9 @@ class ArticlesListViewModel(
     private val navigateToComments = MutableLiveData<Event<Article>>()
     fun navigateToComments(): LiveData<Event<Article>> = navigateToComments
 
+    private val navigateToArticle = MutableLiveData<Event<String>>()
+    fun navigateToArticle(): LiveData<Event<String>> = navigateToArticle
+
     fun init() {
         refreshList()
     }
@@ -37,7 +40,8 @@ class ArticlesListViewModel(
                     articles = results.map {
                         articleDataMapper.toArticleViewItem(
                             it,
-                            ::getArticle
+                            ::commentsCallback,
+                            ::articleViewerCallback
                         )
                     },
                     refreshing = false
@@ -52,9 +56,15 @@ class ArticlesListViewModel(
         }
     }
 
-    private fun getArticle(id: Long) {
+    private fun commentsCallback(id: Long) {
         viewModelScope.launch {
             navigateToComments.value = Event(articlesUseCase.getArticle(id))
+        }
+    }
+
+    private fun articleViewerCallback(id: Long) {
+        viewModelScope.launch {
+            navigateToArticle.value = Event(articlesUseCase.getArticle(id).url ?: "http://www.ddg.gg")
         }
     }
 

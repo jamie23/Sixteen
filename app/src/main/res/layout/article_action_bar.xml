@@ -22,26 +22,26 @@
         android:src="@drawable/ic_save_black_24dp"
         android:tint="@color/sub_text"
         app:layout_constraintStart_toEndOf="@id/upvote"
-        app:layout_constraintEnd_toStartOf="@id/replies"
+        app:layout_constraintEnd_toStartOf="@id/commentsActionBar"
         app:layout_constraintTop_toTopOf="parent"/>
 
     <ImageView
-        android:id="@+id/replies"
+        android:id="@+id/commentsActionBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_message_black_24dp"
         app:layout_constraintStart_toEndOf="@id/save"
-        app:layout_constraintEnd_toStartOf="@id/link"
+        app:layout_constraintEnd_toStartOf="@id/linkActionBar"
         android:tint="@color/sub_text"
         app:layout_constraintTop_toTopOf="parent"/>
 
     <ImageView
-        android:id="@+id/link"
+        android:id="@+id/linkActionBar"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_link_black_24dp"
         android:tint="@color/sub_text"
-        app:layout_constraintStart_toEndOf="@id/replies"
+        app:layout_constraintStart_toEndOf="@id/commentsActionBar"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
 

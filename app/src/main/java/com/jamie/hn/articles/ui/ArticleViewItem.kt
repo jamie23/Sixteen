@@ -8,5 +8,6 @@ data class ArticleViewItem(
     val time: String,
     val title: String,
     val url: String,
-    val commentsCallback: (Long) -> Unit
+    val commentsCallback: (Long) -> Unit,
+    val articleViewerCallback: (Long) -> Unit
 )
