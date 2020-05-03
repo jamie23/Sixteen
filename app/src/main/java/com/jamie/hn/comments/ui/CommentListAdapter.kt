@@ -1,9 +1,12 @@
 package com.jamie.hn.comments.ui
 
 import android.content.Context
+import android.text.method.LinkMovementMethod
+import android.text.util.Linkify
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.recyclerview.widget.RecyclerView
@@ -39,8 +42,9 @@ class CommentListAdapter : RecyclerView.Adapter<CommentListAdapter.CommentListHo
         holder.itemView.run {
             author.text = data[position].author
             time.text = data[position].time
-            text.text = data[position].text
             divider.visible(data[position].showTopDivider)
+            text.text = data[position].text
+            makeLinksClickable(text)
         }
 
         addDepthMargins(
@@ -50,6 +54,11 @@ class CommentListAdapter : RecyclerView.Adapter<CommentListAdapter.CommentListHo
             data[position].author,
             data[position].text
         )
+    }
+
+    private fun makeLinksClickable(textView: TextView) {
+        Linkify.addLinks(textView, Linkify.ALL)
+        textView.movementMethod = LinkMovementMethod.getInstance()
     }
 
     private fun addDepthMargins(depth: Int, context: Context, view: View, author: String, text: String) {
