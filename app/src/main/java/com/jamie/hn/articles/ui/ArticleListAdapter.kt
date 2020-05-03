@@ -59,7 +59,6 @@ class ArticleListAdapter : RecyclerView.Adapter<ArticleListAdapter.ArticleListHo
                     commentsCallback(id)
                 }
             }
-
         }
     }
 }

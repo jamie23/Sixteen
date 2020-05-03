@@ -8,7 +8,11 @@ class ArticleDataMapper(
     private val resourceProvider: ArticleResourceProvider
 ) {
 
-    fun toArticleViewItem(article: Article, commentsCallback: (Long) -> Unit, articleViewerCallback: (Long) -> Unit): ArticleViewItem {
+    fun toArticleViewItem(
+        article: Article,
+        commentsCallback: (Long) -> Unit,
+        articleViewerCallback: (Long) -> Unit
+    ): ArticleViewItem {
         return ArticleViewItem(
             article.id,
             article.by,
