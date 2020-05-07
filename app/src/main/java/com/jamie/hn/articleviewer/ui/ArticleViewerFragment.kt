@@ -14,6 +14,11 @@ class ArticleViewerFragment : Fragment(R.layout.article_viewer_fragment) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         articleWebPage.webViewClient = WebViewClient()
+        articleWebPage.settings.javaScriptEnabled = true
+        articleWebPage.settings.builtInZoomControls = true
+        articleWebPage.settings.useWideViewPort = true
+        articleWebPage.settings.loadWithOverviewMode = true
+
         articleWebPage.loadUrl(url)
     }
 }
