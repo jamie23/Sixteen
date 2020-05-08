@@ -44,4 +44,5 @@
             tools:listitem="@layout/comment_item" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
 </androidx.constraintlayout.widget.ConstraintLayout>
