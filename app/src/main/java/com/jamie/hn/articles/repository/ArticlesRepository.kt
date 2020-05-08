@@ -9,7 +9,16 @@ class ArticlesRepository(
     private val localStorage: LocalStorage
 ) : Repository {
 
-    override suspend fun topStories() = webStorage.topStories().take(20)
+    override suspend fun topStories(useCachedVersion: Boolean): List<Long> {
+        if (useCachedVersion) {
+            val localCopy = localStorage.listArticleIds
+            if (localCopy.isNotEmpty()) return localCopy
+        }
+
+        val newCopy = webStorage.topStories().take(20)
+        localStorage.listArticleIds = newCopy
+        return newCopy
+    }
 
     override suspend fun story(id: Long, useCachedVersion: Boolean): Article {
 

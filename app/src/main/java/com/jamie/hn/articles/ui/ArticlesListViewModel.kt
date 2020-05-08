@@ -23,11 +23,15 @@ class ArticlesListViewModel(
     private val navigateToArticle = MutableLiveData<Event<String>>()
     fun navigateToArticle(): LiveData<Event<String>> = navigateToArticle
 
-    fun init() {
-        refreshList()
+    fun userManuallyRefreshed() {
+        refreshList(false)
     }
 
-    fun refreshList() {
+    fun automaticallyRefreshed() {
+        refreshList(true)
+    }
+
+    private fun refreshList(useCachedVersion: Boolean) {
         articleViewState.value = ArticlesViewState(
             articles = emptyList(),
             refreshing = true
@@ -35,7 +39,7 @@ class ArticlesListViewModel(
 
         viewModelScope.launch {
             try {
-                val results = articlesUseCase.getArticles()
+                val results = articlesUseCase.getArticles(useCachedVersion)
                 articleViewState.value = ArticlesViewState(
                     articles = results.map {
                         articleDataMapper.toArticleViewItem(
@@ -64,7 +68,8 @@ class ArticlesListViewModel(
 
     private fun articleViewerCallback(id: Long) {
         viewModelScope.launch {
-            navigateToArticle.value = Event(articlesUseCase.getArticle(id).url ?: "http://www.ddg.gg")
+            navigateToArticle.value =
+                Event(articlesUseCase.getArticle(id).url ?: "http://www.ddg.gg")
         }
     }
 

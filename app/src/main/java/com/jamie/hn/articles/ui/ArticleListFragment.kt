@@ -7,6 +7,7 @@ import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
 import com.jamie.hn.R
 import com.jamie.hn.core.extensions.visibleOrGone
 import kotlinx.android.synthetic.main.article_list_fragment.*
@@ -29,17 +30,18 @@ class ArticleListFragment : Fragment(R.layout.article_list_fragment) {
             adapter = articleListAdapter
         }
 
-        viewModel.init()
+        viewModel.automaticallyRefreshed()
 
         viewModel.articleViewState().observe(viewLifecycleOwner, Observer {
             progressBar.visibleOrGone(it.refreshing)
             articleSwipeLayout.isRefreshing = it.refreshing
             articleList.visibleOrGone(!it.refreshing)
             articleListAdapter.data(it.articles)
+            articleListAdapter.stateRestorationPolicy = PREVENT_WHEN_EMPTY
         })
 
         articleSwipeLayout.setOnRefreshListener {
-            viewModel.refreshList()
+            viewModel.userManuallyRefreshed()
         }
 
         viewModel.navigateToComments().observe(viewLifecycleOwner, Observer {

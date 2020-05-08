@@ -11,16 +11,16 @@ class ArticlesUseCase(
     private val articlesRepository: ArticlesRepository
 ) {
 
-    suspend fun getArticles(): List<Article> {
+    suspend fun getArticles(useCachedVersion: Boolean): List<Article> {
         try {
-            val storyIds = articlesRepository.topStories()
+            val storyIds = articlesRepository.topStories(useCachedVersion)
             val listArticles = mutableListOf<Deferred<Article>>()
 
             withContext(Dispatchers.IO) {
                 storyIds.forEach {
                     listArticles.add(
                         async {
-                            articlesRepository.story(it, false)
+                            articlesRepository.story(it, useCachedVersion)
                         })
                 }
             }
