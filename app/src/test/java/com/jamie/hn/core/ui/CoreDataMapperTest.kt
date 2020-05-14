@@ -31,10 +31,9 @@ class CoreDataMapperTest : BaseTest() {
 
     @Nested
     inner class Time {
-        // TODO: CHANGE THESE TO PARSE DATE
         @Test
         fun `when time is yesterday then use days`() {
-            val dateYesterday = LocalDateTime.now().minusDays(1).toEpochSecond(ZoneOffset.UTC)
+            val dateYesterday = LocalDateTime.now().minusHours(36).toEpochSecond(ZoneOffset.UTC)
 
             val item = coreDataMapper.time(dateYesterday)
             Assertions.assertEquals("1d", item)
@@ -42,8 +41,9 @@ class CoreDataMapperTest : BaseTest() {
 
         @Test
         fun `when time is hour ago then use hours`() {
-            val dateHour = LocalDateTime.now().minusHours(1).toEpochSecond(ZoneOffset.UTC)
+            val dateHour = LocalDateTime.now().minusHours(1).toEpochSecond(ZoneOffset.)
 
+            println(dateHour)
             val item = coreDataMapper.time(dateHour)
             Assertions.assertEquals("1h", item)
         }

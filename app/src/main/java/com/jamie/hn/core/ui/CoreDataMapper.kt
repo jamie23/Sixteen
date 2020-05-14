@@ -4,12 +4,13 @@ import java.time.Duration
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
+import java.time.ZoneOffset
 
 class CoreDataMapper(
     private val resourceProvider: CoreResourceProvider
 ) {
     fun time(time: Long): String {
-        val timePost = LocalDateTime.ofInstant(Instant.ofEpochSecond(time), ZoneId.systemDefault())
+        val timePost = LocalDateTime.ofInstant(Instant.ofEpochSecond(time), ZoneOffset.UTC)
         val timeNow = LocalDateTime.now()
 
         val timeBetween = Duration.between(timePost, timeNow)
@@ -19,10 +20,4 @@ class CoreDataMapper(
 
         return ""
     }
-
-//    fun time(time: Long): String {
-//        val sdf = SimpleDateFormat("MM/dd/yyyy")
-//        val netDate = Date(time)
-//        return sdf.format(netDate)
-//    }
 }

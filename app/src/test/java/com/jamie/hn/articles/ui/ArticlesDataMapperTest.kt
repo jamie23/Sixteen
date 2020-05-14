@@ -35,7 +35,7 @@ class ArticlesDataMapperTest {
     fun `when by is populated then populate Author`() {
         val article = Article(by = "Jamie")
 
-        val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback)
+        val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback, ::testArticleViewerCallback)
 
         assertEquals("Jamie", item.author)
     }
@@ -44,7 +44,7 @@ class ArticlesDataMapperTest {
     fun `when descendants is populated then populate Author`() {
         val article = Article(descendants = 1)
 
-        val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback)
+        val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback, ::testArticleViewerCallback)
 
         assertEquals("1 comment", item.comments)
     }
@@ -53,7 +53,7 @@ class ArticlesDataMapperTest {
     fun `when score is populated then populate score`() {
         val article = Article(score = 1)
 
-        val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback)
+        val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback, ::testArticleViewerCallback)
 
         assertEquals("1", item.score)
     }
@@ -62,7 +62,7 @@ class ArticlesDataMapperTest {
     fun `when title is populated then populate title`() {
         val article = Article(title = "Jamie")
 
-        val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback)
+        val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback, ::testArticleViewerCallback)
 
         assertEquals("Jamie", item.title)
     }
@@ -72,7 +72,7 @@ class ArticlesDataMapperTest {
         val dateYesterday = LocalDateTime.now().minusDays(1).toEpochSecond(ZoneOffset.UTC)
         val article = Article(time = dateYesterday)
 
-        val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback)
+        val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback, ::testArticleViewerCallback)
 
         verify { coreDataMapper.time(dateYesterday) }
         assertEquals("1d", item.time)
@@ -85,7 +85,7 @@ class ArticlesDataMapperTest {
         fun `when url is empty then return empty string`() {
             val article = Article(url = "")
 
-            val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback)
+            val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback, ::testArticleViewerCallback)
             assertEquals("", item.url)
         }
 
@@ -93,7 +93,7 @@ class ArticlesDataMapperTest {
         fun `when url is null then return empty string`() {
             val article = Article(url = "")
 
-            val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback)
+            val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback, ::testArticleViewerCallback)
             assertEquals("", item.url)
         }
 
@@ -101,7 +101,7 @@ class ArticlesDataMapperTest {
         fun `when url has http protocol then it is removed`() {
             val article = Article(url = "http://ddg.gg")
 
-            val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback)
+            val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback, ::testArticleViewerCallback)
             assertEquals("ddg.gg", item.url)
         }
 
@@ -109,7 +109,7 @@ class ArticlesDataMapperTest {
         fun `when url has https protocol then it is removed`() {
             val article = Article(url = "https://ddg.gg")
 
-            val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback)
+            val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback, ::testArticleViewerCallback)
             assertEquals("ddg.gg", item.url)
         }
 
@@ -117,7 +117,7 @@ class ArticlesDataMapperTest {
         fun `when url has a path then path is removed`() {
             val article = Article(url = "ddg.gg/jamie")
 
-            val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback)
+            val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback, ::testArticleViewerCallback)
             assertEquals("ddg.gg", item.url)
         }
 
@@ -125,7 +125,7 @@ class ArticlesDataMapperTest {
         fun `when url has https protocol and path then protocol and path are removed`() {
             val article = Article(url = "https://ddg.gg/page")
 
-            val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback)
+            val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback, ::testArticleViewerCallback)
             assertEquals("ddg.gg", item.url)
         }
 
@@ -133,7 +133,7 @@ class ArticlesDataMapperTest {
         fun `when url has www then www is removed`() {
             val article = Article(url = "www.ddg.gg")
 
-            val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback)
+            val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback, ::testArticleViewerCallback)
             assertEquals("ddg.gg", item.url)
         }
 
@@ -141,7 +141,7 @@ class ArticlesDataMapperTest {
         fun `when url has www and protocol then www and protocol are removed`() {
             val article = Article(url = "https://www.ddg.gg")
 
-            val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback)
+            val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback, ::testArticleViewerCallback)
             assertEquals("ddg.gg", item.url)
         }
 
@@ -149,7 +149,7 @@ class ArticlesDataMapperTest {
         fun `when url has www and path then www and path are removed`() {
             val article = Article(url = "www.ddg.gg/jamie")
 
-            val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback)
+            val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback, ::testArticleViewerCallback)
             assertEquals("ddg.gg", item.url)
         }
 
@@ -157,7 +157,7 @@ class ArticlesDataMapperTest {
         fun `when url has www path and protocol then all are removed`() {
             val article = Article(url = "https://www.ddg.gg/jamie")
 
-            val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback)
+            val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback, ::testArticleViewerCallback)
             assertEquals("ddg.gg", item.url)
         }
     }
@@ -166,12 +166,16 @@ class ArticlesDataMapperTest {
     fun `when comments callback is passed in then commentsCallback is assigned to ArticleViewItem`() {
         val article = Article()
 
-        val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback)
+        val item = articleDataMapper.toArticleViewItem(article, ::testCommentsCallback, ::testArticleViewerCallback)
 
         assertEquals(item.commentsCallback, ::testCommentsCallback)
     }
 
     private fun testCommentsCallback(id: Long) {
+        println(id)
+    }
+
+    private fun testArticleViewerCallback(id: Long) {
         println(id)
     }
 }

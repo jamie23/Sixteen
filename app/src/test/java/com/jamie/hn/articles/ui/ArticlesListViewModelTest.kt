@@ -3,6 +3,7 @@ package com.jamie.hn.articles.ui
 import androidx.lifecycle.Observer
 import com.jamie.hn.articles.domain.Article
 import com.jamie.hn.articles.domain.ArticlesUseCase
+import com.jamie.hn.articles.ui.ArticlesListViewModel.ArticlesViewState
 import com.jamie.hn.core.BaseTest
 import com.jamie.hn.core.InstantExecutorExtension
 import io.mockk.MockKAnnotations
@@ -38,31 +39,31 @@ class ArticlesListViewModelTest : BaseTest() {
 
         @Test
         fun `when use case returns multiple articles then map those to view items and post to the view`() {
-            coEvery { articlesUseCase.getArticles() } returns listOf(
+            coEvery { articlesUseCase.getArticles(false) } returns listOf(
                 Article(),
                 Article(),
                 Article()
             )
 
-            val observer = mockk<Observer<List<ArticleViewItem>>>(relaxed = true)
+            val observer = mockk<Observer<ArticlesViewState>>()
             articlesListViewModel.articleViewState().observeForever(observer)
 
-            articlesListViewModel.init()
+//            articlesListViewModel.init()
 
-            verify(exactly = 3) { articlesDataMapper.toArticleViewItem(any(), any()) }
+            verify(exactly = 3) { articlesDataMapper.toArticleViewItem(any(), any(), any()) }
             verify(exactly = 1) { observer.onChanged(any()) }
         }
 
         @Test
         fun `when use case returns throws exception then do not post items to view`() {
-            coEvery { articlesUseCase.getArticles() } throws Exception()
+            coEvery { articlesUseCase.getArticles(true) } throws Exception()
 
-            val observer = mockk<Observer<List<ArticleViewItem>>>()
+            val observer = mockk<Observer<ArticlesViewState>>()
             articlesListViewModel.articleViewState().observeForever(observer)
 
-            articlesListViewModel.init()
+//            articlesListViewModel.init()
 
-            verify(exactly = 0) { articlesDataMapper.toArticleViewItem(any(), any()) }
+            verify(exactly = 0) { articlesDataMapper.toArticleViewItem(any(), any(), any()) }
             verify(exactly = 0) { observer.onChanged(any()) }
         }
     }

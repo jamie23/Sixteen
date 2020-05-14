@@ -16,6 +16,7 @@ import com.jamie.hn.core.ui.convertDpToPixels
 import kotlinx.android.synthetic.main.article_item.view.author
 import kotlinx.android.synthetic.main.article_item.view.time
 import kotlinx.android.synthetic.main.comment_item.view.*
+import java.util.regex.Pattern
 
 class CommentListAdapter : RecyclerView.Adapter<CommentListAdapter.CommentListHolder>() {
     class CommentListHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
@@ -57,7 +58,7 @@ class CommentListAdapter : RecyclerView.Adapter<CommentListAdapter.CommentListHo
     }
 
     private fun makeLinksClickable(textView: TextView) {
-        Linkify.addLinks(textView, Linkify.ALL)
+        Linkify.addLinks(textView, Linkify.WEB_URLS)
         textView.movementMethod = LinkMovementMethod.getInstance()
     }
 

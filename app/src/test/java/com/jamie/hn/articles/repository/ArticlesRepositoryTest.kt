@@ -33,7 +33,7 @@ class ArticlesRepositoryTest {
         coEvery { hnService.topStories() } returns listOf(1, 2, 3)
 
         runBlocking {
-            articlesRepository.topStories()
+            articlesRepository.topStories(false)
         }
 
         coVerify { hnService.topStories() }
@@ -47,7 +47,7 @@ class ArticlesRepositoryTest {
         coEvery { hnService.getArticle(1) } returns article
 
         runBlocking {
-            resultArticle = articlesRepository.story(1)
+            resultArticle = articlesRepository.story(1, false)
         }
 
         coVerify { hnService.getArticle(1) }

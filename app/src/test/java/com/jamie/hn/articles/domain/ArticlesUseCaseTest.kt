@@ -25,16 +25,16 @@ class ArticlesUseCaseTest {
 
     @Test
     fun `when story ids are returned from the repository then get each individual story from the repository`() {
-        coEvery { articlesRepository.topStories() } returns listOf(1, 2, 3)
+        coEvery { articlesRepository.topStories(false) } returns listOf(1, 2, 3)
 
         runBlocking {
-            articlesUseCase.getArticles()
+            articlesUseCase.getArticles(false)
         }
 
         coVerifyOrder {
-            articlesRepository.story(1)
-            articlesRepository.story(2)
-            articlesRepository.story(3)
+            articlesRepository.story(1, false)
+            articlesRepository.story(2, false)
+            articlesRepository.story(3, false)
         }
     }
 }
