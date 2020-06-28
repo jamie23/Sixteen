@@ -2,7 +2,7 @@ package com.jamie.hn.core.extensions
 
 import android.view.View
 
-fun View.visible(visible: Boolean) {
+fun View.visibleOrInvisible(visible: Boolean) {
     visibility = when (visible) {
         true -> View.VISIBLE
         false -> View.INVISIBLE

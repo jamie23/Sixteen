@@ -41,7 +41,7 @@ class CoreDataMapperTest : BaseTest() {
 
         @Test
         fun `when time is hour ago then use hours`() {
-            val dateHour = LocalDateTime.now().minusHours(1).toEpochSecond(ZoneOffset.)
+            val dateHour = LocalDateTime.now().minusHours(1).toEpochSecond(ZoneOffset.UTC)
 
             println(dateHour)
             val item = coreDataMapper.time(dateHour)

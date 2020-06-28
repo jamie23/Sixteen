@@ -1,22 +1,22 @@
 package com.jamie.hn.core.ui
 
-import java.time.Duration
-import java.time.Instant
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZoneOffset
+import org.joda.time.DateTime
+import org.joda.time.Duration
 
 class CoreDataMapper(
     private val resourceProvider: CoreResourceProvider
 ) {
-    fun time(time: Long): String {
-        val timePost = LocalDateTime.ofInstant(Instant.ofEpochSecond(time), ZoneOffset.UTC)
-        val timeNow = LocalDateTime.now()
+    fun time(time: DateTime): String {
+        val duration = Duration(time, DateTime.now())
 
-        val timeBetween = Duration.between(timePost, timeNow)
-        if (timeBetween.toDays() > 0) return "${timeBetween.toDays()}${resourceProvider.days}"
-        if (timeBetween.toHours() > 0L) return "${timeBetween.toHours()}${resourceProvider.hours}"
-        if (timeBetween.toMinutes() > 0L) return "${timeBetween.toMinutes()}${resourceProvider.minutes}"
+        val timeDays = duration.standardDays
+        if (timeDays > 0) return "${timeDays}${resourceProvider.days}"
+
+        val timeHours = duration.standardHours
+        if (timeHours > 0) return "${timeHours}${resourceProvider.hours}"
+
+        val timeMinutes = duration.standardMinutes
+        if (timeMinutes > 0L) return "${timeMinutes}${resourceProvider.minutes}"
 
         return ""
     }

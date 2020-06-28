@@ -2,7 +2,7 @@
     <string name="app_name">HN</string>
 
     <!-- Articles -->
-    <string name="articles_title">Articles</string>
+    <string name="stories_title">Stories</string>
     <string name="days">d</string>
     <string name="hours">h</string>
     <string name="minutes">m</string>

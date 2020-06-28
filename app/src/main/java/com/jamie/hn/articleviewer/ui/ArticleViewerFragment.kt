@@ -11,7 +11,6 @@ import com.jamie.hn.R
 import com.jamie.hn.core.extensions.visibleOrGone
 import kotlinx.android.synthetic.main.article_viewer_fragment.*
 
-
 class ArticleViewerFragment : Fragment(R.layout.article_viewer_fragment) {
     private val url: String
         get() = arguments?.get("url") as String

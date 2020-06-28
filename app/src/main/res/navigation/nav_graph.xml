@@ -3,24 +3,22 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/articleListFragment">
+    app:startDestination="@id/storyListFragment">
 
     <fragment
-        android:id="@+id/articleListFragment"
-        android:name="com.jamie.hn.articles.ui.ArticleListFragment"
-        android:label="@string/articles_title"
-        tools:layout="@layout/article_list_fragment">
+        android:id="@+id/storyListFragment"
+        android:name="com.jamie.hn.stories.ui.StoryListFragment"
+        android:label="@string/stories_title"
+        tools:layout="@layout/story_list_fragment">
         <action
-            android:id="@+id/action_articlesList_to_commentsList"
+            android:id="@+id/action_storiesList_to_commentsList"
             app:destination="@id/commentsFragment">
             <argument
-                android:name="article"
-                android:defaultValue="@null"
-                app:argType="com.jamie.hn.articles.domain.Article"
-                app:nullable="true" />
+                android:name="storyId"
+                app:argType="long" />
         </action>
         <action
-            android:id="@+id/action_articlesList_to_articleViewer"
+            android:id="@+id/action_storiesList_to_articleViewer"
             app:destination="@id/articleViewerFragment">
             <argument
                 android:name="url"
