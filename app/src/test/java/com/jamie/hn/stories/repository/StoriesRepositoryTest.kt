@@ -103,7 +103,6 @@ class StoriesRepositoryTest {
         }
     }
 
-    //
     @Nested
     inner class GetStory {
 

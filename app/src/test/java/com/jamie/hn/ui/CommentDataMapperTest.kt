@@ -11,7 +11,7 @@ class CommentDataMapperTest {
     private lateinit var coreDataMapper: CoreDataMapper
 
     @BeforeEach
-    private fun setup() {
+    fun setup() {
         MockKAnnotations.init(this)
     }
 }

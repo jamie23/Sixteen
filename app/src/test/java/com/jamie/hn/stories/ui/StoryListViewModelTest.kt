@@ -6,7 +6,7 @@ import com.jamie.hn.core.BaseTest
 import com.jamie.hn.core.Event
 import com.jamie.hn.core.InstantExecutorExtension
 import com.jamie.hn.stories.domain.model.Story
-import com.jamie.hn.stories.ui.StoryListViewModel.*
+import com.jamie.hn.stories.ui.StoryListViewModel.StoryListViewState
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify

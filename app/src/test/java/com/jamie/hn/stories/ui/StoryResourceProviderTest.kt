@@ -6,14 +6,13 @@ import com.jamie.hn.core.InstantExecutorExtension
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
-import io.mockk.slot
 import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(InstantExecutorExtension::class)
-class StoryResourceProviderTest: BaseTest() {
+class StoryResourceProviderTest : BaseTest() {
 
     @MockK
     private lateinit var resources: Resources

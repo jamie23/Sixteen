@@ -18,7 +18,7 @@ class CoreDataMapperTest : BaseTest() {
     private lateinit var coreDataMapper: CoreDataMapper
 
     @BeforeEach
-    private fun setup() {
+    fun setup() {
         MockKAnnotations.init(this)
 
         every { coreResourceProvider.days } returns "d"
