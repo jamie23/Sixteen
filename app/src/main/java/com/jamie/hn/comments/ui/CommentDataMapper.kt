@@ -12,8 +12,7 @@ class CommentDataMapper(
     fun toCommentViewItem(wrapper: CommentWithDepth) =
         CommentViewItem(
             author = wrapper.comment.author,
-            text = HtmlCompat.fromHtml(wrapper.comment.text, FROM_HTML_MODE_LEGACY).toString()
-                .removeAppendedNewLines(),
+            text = htmlTextParser(wrapper.comment.text).removeAppendedNewLines(),
             time = coreDataMapper.time(wrapper.comment.time),
             depth = wrapper.depth,
             showTopDivider = wrapper.depth == 0
@@ -25,4 +24,7 @@ class CommentDataMapper(
         } else {
             this
         }
+
+    fun htmlTextParser(text: String) =
+        HtmlCompat.fromHtml(text, FROM_HTML_MODE_LEGACY).toString()
 }
