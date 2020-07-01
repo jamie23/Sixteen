@@ -5,7 +5,7 @@ import org.joda.time.DateTime
 
 data class Story(
     val author: String = "",
-    val comments: List<Comment>,
+    val comments: List<Comment> = emptyList(),
     val commentCount: Int = 0,
     val commentsUrl: String = "",
     val domain: String = "",

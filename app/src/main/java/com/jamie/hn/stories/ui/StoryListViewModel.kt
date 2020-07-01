@@ -13,8 +13,8 @@ class StoryListViewModel(
     private val storiesUseCase: StoriesUseCase
 ) : ViewModel() {
 
-    private val articleViewState = MutableLiveData<ArticlesViewState>()
-    fun articleViewState(): LiveData<ArticlesViewState> = articleViewState
+    private val storyListViewState = MutableLiveData<StoryListViewState>()
+    fun storyListViewState(): LiveData<StoryListViewState> = storyListViewState
 
     private val navigateToComments = MutableLiveData<Event<Long>>()
     fun navigateToComments(): LiveData<Event<Long>> = navigateToComments
@@ -31,14 +31,14 @@ class StoryListViewModel(
     }
 
     private fun refreshList(useCachedVersion: Boolean) {
-        articleViewState.value = ArticlesViewState(
+        storyListViewState.value = StoryListViewState(
             stories = emptyList(),
             refreshing = true
         )
 
         viewModelScope.launch {
             val results = storiesUseCase.getStories(useCachedVersion)
-            articleViewState.value = ArticlesViewState(
+            storyListViewState.value = StoryListViewState(
                 stories = results.map {
                     storyDataMapper.toStoryViewItem(
                         it,
@@ -53,18 +53,18 @@ class StoryListViewModel(
 
     private fun commentsCallback(id: Long) {
         viewModelScope.launch {
-            navigateToComments.value = Event(storiesUseCase.getStory(id).id)
+            navigateToComments.value = Event(storiesUseCase.getStory(id, true).id)
         }
     }
 
     private fun articleViewerCallback(id: Long) {
         viewModelScope.launch {
             navigateToArticle.value =
-                Event(storiesUseCase.getStory(id).url)
+                Event(storiesUseCase.getStory(id, true).url)
         }
     }
 
-    data class ArticlesViewState(
+    data class StoryListViewState(
         val stories: List<StoryViewItem>,
         val refreshing: Boolean
     )

@@ -9,6 +9,6 @@ class StoriesUseCase(
     suspend fun getStories(useCachedVersion: Boolean) =
         storiesRepository.topStories(useCachedVersion)
 
-    suspend fun getStory(id: Long) =
-        storiesRepository.story(id, true)
+    suspend fun getStory(id: Long, useCachedVersion: Boolean) =
+        storiesRepository.story(id, useCachedVersion)
 }

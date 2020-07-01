@@ -4,12 +4,11 @@ import com.jamie.hn.core.BaseTest
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import org.joda.time.DateTime
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
-import java.time.ZoneOffset
 
 class CoreDataMapperTest : BaseTest() {
 
@@ -31,17 +30,18 @@ class CoreDataMapperTest : BaseTest() {
 
     @Nested
     inner class Time {
+
         @Test
         fun `when time is yesterday then use days`() {
-            val dateYesterday = LocalDateTime.now().minusHours(36).toEpochSecond(ZoneOffset.UTC)
+            val dateDay = DateTime.now().minusDays(1)
 
-            val item = coreDataMapper.time(dateYesterday)
+            val item = coreDataMapper.time(dateDay)
             Assertions.assertEquals("1d", item)
         }
 
         @Test
         fun `when time is hour ago then use hours`() {
-            val dateHour = LocalDateTime.now().minusHours(1).toEpochSecond(ZoneOffset.UTC)
+            val dateHour = DateTime.now().minusHours(1)
 
             println(dateHour)
             val item = coreDataMapper.time(dateHour)
@@ -50,7 +50,7 @@ class CoreDataMapperTest : BaseTest() {
 
         @Test
         fun `when time is minutes ago then use minutes`() {
-            val dateMinute = LocalDateTime.now().minusMinutes(1).toEpochSecond(ZoneOffset.UTC)
+            val dateMinute = DateTime.now().minusMinutes(1)
 
             val item = coreDataMapper.time(dateMinute)
             Assertions.assertEquals("1m", item)
@@ -58,7 +58,7 @@ class CoreDataMapperTest : BaseTest() {
 
         @Test
         fun `when time is outside of checked range then use empty string`() {
-            val dateNow = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC)
+            val dateNow = DateTime.now()
 
             val item = coreDataMapper.time(dateNow)
             Assertions.assertEquals("", item)

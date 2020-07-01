@@ -32,7 +32,7 @@ class StoryListFragment : Fragment(R.layout.story_list_fragment) {
 
         viewModel.automaticallyRefreshed()
 
-        viewModel.articleViewState().observe(viewLifecycleOwner, Observer {
+        viewModel.storyListViewState().observe(viewLifecycleOwner, Observer {
             progressBar.visibleOrGone(it.refreshing)
             articleSwipeLayout.isRefreshing = it.refreshing
             articleList.visibleOrGone(!it.refreshing)
