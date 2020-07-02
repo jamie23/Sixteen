@@ -1,8 +1,7 @@
-package com.jamie.hn.comments
+package com.jamie.hn.comments.ui
 
 import com.jamie.hn.comments.domain.model.Comment
 import com.jamie.hn.comments.domain.model.CommentWithDepth
-import com.jamie.hn.comments.ui.CommentDataMapper
 import com.jamie.hn.core.BaseTest
 import com.jamie.hn.core.ui.CoreDataMapper
 import io.mockk.MockKAnnotations
