@@ -22,6 +22,8 @@ class ArticleViewerFragment : Fragment(R.layout.article_viewer_fragment) {
         articleWebPage.webChromeClient = object : WebChromeClient() {
             override fun onProgressChanged(view: WebView, newProgress: Int) {
                 super.onProgressChanged(view, newProgress)
+
+                if (doNotUpdateUI()) return
                 progressBar.progress = newProgress
             }
         }
@@ -29,12 +31,16 @@ class ArticleViewerFragment : Fragment(R.layout.article_viewer_fragment) {
         articleWebPage.webViewClient = object : WebViewClient() {
             override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
+
+                if (doNotUpdateUI()) return
                 progressBar.visibleOrGone(true)
                 articleWebPage.visibleOrGone(false)
             }
 
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
+
+                if (doNotUpdateUI()) return
                 progressBar.visibleOrGone(false)
                 articleWebPage.visibleOrGone(true)
             }
@@ -49,4 +55,7 @@ class ArticleViewerFragment : Fragment(R.layout.article_viewer_fragment) {
 
         articleWebPage.loadUrl(url)
     }
+
+    // If the user navigates back before the page has started/finished loading, ignore UI updates
+    private fun doNotUpdateUI() = progressBar == null || articleWebPage == null
 }
