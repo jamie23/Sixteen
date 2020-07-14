@@ -62,7 +62,7 @@ class CommentsListViewModelTest : BaseTest() {
 
         coVerifySequence {
             observer.onChanged(CommentsViewState(emptyList(), true))
-            storiesRepository.story(1, false)
+            storiesRepository.story(2, false)
             observer.onChanged(CommentsViewState(emptyList(), false))
         }
     }

@@ -6,6 +6,8 @@ apply plugin: 'kotlin-android-extensions'
 
 apply plugin: "androidx.navigation.safeargs.kotlin"
 
+apply plugin: 'de.mannodermaus.android-junit5'
+
 android {
     compileSdkVersion 29
     buildToolsVersion "29.0.2"
@@ -76,12 +78,12 @@ dependencies {
     testImplementation "io.mockk:mockk:1.9.3"
     testImplementation "org.junit.jupiter:junit-jupiter-api:5.6.0"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.6.0"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:5.6.0"
 
     testImplementation 'android.arch.core:core-testing:1.1.1'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 }
-
 
 task ktlint(type: JavaExec, group: "verification") {
     description = "Check Kotlin code style."
