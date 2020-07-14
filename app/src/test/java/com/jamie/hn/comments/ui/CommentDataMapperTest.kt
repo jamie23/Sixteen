@@ -8,8 +8,8 @@ import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.spyk
-import junit.framework.Assert.assertEquals
 import org.joda.time.DateTime
+import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test

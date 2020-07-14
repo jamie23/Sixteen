@@ -18,9 +18,9 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
-import junit.framework.Assert.assertEquals
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
+import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -62,7 +62,7 @@ class CommentsListViewModelTest : BaseTest() {
 
         coVerifySequence {
             observer.onChanged(CommentsViewState(emptyList(), true))
-            storiesRepository.story(2, false)
+            storiesRepository.story(1, false)
             observer.onChanged(CommentsViewState(emptyList(), false))
         }
     }

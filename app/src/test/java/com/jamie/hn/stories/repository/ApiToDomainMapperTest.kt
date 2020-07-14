@@ -4,8 +4,8 @@ import com.jamie.hn.comments.domain.model.Comment
 import com.jamie.hn.core.BaseTest
 import com.jamie.hn.stories.repository.model.ApiComment
 import com.jamie.hn.stories.repository.model.ApiStory
-import junit.framework.Assert.assertEquals
 import org.joda.time.DateTime
+import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
