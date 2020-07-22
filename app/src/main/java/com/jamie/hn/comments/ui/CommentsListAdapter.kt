@@ -31,7 +31,17 @@ class CommentsListAdapter : RecyclerView.Adapter<CommentsListAdapter.CommentList
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.comment_item, parent, false)
 
-        return CommentListHolder(view)
+        val commentListHolder = CommentListHolder(view)
+
+        // Listener each of the view is the same
+        view.setOnLongClickListener {
+            data[commentListHolder.absoluteAdapterPosition].longClickCommentListener.invoke(
+                commentListHolder.absoluteAdapterPosition
+            )
+            true
+        }
+
+        return commentListHolder
     }
 
     override fun getItemCount() = data.size
@@ -45,6 +55,14 @@ class CommentsListAdapter : RecyclerView.Adapter<CommentsListAdapter.CommentList
             divider.visibleOrInvisible(data[position].showTopDivider)
             text.text = data[position].text
             makeLinksClickable(text)
+            text.setOnLongClickListener {
+                // Adding Linkify stops on click listeners on the text view so we add one if the
+                // cursor is not on text
+                if (text.isNotLink()) {
+                    data[position].longClickCommentListener.invoke(position)
+                }
+                true
+            }
         }
 
         addDepthMargins(
@@ -114,10 +132,19 @@ class CommentsListAdapter : RecyclerView.Adapter<CommentsListAdapter.CommentList
         id: Int,
         pixelOffset: Int
     ) {
-        set.connect(id, ConstraintSet.START, ConstraintSet.PARENT_ID, ConstraintSet.START, pixelOffset)
+        set.connect(
+            id,
+            ConstraintSet.START,
+            ConstraintSet.PARENT_ID,
+            ConstraintSet.START,
+            pixelOffset
+        )
         set.connect(id, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
         set.connect(id, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
     }
+
+    private fun TextView.isNotLink() =
+        this.selectionStart == -1 && this.selectionEnd == -1
 
     companion object {
         const val PADDING = 12f

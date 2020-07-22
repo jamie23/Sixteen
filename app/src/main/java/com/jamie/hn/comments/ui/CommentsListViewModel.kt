@@ -18,7 +18,12 @@ class CommentsListViewModel(
     private val commentsViewState = MutableLiveData<CommentsViewState>()
     fun commentsViewState(): LiveData<CommentsViewState> = commentsViewState
 
+    private lateinit var commentsViewRepository: CommentsViewRepository
+
     fun init() {
+        commentsViewRepository = CommentsViewRepository(
+            ::viewStateUpdate
+        )
         refreshList()
     }
 
@@ -37,18 +42,14 @@ class CommentsListViewModel(
                 listAllComments.addAll(it.allCommentsInChain())
             }
 
-            commentsViewState.postValue(
-                CommentsViewState(
-                    comments = commentsToViewItems(listAllComments),
-                    refreshing = false
-                )
-            )
+            commentsViewRepository.fullCommentList = listAllComments
         }
     }
 
     private fun commentsToViewItems(comments: List<CommentWithDepth>) = comments.map {
         commentDataMapper.toCommentViewItem(
-            it
+            it,
+            ::collapseCallback
         )
     }
 
@@ -74,6 +75,15 @@ class CommentsListViewModel(
         }
 
         return listComments
+    }
+
+    private fun collapseCallback(position: Int) {
+        println("Jamie $position")
+    }
+
+    private fun viewStateUpdate(commentList: List<CommentWithDepth>) {
+        commentsViewState.value =
+            CommentsViewState(commentsToViewItems(commentList), false)
     }
 
     data class CommentsViewState(

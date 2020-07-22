@@ -9,13 +9,14 @@ class CommentDataMapper(
     private val coreDataMapper: CoreDataMapper
 ) {
 
-    fun toCommentViewItem(wrapper: CommentWithDepth) =
+    fun toCommentViewItem(wrapper: CommentWithDepth, collapseCallback: (Int) -> Unit) =
         CommentViewItem(
             author = wrapper.comment.author,
             text = htmlTextParser(wrapper.comment.text).removeAppendedNewLines(),
             time = coreDataMapper.time(wrapper.comment.time),
             depth = wrapper.depth,
-            showTopDivider = wrapper.depth == 0
+            showTopDivider = wrapper.depth == 0,
+            longClickCommentListener = getLongClickListener(collapseCallback)
         )
 
     private fun String.removeAppendedNewLines() =
@@ -27,4 +28,10 @@ class CommentDataMapper(
 
     fun htmlTextParser(text: String) =
         HtmlCompat.fromHtml(text, FROM_HTML_MODE_LEGACY).toString()
+
+    private fun getLongClickListener(
+        collapseCallback: (Int) -> Unit
+    ): (position: Int) -> Unit {
+        return collapseCallback
+    }
 }
