@@ -6,5 +6,6 @@ data class CommentViewItem(
     val time: String,
     val depth: Int,
     val showTopDivider: Boolean,
-    val longClickCommentListener: (position: Int) -> Unit
+    val longClickCommentListener: (position: Int) -> Unit,
+    val id: Int
 )

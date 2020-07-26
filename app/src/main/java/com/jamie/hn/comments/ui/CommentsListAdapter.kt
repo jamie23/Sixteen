@@ -31,17 +31,7 @@ class CommentsListAdapter : RecyclerView.Adapter<CommentsListAdapter.CommentList
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.comment_item, parent, false)
 
-        val commentListHolder = CommentListHolder(view)
-
-        // Listener each of the view is the same
-        view.setOnLongClickListener {
-            data[commentListHolder.absoluteAdapterPosition].longClickCommentListener.invoke(
-                commentListHolder.absoluteAdapterPosition
-            )
-            true
-        }
-
-        return commentListHolder
+        return CommentListHolder(view)
     }
 
     override fun getItemCount() = data.size
@@ -59,7 +49,7 @@ class CommentsListAdapter : RecyclerView.Adapter<CommentsListAdapter.CommentList
                 // Adding Linkify stops on click listeners on the text view so we add one if the
                 // cursor is not on text
                 if (text.isNotLink()) {
-                    data[position].longClickCommentListener.invoke(position)
+                    data[position].longClickCommentListener.invoke(data[position].id)
                 }
                 true
             }
