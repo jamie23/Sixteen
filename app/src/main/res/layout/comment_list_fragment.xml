@@ -41,7 +41,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:itemCount="3"
-            tools:listitem="@layout/comment_item" />
+            tools:listitem="@layout/comment_item_full" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 

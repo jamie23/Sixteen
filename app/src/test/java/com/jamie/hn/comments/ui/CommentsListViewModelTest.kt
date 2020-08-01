@@ -3,7 +3,7 @@ package com.jamie.hn.comments.ui
 import androidx.lifecycle.Observer
 import com.jamie.hn.comments.domain.model.Comment
 import com.jamie.hn.comments.domain.model.CommentWithDepth
-import com.jamie.hn.comments.ui.CommentsListViewModel.CommentsViewState
+import com.jamie.hn.comments.ui.CommentsListViewModel.ListViewState
 import com.jamie.hn.core.BaseTest
 import com.jamie.hn.core.InstantExecutorExtension
 import com.jamie.hn.stories.domain.model.Story
@@ -55,15 +55,15 @@ class CommentsListViewModelTest : BaseTest() {
         coEvery { storiesRepository.story(1, false) } returns Story(time = DateTime.now())
         every { commentDataMapper.toCommentViewItem(any()) } returns commentViewItem
 
-        val observer = spyk<Observer<CommentsViewState>>()
+        val observer = spyk<Observer<ListViewState>>()
 
         commentsListViewModel.commentsViewState().observeForever(observer)
         commentsListViewModel.init()
 
         coVerifySequence {
-            observer.onChanged(CommentsViewState(emptyList(), true))
+            observer.onChanged(ListViewState(emptyList(), true))
             storiesRepository.story(1, false)
-            observer.onChanged(CommentsViewState(emptyList(), false))
+            observer.onChanged(ListViewState(emptyList(), false))
         }
     }
 
@@ -74,13 +74,13 @@ class CommentsListViewModelTest : BaseTest() {
         fun `when init is called then we emit refreshing view state, retrieve the story from the repository not using cache`() {
             coEvery { storiesRepository.story(1, false) } returns Story(time = DateTime.now())
 
-            val observer = spyk<Observer<CommentsViewState>>()
+            val observer = spyk<Observer<ListViewState>>()
 
             commentsListViewModel.commentsViewState().observeForever(observer)
             commentsListViewModel.refreshList()
 
             coVerifyOrder {
-                observer.onChanged(CommentsViewState(emptyList(), true))
+                observer.onChanged(ListViewState(emptyList(), true))
                 storiesRepository.story(1, false)
             }
         }
@@ -137,7 +137,7 @@ class CommentsListViewModelTest : BaseTest() {
                 depth = 0,
                 showTopDivider = false
             )
-            val observer = spyk<Observer<CommentsViewState>>()
+            val observer = spyk<Observer<ListViewState>>()
 
             every { commentDataMapper.toCommentViewItem(commentWithDepth) } returns commentViewItem
             coEvery {
@@ -152,7 +152,7 @@ class CommentsListViewModelTest : BaseTest() {
 
             verify {
                 observer.onChanged(
-                    CommentsViewState(
+                    ListViewState(
                         listOf(commentViewItem),
                         refreshing = false
                     )
