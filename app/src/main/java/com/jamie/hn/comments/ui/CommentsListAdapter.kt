@@ -121,7 +121,6 @@ class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         type: Int,
         startBoundView: Int
     ) {
-
         val layout: ConstraintLayout = if (type == TYPE_FULL) {
             view.findViewById(R.id.commentItem)
         } else {

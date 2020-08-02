@@ -29,7 +29,6 @@ class CommentsUseCase(
     }
 
     private fun Comment.allCommentsInChain(depth: Int = 0): List<CommentWithDepth> {
-
         if (this.comments.isEmpty()) return listOf(
             commentWithoutChildren(
                 this,
