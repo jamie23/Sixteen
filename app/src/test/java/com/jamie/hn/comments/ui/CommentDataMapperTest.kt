@@ -3,7 +3,6 @@ package com.jamie.hn.comments.ui
 import com.jamie.hn.comments.domain.model.Comment
 import com.jamie.hn.comments.domain.model.CommentWithDepth
 import com.jamie.hn.comments.ui.repository.model.CommentCurrentState
-import com.jamie.hn.comments.ui.repository.model.CurrentState
 import com.jamie.hn.comments.ui.repository.model.CurrentState.FULL
 import com.jamie.hn.core.BaseTest
 import com.jamie.hn.core.ui.CoreDataMapper
