@@ -35,7 +35,6 @@ class CommentsUseCaseTest : BaseTest() {
     private lateinit var commentsUseCase: CommentsUseCase
     private lateinit var scope: CoroutineScope
 
-
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
@@ -77,7 +76,6 @@ class CommentsUseCaseTest : BaseTest() {
         coVerify { repository.story(1, false) }
         verify { onResult.invoke(any()) }
     }
-
 
     @Nested
     inner class AllCommentsInChain {

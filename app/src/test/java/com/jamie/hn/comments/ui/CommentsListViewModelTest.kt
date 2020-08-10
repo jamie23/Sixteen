@@ -1,6 +1,5 @@
 package com.jamie.hn.comments.ui
 
-import android.widget.ListView
 import androidx.lifecycle.Observer
 import com.jamie.hn.comments.domain.CommentsUseCase
 import com.jamie.hn.comments.domain.model.Comment
@@ -28,7 +27,6 @@ import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
 import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -112,7 +110,7 @@ class CommentsListViewModelTest : BaseTest() {
         }
 
         @Test
-        fun `when the repository is populated from the use case, we map the comments from the repository, mapping via the mapper and posting the value woth refreshing false`() {
+        fun `when the repository is populated from the use case, we map the comments from the repository, mapping via the mapper and posting the value with refreshing false`() {
             val callback = slot<(List<CommentWithDepth>) -> Unit>()
             val mockedCommentViewItem = mockk<CommentViewItem>()
             val observer = spyk<Observer<ListViewState>>()
@@ -141,59 +139,17 @@ class CommentsListViewModelTest : BaseTest() {
         }
     }
 
-//
-//    @Nested
-//    inner class RefreshList {
-//
-//        @Test
-//        fun `when init is called then we emit refreshing view state, retrieve the story from the repository not using cache`() {
-//            coEvery { storiesRepository.story(1, false) } returns Story(time = DateTime.now())
-//
-//            val observer = spyk<Observer<ListViewState>>()
-//
-//            commentsListViewModel.commentsViewState().observeForever(observer)
-//            commentsListViewModel.refreshList()
-//
-//            coVerifyOrder {
-//                observer.onChanged(ListViewState(emptyList(), true))
-//                storiesRepository.story(1, false)
-//            }
-//        }
-//
-//        @Test
-//        fun `when we post the new state then we map the CommentWithDepth to CommentViewItems and refreshing as false`() {
-//            val commentWithDepth = CommentWithDepth(comment = singleComment(), depth = 0)
-//            val commentViewItem = CommentViewItem(
-//                author = "jamie",
-//                text = "text",
-//                time = "time",
-//                depth = 0,
-//                showTopDivider = false
-//            )
-//            val observer = spyk<Observer<ListViewState>>()
-//
-//            every { commentDataMapper.toCommentViewItem(commentWithDepth) } returns commentViewItem
-//            coEvery {
-//                storiesRepository.story(
-//                    1,
-//                    false
-//                )
-//            } returns story(singleComment())
-//
-//            commentsListViewModel.commentsViewState().observeForever(observer)
-//            commentsListViewModel.refreshList()
-//
-//            verify {
-//                observer.onChanged(
-//                    ListViewState(
-//                        listOf(commentViewItem),
-//                        refreshing = false
-//                    )
-//                )
-//            }
-//        }
-//    }
-//
+    @Nested
+    inner class LongClickListener {
+        // Clicked on comment when full is set to collapsed
+        // Clicked on comment when collapsed is set to full
+
+        // When the comment with state's id is the lastIndex then update nothing else
+
+        // When the comment with states id is not the lastIndex
+            // when the id of next sibling is null (there is no next sibling, then update til end of list
+            // when the id of next sibling is not null then update until the sibling
+    }
 
     private fun useCaseResponse() = listOf(
         CommentWithDepth(

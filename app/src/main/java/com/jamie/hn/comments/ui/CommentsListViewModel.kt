@@ -68,18 +68,18 @@ class CommentsListViewModel(
     private fun longClickCommentListener(id: Int) {
         val newStateList = commentsViewRepository.commentList.toMutableList()
         val commentWithState = newStateList[id]
-        var newState: CurrentState
+        var childrenNewState: CurrentState
 
         if (commentWithState.state == FULL) {
             commentWithState.state = COLLAPSED
-            newState = HIDDEN
+            childrenNewState = HIDDEN
         } else {
             commentWithState.state = FULL
-            newState = FULL
+            childrenNewState = FULL
         }
 
         updateVisibilityStateOfItem(
-            newState,
+            childrenNewState,
             commentWithState,
             newStateList,
             commentWithState.comment.depth,
