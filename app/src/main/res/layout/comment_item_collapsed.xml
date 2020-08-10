@@ -50,6 +50,7 @@
         android:textColor="@color/sub_text"
         android:layout_marginBottom="2dp"
         android:textSize="12sp"
+        app:layout_constraintBottom_toTopOf="@id/contentBottom"
         app:layout_constraintStart_toEndOf="@id/contentStart"
         app:layout_constraintTop_toTopOf="@id/contentTop"
         tools:text="Jamie [4 children]" />
@@ -60,6 +61,7 @@
         android:layout_height="wrap_content"
         android:textColor="@color/sub_text"
         android:textSize="12sp"
+        app:layout_constraintBottom_toTopOf="@id/contentBottom"
         app:layout_constraintEnd_toStartOf="@id/contentEnd"
         app:layout_constraintTop_toTopOf="@id/contentTop"
         tools:text="4h" />
