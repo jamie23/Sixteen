@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/commentItemCollapsed"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="?selectableItemBackground">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/contentTop"
@@ -47,8 +48,8 @@
         android:id="@+id/authorAndHiddenChildren"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textColor="@color/sub_text"
         android:layout_marginBottom="2dp"
+        android:textColor="@color/sub_text"
         android:textSize="12sp"
         app:layout_constraintBottom_toTopOf="@id/contentBottom"
         app:layout_constraintStart_toEndOf="@id/contentStart"
