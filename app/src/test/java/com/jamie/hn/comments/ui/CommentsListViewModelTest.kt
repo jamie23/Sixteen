@@ -1,25 +1,27 @@
 package com.jamie.hn.comments.ui
 
 import androidx.lifecycle.Observer
+import com.jamie.hn.comments.domain.CommentsUseCase
 import com.jamie.hn.comments.domain.model.Comment
 import com.jamie.hn.comments.domain.model.CommentWithDepth
-import com.jamie.hn.comments.ui.CommentsListViewModel.CommentsViewState
+import com.jamie.hn.comments.ui.CommentsListViewModel.ListViewState
+import com.jamie.hn.comments.ui.repository.model.CommentCurrentState
+import com.jamie.hn.comments.ui.repository.model.CurrentState.COLLAPSED
+import com.jamie.hn.comments.ui.repository.model.CurrentState.FULL
 import com.jamie.hn.core.BaseTest
 import com.jamie.hn.core.InstantExecutorExtension
-import com.jamie.hn.stories.domain.model.Story
-import com.jamie.hn.stories.repository.StoriesRepository
 import io.mockk.MockKAnnotations
+import io.mockk.Runs
 import io.mockk.coEvery
-import io.mockk.coVerifyOrder
 import io.mockk.coVerifySequence
-import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.invoke
+import io.mockk.just
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormat
 import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -33,7 +35,7 @@ class CommentsListViewModelTest : BaseTest() {
     private lateinit var commentDataMapper: CommentDataMapper
 
     @MockK
-    private lateinit var storiesRepository: StoriesRepository
+    private lateinit var commentsUseCase: CommentsUseCase
 
     private lateinit var commentsListViewModel: CommentsListViewModel
 
@@ -43,145 +45,310 @@ class CommentsListViewModelTest : BaseTest() {
 
         commentsListViewModel = CommentsListViewModel(
             commentDataMapper = commentDataMapper,
-            repository = storiesRepository,
-            storyId = 1
+            storyId = 1,
+            commentsUseCase = commentsUseCase
         )
     }
 
-    @Test
-    fun `when init is called then we emit refreshing view state, retrieve the story from the repository and post the new view state`() {
-        val commentViewItem = mockk<CommentViewItem>()
+    @Nested
+    inner class Init {
 
-        coEvery { storiesRepository.story(1, false) } returns Story(time = DateTime.now())
-        every { commentDataMapper.toCommentViewItem(any()) } returns commentViewItem
+        @Test
+        fun `when init is called then we emit refreshing view state and retrieve the comments from the use with the correct story id`() {
+            coEvery { commentsUseCase.retrieveComments(any(), any(), any(), any()) } just Runs
+            val observer = spyk<Observer<ListViewState>>()
 
-        val observer = spyk<Observer<CommentsViewState>>()
+            commentsListViewModel.commentsViewState().observeForever(observer)
+            commentsListViewModel.init()
 
-        commentsListViewModel.commentsViewState().observeForever(observer)
-        commentsListViewModel.init()
+            coVerifySequence {
+                observer.onChanged(ListViewState(emptyList(), true))
+                commentsUseCase.retrieveComments(any(), 1, false, any())
+            }
+        }
 
-        coVerifySequence {
-            observer.onChanged(CommentsViewState(emptyList(), true))
-            storiesRepository.story(1, false)
-            observer.onChanged(CommentsViewState(emptyList(), false))
+        @Test
+        fun `when the repository is populated from the use case then the callback modifies the commentsViewRepository with a CommentCurrentState with the id as index and state as full`() {
+            val callback = slot<(List<CommentWithDepth>) -> Unit>()
+            val commentsToMapper = mutableListOf<CommentCurrentState>()
+
+            coEvery {
+                commentsUseCase.retrieveComments(
+                    any(),
+                    any(),
+                    any(),
+                    capture(callback)
+                )
+            } just Runs
+            coEvery {
+                commentDataMapper.toCommentViewItem(
+                    capture(commentsToMapper),
+                    any()
+                )
+            } returns mockk()
+
+            commentsListViewModel.init()
+
+            callback.invoke(useCaseResponse())
+
+            assertEquals(2, commentsToMapper.size)
+
+            assertEquals(0, commentsToMapper[0].comment.id)
+            assertEquals("Jamie", commentsToMapper[0].comment.comment.author)
+            assertEquals(FULL, commentsToMapper[0].state)
+
+            assertEquals(1, commentsToMapper[1].comment.id)
+            assertEquals("Alex", commentsToMapper[1].comment.comment.author)
+            assertEquals(FULL, commentsToMapper[1].state)
+        }
+
+        @Test
+        fun `when the repository is populated from the use case, we map the comments from the repository, mapping via the mapper and posting the value with refreshing false`() {
+            val callback = slot<(List<CommentWithDepth>) -> Unit>()
+            val mockedCommentViewItem = mockk<CommentViewItem>()
+            val observer = spyk<Observer<ListViewState>>()
+
+            coEvery {
+                commentsUseCase.retrieveComments(
+                    any(),
+                    any(),
+                    any(),
+                    capture(callback)
+                )
+            } just Runs
+            coEvery {
+                commentDataMapper.toCommentViewItem(any(), any())
+            } returns mockedCommentViewItem
+
+            commentsListViewModel.commentsViewState().observeForever(observer)
+            commentsListViewModel.init()
+
+            callback.invoke(useCaseResponse())
+            verify {
+                observer.onChanged(
+                    ListViewState(
+                        listOf(
+                            mockedCommentViewItem,
+                            mockedCommentViewItem
+                        ), false
+                    )
+                )
+            }
         }
     }
 
     @Nested
-    inner class RefreshList {
+    inner class LongClickListener {
 
         @Test
-        fun `when init is called then we emit refreshing view state, retrieve the story from the repository not using cache`() {
-            coEvery { storiesRepository.story(1, false) } returns Story(time = DateTime.now())
+        fun `when comment state is full then set the state to be collapsed`() {
+            val longClickListenerCallback = slot<(Int) -> Unit>()
+            val commentsUseCaseCallback = slot<(List<CommentWithDepth>) -> Unit>()
+            val commentsPassedToMapper = mutableListOf<CommentCurrentState>()
 
-            val observer = spyk<Observer<CommentsViewState>>()
-
-            commentsListViewModel.commentsViewState().observeForever(observer)
-            commentsListViewModel.refreshList()
-
-            coVerifyOrder {
-                observer.onChanged(CommentsViewState(emptyList(), true))
-                storiesRepository.story(1, false)
-            }
-        }
-
-        @Nested
-        inner class AllCommentsInChain {
-
-            @Test
-            fun `when the comment has no child comments then return a list containing only that comment with correct depth`() {
-                val commentWithDepth = slot<CommentWithDepth>()
-
-                every { commentDataMapper.toCommentViewItem(capture(commentWithDepth)) } returns mockk()
-                coEvery {
-                    storiesRepository.story(
-                        1,
-                        false
-                    )
-                } returns story(singleComment())
-
-                commentsListViewModel.refreshList()
-
-                assertEquals(0, commentWithDepth.captured.depth)
-                assertEquals(singleComment(), commentWithDepth.captured.comment)
-            }
-
-            @Test
-            fun `when comment has multiple child comments then add return the list containing those with their correct depth `() {
-                val commentWithDepth = mutableListOf<CommentWithDepth>()
-
-                every { commentDataMapper.toCommentViewItem(capture(commentWithDepth)) } returns mockk()
-                coEvery {
-                    storiesRepository.story(
-                        1,
-                        false
-                    )
-                } returns story(singleCommentNestedComment())
-
-                commentsListViewModel.refreshList()
-
-                assertEquals(0, commentWithDepth[0].depth)
-                assertEquals(singleCommentNestedComment(), commentWithDepth[0].comment)
-                assertEquals(1, commentWithDepth[1].depth)
-                assertEquals(singleComment(), commentWithDepth[1].comment)
-            }
-        }
-
-        @Test
-        fun `when we post the new state then we map the CommentWithDepth to CommentViewItems and refreshing as false`() {
-            val commentWithDepth = CommentWithDepth(comment = singleComment(), depth = 0)
-            val commentViewItem = CommentViewItem(
-                author = "jamie",
-                text = "text",
-                time = "time",
-                depth = 0,
-                showTopDivider = false
-            )
-            val observer = spyk<Observer<CommentsViewState>>()
-
-            every { commentDataMapper.toCommentViewItem(commentWithDepth) } returns commentViewItem
             coEvery {
-                storiesRepository.story(
-                    1,
-                    false
+                commentsUseCase.retrieveComments(
+                    any(),
+                    any(),
+                    any(),
+                    capture(commentsUseCaseCallback)
                 )
-            } returns story(singleComment())
-
-            commentsListViewModel.commentsViewState().observeForever(observer)
-            commentsListViewModel.refreshList()
-
-            verify {
-                observer.onChanged(
-                    CommentsViewState(
-                        listOf(commentViewItem),
-                        refreshing = false
-                    )
+            } just Runs
+            coEvery {
+                commentDataMapper.toCommentViewItem(
+                    capture(commentsPassedToMapper),
+                    capture(longClickListenerCallback)
                 )
-            }
+            } returns mockk()
+
+            commentsListViewModel.init()
+
+            commentsUseCaseCallback.invoke(useCaseResponse())
+            longClickListenerCallback.invoke(0)
+
+            assertEquals(COLLAPSED, commentsPassedToMapper[2].state)
+        }
+
+        @Test
+        fun `when comment state is collapsed then set the state to be full`() {
+            val longClickListenerCallback = slot<(Int) -> Unit>()
+            val commentsUseCaseCallback = slot<(List<CommentWithDepth>) -> Unit>()
+            val commentsPassedToMapper = mutableListOf<CommentCurrentState>()
+
+            coEvery {
+                commentsUseCase.retrieveComments(
+                    any(),
+                    any(),
+                    any(),
+                    capture(commentsUseCaseCallback)
+                )
+            } just Runs
+            coEvery {
+                commentDataMapper.toCommentViewItem(
+                    capture(commentsPassedToMapper),
+                    capture(longClickListenerCallback)
+                )
+            } returns mockk()
+
+            commentsListViewModel.init()
+
+            commentsUseCaseCallback.invoke(useCaseResponse())
+            longClickListenerCallback.invoke(0)
+
+            assertEquals(COLLAPSED, commentsPassedToMapper[2].state)
+
+            longClickListenerCallback.invoke(0)
+
+            assertEquals(FULL, commentsPassedToMapper[4].state)
+        }
+
+        // When the comment with state's id is the lastIndex then update nothing else
+        @Test
+        fun `when comment is long clicked and is the last in the list then do not update any other children`() {
+            val longClickListenerCallback = slot<(Int) -> Unit>()
+            val commentsUseCaseCallback = slot<(List<CommentWithDepth>) -> Unit>()
+            val commentsPassedToMapper = mutableListOf<CommentCurrentState>()
+
+            coEvery {
+                commentsUseCase.retrieveComments(
+                    any(),
+                    any(),
+                    any(),
+                    capture(commentsUseCaseCallback)
+                )
+            } just Runs
+            coEvery {
+                commentDataMapper.toCommentViewItem(
+                    capture(commentsPassedToMapper),
+                    capture(longClickListenerCallback)
+                )
+            } returns mockk()
+
+            commentsListViewModel.init()
+
+            commentsUseCaseCallback.invoke(useCaseResponseWithChildren())
+
+            assertEquals(FULL, commentsPassedToMapper[0].state)
+            assertEquals(FULL, commentsPassedToMapper[1].state)
+
+            longClickListenerCallback.invoke(1)
+
+            assertEquals(FULL, commentsPassedToMapper[2].state)
+            assertEquals(COLLAPSED, commentsPassedToMapper[3].state)
+        }
+
+        @Test
+        fun `when comment is long clicked, is not the last index and there is a sibling later then filter out all children before next sibling`() {
+            val longClickListenerCallback = slot<(Int) -> Unit>()
+            val commentsUseCaseCallback = slot<(List<CommentWithDepth>) -> Unit>()
+            val commentsPassedToMapper = mutableListOf<CommentCurrentState>()
+
+            coEvery {
+                commentsUseCase.retrieveComments(
+                    any(),
+                    any(),
+                    any(),
+                    capture(commentsUseCaseCallback)
+                )
+            } just Runs
+            coEvery {
+                commentDataMapper.toCommentViewItem(
+                    capture(commentsPassedToMapper),
+                    capture(longClickListenerCallback)
+                )
+            } returns mockk()
+
+            commentsListViewModel.init()
+
+            val list = useCaseResponseWithChildren()
+            list.add(
+                // Dennis here is not a child of the clicked comment
+                CommentWithDepth(
+                    comment = Comment(author = "Dennis", commentCount = 0, time = DateTime.now()),
+                    depth = 0
+                )
+            )
+
+            commentsUseCaseCallback.invoke(list)
+
+            assertEquals(FULL, commentsPassedToMapper[0].state)
+            assertEquals(FULL, commentsPassedToMapper[1].state)
+            assertEquals(FULL, commentsPassedToMapper[2].state)
+
+            longClickListenerCallback.invoke(0)
+
+            assertEquals(5, commentsPassedToMapper.size)
+            assertEquals(COLLAPSED, commentsPassedToMapper[3].state)
+            assertEquals(0, commentsPassedToMapper[3].comment.id)
+            assertEquals(FULL, commentsPassedToMapper[4].state)
+            assertEquals(2, commentsPassedToMapper[4].comment.id)
+        }
+
+        @Test
+        fun `when comment is long clicked, is not the last index and there is no sibling or lower depth comments then filter results until end of list`() {
+            val longClickListenerCallback = slot<(Int) -> Unit>()
+            val commentsUseCaseCallback = slot<(List<CommentWithDepth>) -> Unit>()
+            val commentsPassedToMapper = mutableListOf<CommentCurrentState>()
+
+            coEvery {
+                commentsUseCase.retrieveComments(
+                    any(),
+                    any(),
+                    any(),
+                    capture(commentsUseCaseCallback)
+                )
+            } just Runs
+            coEvery {
+                commentDataMapper.toCommentViewItem(
+                    capture(commentsPassedToMapper),
+                    capture(longClickListenerCallback)
+                )
+            } returns mockk()
+
+            commentsListViewModel.init()
+
+            val list = useCaseResponseWithChildren()
+            list.add(
+                // Dennis here is a child of the clicked comment
+                CommentWithDepth(
+                    comment = Comment(author = "Dennis", commentCount = 0, time = DateTime.now()),
+                    depth = 1
+                )
+            )
+
+            commentsUseCaseCallback.invoke(list)
+
+            assertEquals(FULL, commentsPassedToMapper[0].state)
+            assertEquals(FULL, commentsPassedToMapper[1].state)
+            assertEquals(FULL, commentsPassedToMapper[2].state)
+
+            longClickListenerCallback.invoke(0)
+
+            assertEquals(4, commentsPassedToMapper.size)
+            assertEquals(COLLAPSED, commentsPassedToMapper[3].state)
+            assertEquals(0, commentsPassedToMapper[3].comment.id)
         }
     }
 
-    private fun story(comment: Comment) =
-        Story(
-            comments = listOf(comment),
-            time = DateTime.parse(
-                "23/08/2020 09:00:00",
-                DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss")
-            )
+    private fun useCaseResponse() = mutableListOf(
+        CommentWithDepth(
+            comment = Comment(author = "Jamie", commentCount = 0, time = DateTime.now()),
+            depth = 0
+        ),
+        CommentWithDepth(
+            comment = Comment(author = "Alex", commentCount = 0, time = DateTime.now()),
+            depth = 0
         )
+    )
 
-    private fun singleCommentNestedComment() =
-        singleComment().copy(comments = listOf(singleComment()), commentCount = 1)
-
-    private fun singleComment() =
-        Comment(
-            author = "Jamie",
-            comments = emptyList(),
-            commentCount = 0,
-            text = "text",
-            time = DateTime.parse(
-                "23/08/2020 09:00:00",
-                DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss")
-            )
+    private fun useCaseResponseWithChildren() = mutableListOf(
+        CommentWithDepth(
+            comment = Comment(author = "Jamie", commentCount = 1, time = DateTime.now()),
+            depth = 0
+        ),
+        CommentWithDepth(
+            comment = Comment(author = "Alex", commentCount = 0, time = DateTime.now()),
+            depth = 1
         )
+    )
 }

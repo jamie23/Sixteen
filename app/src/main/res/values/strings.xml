@@ -15,6 +15,7 @@
 
     <!-- Comments -->
     <string name="comments_title">Comments</string>
+    <string name="comments_children">children</string>
 
     <!-- Article Viewer -->
     <string name="article_viewer_title">Article Viewer</string>

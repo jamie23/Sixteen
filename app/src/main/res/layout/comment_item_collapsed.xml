@@ -2,7 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/commentItem"
+    android:id="@+id/commentItemCollapsed"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -43,16 +43,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-   <TextView
-        android:id="@+id/author"
+    <TextView
+        android:id="@+id/authorAndHiddenChildren"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textColor="@color/orange"
+        android:textColor="@color/sub_text"
         android:layout_marginBottom="2dp"
         android:textSize="12sp"
+        app:layout_constraintBottom_toTopOf="@id/contentBottom"
         app:layout_constraintStart_toEndOf="@id/contentStart"
         app:layout_constraintTop_toTopOf="@id/contentTop"
-        tools:text="Jamie" />
+        tools:text="Jamie [4 children]" />
 
     <TextView
         android:id="@+id/time"
@@ -60,19 +61,9 @@
         android:layout_height="wrap_content"
         android:textColor="@color/sub_text"
         android:textSize="12sp"
+        app:layout_constraintBottom_toTopOf="@id/contentBottom"
         app:layout_constraintEnd_toStartOf="@id/contentEnd"
         app:layout_constraintTop_toTopOf="@id/contentTop"
         tools:text="4h" />
-
-    <TextView
-        android:id="@+id/text"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        app:layout_constraintEnd_toStartOf="@id/time"
-        app:layout_constraintStart_toEndOf="@id/contentStart"
-        app:layout_constraintTop_toBottomOf="@id/author"
-        app:layout_constraintBottom_toBottomOf="@id/contentBottom"
-        tools:text="Efficiency in desalination is measured by comparing the energy expenditure to the enthalpy of vaporization of water (basically the energy required to distill water by boiling it). The current state of the art reverse osmosis desalination plants use about 3.2 KWh of electricity per cubic meter of fresh water (https://pdfs.semanticscholar.org/d4d7/821d585699719289dddd10...). This technology uses about 173 KWh of solar energy per cubic meter of fresh water. The advantage of this method is lower capital costs and not having to convert solar energy to electricity. For large-scale desalination, however, it is almost certainly more cost-effective to use solar panels, batteries, and large scale reverse osmosis systems. This is still a useful project for making drinking water in remote locations, though." />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
