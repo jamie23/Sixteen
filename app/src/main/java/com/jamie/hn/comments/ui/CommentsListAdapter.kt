@@ -9,6 +9,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.jamie.hn.R
 import com.jamie.hn.comments.ui.repository.model.CurrentState.COLLAPSED
@@ -26,11 +28,11 @@ class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     class FullCommentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
     class CollapsedCommentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
-    private var data = listOf<CommentViewItem>()
+    private var differ = AsyncListDiffer(this, DiffCallback)
+    private val globalMarginIds = mutableListOf<Int>()
 
     fun data(newData: List<CommentViewItem>) {
-        this.data = newData
-        notifyDataSetChanged()
+        differ.submitList(newData)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -50,68 +52,105 @@ class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
     }
 
-    override fun getItemCount() = data.size
+    override fun getItemCount() = differ.currentList.size
 
     override fun getItemViewType(position: Int) =
-        when (data[position].state) {
+        when (differ.currentList[position].state) {
             FULL -> TYPE_FULL
             COLLAPSED -> TYPE_COLLAPSED
             else -> throw IllegalArgumentException()
         }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        holder.setIsRecyclable(false)
         val type = getItemViewType(position)
-        var leftMostBoundView: Int
 
-        leftMostBoundView = if (type == TYPE_FULL) {
+        if (type == TYPE_FULL) {
             bindFullCommentViewHolder(holder, position)
-            R.id.author
         } else {
             bindCollapsedCommentViewHolder(holder, position)
-            R.id.authorAndHiddenChildren
         }
-
-        addDepthMargins(data[position].depth, holder.itemView.context, holder.itemView, type, leftMostBoundView)
     }
 
     private fun bindFullCommentViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        val item = differ.currentList[position]
+
         holder.itemView.run {
-            author.text = data[position].author
-            time.text = data[position].time
-            divider.visibleOrInvisible(data[position].showTopDivider)
-            text.text = data[position].text
+            author.text = item.author
+            time.text = item.time
+            divider.visibleOrInvisible(item.showTopDivider)
+            text.text = item.text
             makeLinksClickable(text)
             text.setOnLongClickListener {
                 // Adding Linkify stops on click listeners on the text view so we add one if the
                 // cursor is not on text
                 if (text.isNotLink()) {
-                    data[position].longClickCommentListener.invoke(data[position].id)
+                    item.longClickCommentListener.invoke(item.id)
                 }
                 true
             }
             setOnLongClickListener {
-                data[position].longClickCommentListener.invoke(data[position].id)
+                item.longClickCommentListener.invoke(item.id)
                 true
             }
+
+            addDepthMargins(item.depth, context, this, TYPE_FULL, R.id.author)
         }
     }
 
     private fun bindCollapsedCommentViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        val item = differ.currentList[position]
+
         holder.itemView.run {
-            authorAndHiddenChildren.text = data[position].authorAndHiddenChildren
-            time.text = data[position].time
-            divider.visibleOrInvisible(data[position].showTopDivider)
+            authorAndHiddenChildren.text = item.authorAndHiddenChildren
+            time.text = item.time
+            divider.visibleOrInvisible(item.showTopDivider)
             setOnLongClickListener {
-                data[position].longClickCommentListener.invoke(data[position].id)
+                item.longClickCommentListener.invoke(item.id)
                 true
             }
+
+            addDepthMargins(item.depth, context, this, TYPE_COLLAPSED, R.id.authorAndHiddenChildren)
         }
     }
 
     private fun makeLinksClickable(textView: TextView) {
         Linkify.addLinks(textView, Linkify.WEB_URLS)
         textView.movementMethod = LinkMovementMethod.getInstance()
+    }
+
+    private fun getLayoutFromViewType(view: View, type: Int) =
+        if (type == TYPE_FULL) {
+            view.findViewById(R.id.commentItem) as ConstraintLayout
+        } else {
+            view.findViewById(R.id.commentItemCollapsed) as ConstraintLayout
+        }
+
+    private fun removeRecycledDepthMargins(
+        view: View,
+        type: Int,
+        startBoundView: Int
+    ) {
+        val layout = getLayoutFromViewType(view, type)
+
+        // Remove all margins from already in the recycled view
+        globalMarginIds.forEach {
+            val margin = view.findViewById<View>(it) ?: return@forEach
+            layout.removeView(margin)
+        }
+
+        // Add constraint back in for left most view
+        val set = ConstraintSet()
+        set.clone(layout)
+
+        set.connect(
+            startBoundView,
+            ConstraintSet.START,
+            R.id.contentStart,
+            ConstraintSet.END,
+            0
+        )
+
+        set.applyTo(layout)
     }
 
     private fun addDepthMargins(
@@ -121,14 +160,14 @@ class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         type: Int,
         startBoundView: Int
     ) {
-        val layout: ConstraintLayout = if (type == TYPE_FULL) {
-            view.findViewById(R.id.commentItem)
-        } else {
-            view.findViewById(R.id.commentItemCollapsed)
-        }
+        removeRecycledDepthMargins(view, type, startBoundView)
+
+        if (depth == 0) return
+
+        val layout = getLayoutFromViewType(view, type)
 
         val set = ConstraintSet()
-        val marginIds = mutableListOf<Int>()
+        val localMarginIds = mutableListOf<Int>()
         val pixelOffset = convertDpToPixels(PADDING, view.context).toInt()
 
         for (i in 1..depth) {
@@ -154,7 +193,7 @@ class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 )
             } else {
                 set.connect(
-                    marginIds[i - 2],
+                    localMarginIds[i - 2],
                     ConstraintSet.START,
                     margin.id,
                     ConstraintSet.END,
@@ -164,7 +203,8 @@ class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
             set.applyTo(layout)
 
-            marginIds.add(margin.id)
+            localMarginIds.add(margin.id)
+            globalMarginIds.add(margin.id)
         }
     }
 
@@ -173,6 +213,7 @@ class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         id: Int,
         pixelOffset: Int
     ) {
+        // Margin start constrained to parent start with offset
         set.connect(
             id,
             ConstraintSet.START,
@@ -180,12 +221,25 @@ class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             ConstraintSet.START,
             pixelOffset
         )
+        // Margin top constrained to parent top
         set.connect(id, ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP)
+        // Margin bottom constraint to parent bottom
         set.connect(id, ConstraintSet.BOTTOM, ConstraintSet.PARENT_ID, ConstraintSet.BOTTOM)
     }
 
     private fun TextView.isNotLink() =
         this.selectionStart == -1 && this.selectionEnd == -1
+
+    private object DiffCallback : DiffUtil.ItemCallback<CommentViewItem>() {
+
+        override fun areItemsTheSame(oldItem: CommentViewItem, newItem: CommentViewItem) =
+            oldItem.id == newItem.id
+
+        override fun areContentsTheSame(
+            oldItem: CommentViewItem,
+            newItem: CommentViewItem
+        ) = oldItem == newItem
+    }
 
     companion object {
         const val PADDING = 12f
