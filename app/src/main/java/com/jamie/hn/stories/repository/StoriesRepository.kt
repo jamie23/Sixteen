@@ -37,7 +37,11 @@ class StoriesRepository(
         val newList = localStorage.storyList.toMutableList()
         val index = newList.indexOfFirst { it.id == newCopy.id }
 
-        newList[index] = newCopy
+        if (index == -1) {
+            newList.add(newCopy)
+        } else {
+            newList[index] = newCopy
+        }
 
         localStorage.storyList = newList
         return newCopy

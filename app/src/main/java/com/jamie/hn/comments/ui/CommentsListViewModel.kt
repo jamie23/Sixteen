@@ -50,10 +50,10 @@ class CommentsListViewModel(
 
         viewModelScope.launch {
             commentsUseCase.retrieveComments(
-                storyId,
-                useCachedVersion,
-                ::populateUiCommentRepository,
-                true
+                storyId = storyId,
+                useCache = useCachedVersion,
+                onResult = ::populateUiCommentRepository,
+                requireComments = true
             )
         }
     }

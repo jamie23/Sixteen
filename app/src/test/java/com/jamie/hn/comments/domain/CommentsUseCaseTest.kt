@@ -47,7 +47,7 @@ class CommentsUseCaseTest : BaseTest() {
     }
 
     @Test
-    fun `when retrieveComments is called using cache true then fetch story from repository with using cache true and invoke callback`() {
+    fun `when retrieveComments is called using cache true then fetch story from repository with cache true and requiring comments true and invoke callback`() {
         every { story.comments } returns emptyList()
         every { onResult.invoke(any()) } returns Unit
 
@@ -65,7 +65,7 @@ class CommentsUseCaseTest : BaseTest() {
     }
 
     @Test
-    fun `when retrieveComments is called using cache false then fetch story from repository with using cache false and invoke callback`() {
+    fun `when retrieveComments is called using cache false then fetch story from repository with cache false and invoke callback`() {
         every { story.comments } returns emptyList()
         every { onResult.invoke(any()) } returns Unit
 

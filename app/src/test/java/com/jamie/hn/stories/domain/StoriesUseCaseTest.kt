@@ -32,7 +32,7 @@ class StoriesUseCaseTest {
     }
 
     @Test
-    fun `when getStory is called then call the repository passing in the cache variable and correct id`() {
+    fun `when getStory is called then call the repository passing in the cache variable, correct id and require comments as false`() {
         runBlocking {
             storiesUseCase.getStory(1, true)
         }
