@@ -3,29 +3,24 @@ package com.jamie.hn.comments.domain
 import com.jamie.hn.comments.domain.model.Comment
 import com.jamie.hn.comments.domain.model.CommentWithDepth
 import com.jamie.hn.stories.repository.StoriesRepository
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
 class CommentsUseCase(
     private val repository: StoriesRepository
 ) {
-
-    fun retrieveComments(
-        scope: CoroutineScope,
+    suspend fun retrieveComments(
         storyId: Long,
         useCache: Boolean,
-        onResult: (List<CommentWithDepth>) -> Unit
+        onResult: (List<CommentWithDepth>) -> Unit,
+        requireComments: Boolean
     ) {
-        scope.launch {
-            val story = repository.story(storyId, useCache)
-            val listAllComments = mutableListOf<CommentWithDepth>()
+        val story = repository.story(storyId, useCache, requireComments)
+        val listAllComments = mutableListOf<CommentWithDepth>()
 
-            story.comments.forEach {
-                listAllComments.addAll(it.allCommentsInChain())
-            }
-
-            onResult(listAllComments)
+        story.comments.forEach {
+            listAllComments.addAll(it.allCommentsInChain())
         }
+
+        onResult(listAllComments)
     }
 
     private fun Comment.allCommentsInChain(depth: Int = 0): List<CommentWithDepth> {
@@ -56,9 +51,8 @@ class CommentsUseCase(
     private fun commentWithoutChildren(
         comment: Comment,
         depth: Int
-    ) =
-        CommentWithDepth(
-            comment = comment.copy(comments = listOf()),
-            depth = depth
-        )
+    ) = CommentWithDepth(
+        comment = comment.copy(comments = listOf()),
+        depth = depth
+    )
 }

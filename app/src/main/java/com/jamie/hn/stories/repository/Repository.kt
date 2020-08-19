@@ -4,5 +4,5 @@ import com.jamie.hn.stories.domain.model.Story
 
 interface Repository {
     suspend fun topStories(useCachedVersion: Boolean): List<Story>
-    suspend fun story(id: Long, useCachedVersion: Boolean): Story
+    suspend fun story(id: Long, useCachedVersion: Boolean, requireComments: Boolean): Story
 }

@@ -37,6 +37,12 @@ class StoriesUseCaseTest {
             storiesUseCase.getStory(1, true)
         }
 
-        coVerify { storiesRepository.story(1, true) }
+        coVerify {
+            storiesRepository.story(
+                id = 1,
+                useCachedVersion = true,
+                requireComments = false
+            )
+        }
     }
 }

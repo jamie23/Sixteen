@@ -10,5 +10,9 @@ class StoriesUseCase(
         storiesRepository.topStories(useCachedVersion)
 
     suspend fun getStory(id: Long, useCachedVersion: Boolean) =
-        storiesRepository.story(id, useCachedVersion)
+        storiesRepository.story(
+            id = id,
+            useCachedVersion = useCachedVersion,
+            requireComments = false
+        )
 }

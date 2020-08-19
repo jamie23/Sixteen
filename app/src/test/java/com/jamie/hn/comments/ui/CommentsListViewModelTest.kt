@@ -63,7 +63,12 @@ class CommentsListViewModelTest : BaseTest() {
 
             coVerifySequence {
                 observer.onChanged(ListViewState(emptyList(), true))
-                commentsUseCase.retrieveComments(any(), 1, false, any())
+                commentsUseCase.retrieveComments(
+                    storyId = 1,
+                    useCache = true,
+                    onResult = any(),
+                    requireComments = true
+                )
             }
         }
 
@@ -76,8 +81,8 @@ class CommentsListViewModelTest : BaseTest() {
                 commentsUseCase.retrieveComments(
                     any(),
                     any(),
-                    any(),
-                    capture(callback)
+                    capture(callback),
+                    any()
                 )
             } just Runs
             coEvery {
@@ -112,8 +117,8 @@ class CommentsListViewModelTest : BaseTest() {
                 commentsUseCase.retrieveComments(
                     any(),
                     any(),
-                    any(),
-                    capture(callback)
+                    capture(callback),
+                    any()
                 )
             } just Runs
             coEvery {
@@ -150,8 +155,8 @@ class CommentsListViewModelTest : BaseTest() {
                 commentsUseCase.retrieveComments(
                     any(),
                     any(),
-                    any(),
-                    capture(commentsUseCaseCallback)
+                    capture(commentsUseCaseCallback),
+                    any()
                 )
             } just Runs
             coEvery {
@@ -179,8 +184,8 @@ class CommentsListViewModelTest : BaseTest() {
                 commentsUseCase.retrieveComments(
                     any(),
                     any(),
-                    any(),
-                    capture(commentsUseCaseCallback)
+                    capture(commentsUseCaseCallback),
+                    any()
                 )
             } just Runs
             coEvery {
@@ -213,8 +218,8 @@ class CommentsListViewModelTest : BaseTest() {
                 commentsUseCase.retrieveComments(
                     any(),
                     any(),
-                    any(),
-                    capture(commentsUseCaseCallback)
+                    capture(commentsUseCaseCallback),
+                    any()
                 )
             } just Runs
             coEvery {
@@ -247,8 +252,8 @@ class CommentsListViewModelTest : BaseTest() {
                 commentsUseCase.retrieveComments(
                     any(),
                     any(),
-                    any(),
-                    capture(commentsUseCaseCallback)
+                    capture(commentsUseCaseCallback),
+                    any()
                 )
             } just Runs
             coEvery {
@@ -294,8 +299,8 @@ class CommentsListViewModelTest : BaseTest() {
                 commentsUseCase.retrieveComments(
                     any(),
                     any(),
-                    any(),
-                    capture(commentsUseCaseCallback)
+                    capture(commentsUseCaseCallback),
+                    any()
                 )
             } just Runs
             coEvery {

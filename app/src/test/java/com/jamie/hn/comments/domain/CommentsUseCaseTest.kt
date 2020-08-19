@@ -15,6 +15,7 @@ import io.mockk.verify
 import org.junit.Assert.assertEquals
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Unconfined
+import kotlinx.coroutines.runBlocking
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.junit.jupiter.api.BeforeEach
@@ -39,7 +40,7 @@ class CommentsUseCaseTest : BaseTest() {
     fun setup() {
         MockKAnnotations.init(this)
 
-        coEvery { repository.story(any(), any()) } returns story
+        coEvery { repository.story(any(), any(), any()) } returns story
 
         commentsUseCase = CommentsUseCase(repository)
         scope = CoroutineScope(Unconfined)
@@ -50,14 +51,16 @@ class CommentsUseCaseTest : BaseTest() {
         every { story.comments } returns emptyList()
         every { onResult.invoke(any()) } returns Unit
 
-        commentsUseCase.retrieveComments(
-            scope = scope,
-            storyId = 1,
-            useCache = true,
-            onResult = onResult
-        )
+        runBlocking {
+            commentsUseCase.retrieveComments(
+                storyId = 1,
+                useCache = true,
+                onResult = onResult,
+                requireComments = true
+            )
+        }
 
-        coVerify { repository.story(1, true) }
+        coVerify { repository.story(id = 1, useCachedVersion = true, requireComments = true) }
         verify { onResult.invoke(any()) }
     }
 
@@ -66,14 +69,16 @@ class CommentsUseCaseTest : BaseTest() {
         every { story.comments } returns emptyList()
         every { onResult.invoke(any()) } returns Unit
 
-        commentsUseCase.retrieveComments(
-            scope = scope,
-            storyId = 1,
-            useCache = false,
-            onResult = onResult
-        )
+        runBlocking {
+            commentsUseCase.retrieveComments(
+                storyId = 1,
+                useCache = false,
+                onResult = onResult,
+                requireComments = true
+            )
+        }
 
-        coVerify { repository.story(1, false) }
+        coVerify { repository.story(id = 1, useCachedVersion = false, requireComments = true) }
         verify { onResult.invoke(any()) }
     }
 
@@ -85,14 +90,16 @@ class CommentsUseCaseTest : BaseTest() {
             val returnedComments = slot<List<CommentWithDepth>>()
 
             every { onResult.invoke(any()) } returns Unit
-            coEvery { repository.story(any(), any()) } returns story(singleComment())
+            coEvery { repository.story(any(), any(), any()) } returns story(singleComment())
 
-            commentsUseCase.retrieveComments(
-                scope = scope,
-                storyId = 1,
-                useCache = false,
-                onResult = onResult
-            )
+            runBlocking {
+                commentsUseCase.retrieveComments(
+                    storyId = 1,
+                    useCache = false,
+                    onResult = onResult,
+                    requireComments = true
+                )
+            }
 
             verify { onResult.invoke(capture(returnedComments)) }
 
@@ -106,14 +113,16 @@ class CommentsUseCaseTest : BaseTest() {
             val returnedComments = slot<List<CommentWithDepth>>()
 
             every { onResult.invoke(any()) } returns Unit
-            coEvery { repository.story(any(), any()) } returns story(singleCommentNestedComment())
+            coEvery { repository.story(any(), any(), any()) } returns story(singleCommentNestedComment())
 
-            commentsUseCase.retrieveComments(
-                scope = scope,
-                storyId = 1,
-                useCache = false,
-                onResult = onResult
-            )
+            runBlocking {
+                commentsUseCase.retrieveComments(
+                    storyId = 1,
+                    useCache = false,
+                    onResult = onResult,
+                    requireComments = true
+                )
+            }
 
             verify { onResult.invoke(capture(returnedComments)) }
 

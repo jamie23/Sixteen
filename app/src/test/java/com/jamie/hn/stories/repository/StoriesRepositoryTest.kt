@@ -99,6 +99,7 @@ class StoriesRepositoryTest {
 
             verify(exactly = 0) { localStorage.storyList }
             verify { localStorage.storyList = listOf(Story(time = date)) }
+            verify { apiToDomainMapper.toStoryDomainModel(any(), false) }
             assertEquals(listOf(Story(time = date)), topStories)
         }
     }
@@ -115,7 +116,11 @@ class StoriesRepositoryTest {
             every { localStorage.storyList } returns storedList
 
             runBlocking {
-                story = storiesRepository.story(1, true)
+                story = storiesRepository.story(
+                    id = 1,
+                    useCachedVersion = true,
+                    requireComments = false
+                )
             }
 
             verify(exactly = 0) { localStorage.storyList = any() }
@@ -133,7 +138,11 @@ class StoriesRepositoryTest {
             coEvery { webStorage.story(1) } returns apiStory
 
             runBlocking {
-                story = storiesRepository.story(1, true)
+                story = storiesRepository.story(
+                    id = 1,
+                    useCachedVersion = true,
+                    requireComments = false
+                )
             }
 
             coVerifyOrder {
@@ -156,7 +165,11 @@ class StoriesRepositoryTest {
             coEvery { webStorage.story(1) } returns apiStory
 
             runBlocking {
-                story = storiesRepository.story(1, false)
+                story = storiesRepository.story(
+                    id = 1,
+                    useCachedVersion = false,
+                    requireComments = false
+                )
             }
 
             coVerifyOrder {
