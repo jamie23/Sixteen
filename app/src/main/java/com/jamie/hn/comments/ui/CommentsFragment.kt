@@ -42,7 +42,7 @@ class CommentsFragment : Fragment(R.layout.comment_list_fragment) {
         })
 
         commentSwipeLayout.setOnRefreshListener {
-            viewModel.refreshList()
+            viewModel.userManuallyRefreshed()
         }
     }
 }

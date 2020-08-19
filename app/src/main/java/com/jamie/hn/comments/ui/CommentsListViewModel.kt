@@ -12,6 +12,7 @@ import com.jamie.hn.comments.ui.repository.model.CurrentState
 import com.jamie.hn.comments.ui.repository.model.CurrentState.COLLAPSED
 import com.jamie.hn.comments.ui.repository.model.CurrentState.FULL
 import com.jamie.hn.comments.ui.repository.model.CurrentState.HIDDEN
+import kotlinx.coroutines.launch
 
 class CommentsListViewModel(
     private val commentDataMapper: CommentDataMapper,
@@ -24,26 +25,37 @@ class CommentsListViewModel(
 
     private lateinit var commentsViewRepository: CommentsViewRepository
 
+    fun userManuallyRefreshed() {
+        refreshList(false)
+    }
+
+    private fun automaticallyRefreshed() {
+        refreshList(true)
+    }
+
     fun init() {
         commentsViewRepository =
             CommentsViewRepository(
                 ::viewStateUpdate
             )
-        refreshList()
+
+        automaticallyRefreshed()
     }
 
-    fun refreshList() {
+    private fun refreshList(useCachedVersion: Boolean) {
         listViewState.value = ListViewState(
             comments = emptyList(),
             refreshing = true
         )
 
-        commentsUseCase.retrieveComments(
-            viewModelScope,
-            storyId,
-            false,
-            ::populateUiCommentRepository
-        )
+        viewModelScope.launch {
+            commentsUseCase.retrieveComments(
+                storyId = storyId,
+                useCache = useCachedVersion,
+                onResult = ::populateUiCommentRepository,
+                requireComments = true
+            )
+        }
     }
 
     private fun viewStateUpdate(commentList: List<CommentCurrentState>) {

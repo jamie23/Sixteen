@@ -13,5 +13,6 @@ data class Story(
     val score: Int = 0,
     val time: DateTime,
     val title: String = "",
-    val url: String = ""
+    val url: String = "",
+    val retrievedComments: Boolean = false
 )

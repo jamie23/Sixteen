@@ -13,6 +13,7 @@ import com.jamie.hn.core.InstantExecutorExtension
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.coVerifySequence
 import io.mockk.impl.annotations.MockK
 import io.mockk.invoke
@@ -54,7 +55,7 @@ class CommentsListViewModelTest : BaseTest() {
     inner class Init {
 
         @Test
-        fun `when init is called then we emit refreshing view state and retrieve the comments from the use with the correct story id`() {
+        fun `when init is called then we emit refreshing view state and retrieve the comments from the use case with the correct story id and use cache is true`() {
             coEvery { commentsUseCase.retrieveComments(any(), any(), any(), any()) } just Runs
             val observer = spyk<Observer<ListViewState>>()
 
@@ -63,7 +64,12 @@ class CommentsListViewModelTest : BaseTest() {
 
             coVerifySequence {
                 observer.onChanged(ListViewState(emptyList(), true))
-                commentsUseCase.retrieveComments(any(), 1, false, any())
+                commentsUseCase.retrieveComments(
+                    storyId = 1,
+                    useCache = true,
+                    onResult = any(),
+                    requireComments = true
+                )
             }
         }
 
@@ -76,8 +82,8 @@ class CommentsListViewModelTest : BaseTest() {
                 commentsUseCase.retrieveComments(
                     any(),
                     any(),
-                    any(),
-                    capture(callback)
+                    capture(callback),
+                    any()
                 )
             } just Runs
             coEvery {
@@ -112,8 +118,8 @@ class CommentsListViewModelTest : BaseTest() {
                 commentsUseCase.retrieveComments(
                     any(),
                     any(),
-                    any(),
-                    capture(callback)
+                    capture(callback),
+                    any()
                 )
             } just Runs
             coEvery {
@@ -150,8 +156,8 @@ class CommentsListViewModelTest : BaseTest() {
                 commentsUseCase.retrieveComments(
                     any(),
                     any(),
-                    any(),
-                    capture(commentsUseCaseCallback)
+                    capture(commentsUseCaseCallback),
+                    any()
                 )
             } just Runs
             coEvery {
@@ -179,8 +185,8 @@ class CommentsListViewModelTest : BaseTest() {
                 commentsUseCase.retrieveComments(
                     any(),
                     any(),
-                    any(),
-                    capture(commentsUseCaseCallback)
+                    capture(commentsUseCaseCallback),
+                    any()
                 )
             } just Runs
             coEvery {
@@ -213,8 +219,8 @@ class CommentsListViewModelTest : BaseTest() {
                 commentsUseCase.retrieveComments(
                     any(),
                     any(),
-                    any(),
-                    capture(commentsUseCaseCallback)
+                    capture(commentsUseCaseCallback),
+                    any()
                 )
             } just Runs
             coEvery {
@@ -247,8 +253,8 @@ class CommentsListViewModelTest : BaseTest() {
                 commentsUseCase.retrieveComments(
                     any(),
                     any(),
-                    any(),
-                    capture(commentsUseCaseCallback)
+                    capture(commentsUseCaseCallback),
+                    any()
                 )
             } just Runs
             coEvery {
@@ -294,8 +300,8 @@ class CommentsListViewModelTest : BaseTest() {
                 commentsUseCase.retrieveComments(
                     any(),
                     any(),
-                    any(),
-                    capture(commentsUseCaseCallback)
+                    capture(commentsUseCaseCallback),
+                    any()
                 )
             } just Runs
             coEvery {
@@ -327,6 +333,22 @@ class CommentsListViewModelTest : BaseTest() {
             assertEquals(4, commentsPassedToMapper.size)
             assertEquals(COLLAPSED, commentsPassedToMapper[3].state)
             assertEquals(0, commentsPassedToMapper[3].comment.id)
+        }
+    }
+
+    @Test
+    fun `when userManuallyRefreshed is called then retrieve the comments from the use case with use cache as false`() {
+        coEvery { commentsUseCase.retrieveComments(any(), any(), any(), any()) } just Runs
+
+        commentsListViewModel.userManuallyRefreshed()
+
+        coVerify {
+            commentsUseCase.retrieveComments(
+                storyId = 1,
+                useCache = false,
+                onResult = any(),
+                requireComments = true
+            )
         }
     }
 

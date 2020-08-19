@@ -20,6 +20,44 @@ class ApiToDomainMapperTest : BaseTest() {
     }
 
     @Test
+    fun `when toStoryDomainModel is called with retrievedComments as true then retrievedComments is true on the Story`() {
+        val apiStory = ApiStory(
+            author = "jamie",
+            comments = null,
+            commentsUrl = "url",
+            domain = "domain",
+            id = 1,
+            score = 2,
+            time = time,
+            title = "title",
+            url = "url"
+        )
+
+        val story = apiToDomainMapper.toStoryDomainModel(apiStory, true)
+
+        assertEquals(true, story.retrievedComments)
+    }
+
+    @Test
+    fun `when toStoryDomainModel is called with retrievedComments as false then retrievedComments is falsw on the Story`() {
+        val apiStory = ApiStory(
+            author = "jamie",
+            comments = null,
+            commentsUrl = "url",
+            domain = "domain",
+            id = 1,
+            score = 2,
+            time = time,
+            title = "title",
+            url = "url"
+        )
+
+        val story = apiToDomainMapper.toStoryDomainModel(apiStory, false)
+
+        assertEquals(false, story.retrievedComments)
+    }
+
+    @Test
     fun `when toStoryDomainModel is called with a story with no comments then correctly return a Story with no comments`() {
         val apiStory = ApiStory(
             author = "jamie",
@@ -44,6 +82,7 @@ class ApiToDomainMapperTest : BaseTest() {
         assertEquals(DateTime.parse(time), story.time)
         assertEquals("title", story.title)
         assertEquals("url", story.url)
+        assertEquals(false, story.retrievedComments)
     }
 
     @Test

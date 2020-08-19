@@ -81,7 +81,7 @@ class StoriesRepositoryTest {
         }
 
         @Test
-        fun `when useCachedVersion is false then get top stories from web and store them in local storage and then return them `() {
+        fun `when useCachedVersion is false then get top stories from web and store them in local storage and then return them`() {
             val date = DateTime.parse(
                 "23/08/2020 09:00:00",
                 DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss")
@@ -99,6 +99,7 @@ class StoriesRepositoryTest {
 
             verify(exactly = 0) { localStorage.storyList }
             verify { localStorage.storyList = listOf(Story(time = date)) }
+            verify { apiToDomainMapper.toStoryDomainModel(any(), false) }
             assertEquals(listOf(Story(time = date)), topStories)
         }
     }
@@ -107,7 +108,7 @@ class StoriesRepositoryTest {
     inner class GetStory {
 
         @Test
-        fun `when useCachedVersion is true and local storage is not null then get story from local storage`() {
+        fun `when useCachedVersion is true and local storage is not null and requireComments is false then get story from local storage`() {
             val storedStory = Story(id = 1, time = DateTime.now())
             val storedList = listOf(storedStory)
             var story = Story(time = DateTime.now())
@@ -115,7 +116,11 @@ class StoriesRepositoryTest {
             every { localStorage.storyList } returns storedList
 
             runBlocking {
-                story = storiesRepository.story(1, true)
+                story = storiesRepository.story(
+                    id = 1,
+                    useCachedVersion = true,
+                    requireComments = false
+                )
             }
 
             verify(exactly = 0) { localStorage.storyList = any() }
@@ -129,20 +134,75 @@ class StoriesRepositoryTest {
             val apiStory = ApiStory(time = DateTime.now().toString())
 
             every { localStorage.storyList } returns emptyList()
-            every { apiToDomainMapper.toStoryDomainModel(any()) } returns storedStory
+            every { apiToDomainMapper.toStoryDomainModel(any(), true) } returns storedStory
             coEvery { webStorage.story(1) } returns apiStory
 
             runBlocking {
-                story = storiesRepository.story(1, true)
+                story = storiesRepository.story(
+                    id = 1,
+                    useCachedVersion = true,
+                    requireComments = false
+                )
             }
 
             coVerifyOrder {
                 localStorage.storyList
                 webStorage.story(1)
-                apiToDomainMapper.toStoryDomainModel(apiStory)
+                apiToDomainMapper.toStoryDomainModel(apiStory, true)
                 localStorage.storyList
                 localStorage.storyList = any()
             }
+            assertEquals(storedStory, story)
+        }
+
+        @Test
+        fun `when useCachedVersion is true and requireComments is true and localCopy has not retrieved comments then get the story from web storage and replace the local story with the new one`() {
+            val storedStory = Story(id = 1, time = DateTime.now(), retrievedComments = false)
+            val newStoredStory = Story(id = 1, time = DateTime.now(), retrievedComments = true)
+            val storedList = listOf(storedStory)
+            val apiStory = ApiStory(time = DateTime.now().toString())
+            var story = Story(time = DateTime.now())
+
+            every { localStorage.storyList } returns storedList
+            every { apiToDomainMapper.toStoryDomainModel(any(), true) } returns newStoredStory
+            coEvery { webStorage.story(1) } returns apiStory
+
+            runBlocking {
+                story = storiesRepository.story(
+                    id = 1,
+                    useCachedVersion = true,
+                    requireComments = true
+                )
+            }
+
+            coVerifyOrder {
+                localStorage.storyList
+                webStorage.story(1)
+                apiToDomainMapper.toStoryDomainModel(apiStory, true)
+                localStorage.storyList
+                localStorage.storyList = listOf(newStoredStory)
+            }
+            assertEquals(newStoredStory, story)
+        }
+
+        @Test
+        fun `when useCachedVersion is true and requireComments is true and localCopy has retrieved comments then get the story from local storage`() {
+            var story = Story(time = DateTime.now())
+            val storedStory = Story(id = 1, time = DateTime.now(), retrievedComments = true)
+            val storedList = listOf(storedStory)
+
+            every { localStorage.storyList } returns storedList
+
+            runBlocking {
+                story = storiesRepository.story(
+                    id = 1,
+                    useCachedVersion = true,
+                    requireComments = true
+                )
+            }
+
+            verify(exactly = 0) { localStorage.storyList = any() }
+            verify(exactly = 0) { apiToDomainMapper.toStoryDomainModel(any(), any()) }
             assertEquals(storedStory, story)
         }
 
@@ -152,16 +212,20 @@ class StoriesRepositoryTest {
             var story = Story(time = DateTime.now())
             val storedStory = Story(id = 1, time = DateTime.now())
 
-            every { apiToDomainMapper.toStoryDomainModel(any()) } returns storedStory
+            every { apiToDomainMapper.toStoryDomainModel(any(), true) } returns storedStory
             coEvery { webStorage.story(1) } returns apiStory
 
             runBlocking {
-                story = storiesRepository.story(1, false)
+                story = storiesRepository.story(
+                    id = 1,
+                    useCachedVersion = false,
+                    requireComments = false
+                )
             }
 
             coVerifyOrder {
                 webStorage.story(1)
-                apiToDomainMapper.toStoryDomainModel(apiStory)
+                apiToDomainMapper.toStoryDomainModel(apiStory, true)
                 localStorage.storyList
                 localStorage.storyList = any()
             }

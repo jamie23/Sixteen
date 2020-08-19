@@ -8,7 +8,7 @@ import org.joda.time.DateTime
 
 class ApiToDomainMapper {
 
-    fun toStoryDomainModel(apiStory: ApiStory): Story {
+    fun toStoryDomainModel(apiStory: ApiStory, retrievedComments: Boolean = false): Story {
         return Story(
             apiStory.author,
             apiStory.comments?.map { toCommentDomainModel(it) } ?: emptyList(),
@@ -19,7 +19,8 @@ class ApiToDomainMapper {
             apiStory.score,
             DateTime.parse(apiStory.time),
             apiStory.title,
-            apiStory.url
+            apiStory.url,
+            retrievedComments
         )
     }
 
