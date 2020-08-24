@@ -6,6 +6,7 @@ import com.jamie.hn.core.BaseTest
 import com.jamie.hn.core.Event
 import com.jamie.hn.core.InstantExecutorExtension
 import com.jamie.hn.stories.domain.model.Story
+import com.jamie.hn.stories.repository.model.TopStoryResults
 import com.jamie.hn.stories.ui.StoryListViewModel.StoryListViewState
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
@@ -62,7 +63,7 @@ class StoryListViewModelTest : BaseTest() {
     fun setup() {
         MockKAnnotations.init(this)
 
-        coEvery { storiesUseCase.getStories(any()) } returns stories
+        coEvery { storiesUseCase.getStories(any()) } returns TopStoryResults(stories)
         coEvery { storiesUseCase.getStory(1, true) } returns story
         every { storyDataMapper.toStoryViewItem(any(), any(), any()) } returns storyViewItem
 
@@ -95,6 +96,22 @@ class StoryListViewModelTest : BaseTest() {
                 coVerify { storiesUseCase.getStories(false) }
                 verify { storyDataMapper.toStoryViewItem(story, any(), any()) }
                 verify { observer.onChanged(StoryListViewState(listOf(storyViewItem), false)) }
+            }
+
+            @Test
+            fun `when refresh is called but there is a network failure then emit event for network failure and show cached results`() {
+                val observerStories = spyk<Observer<StoryListViewState>>()
+                val observerNetworkError = spyk<Observer<Event<Unit>>>()
+
+                coEvery { storiesUseCase.getStories(any()) } returns TopStoryResults(stories, true)
+
+                storyListViewModel.storyListViewState().observeForever(observerStories)
+                storyListViewModel.networkError().observeForever(observerNetworkError)
+                storyListViewModel.userManuallyRefreshed()
+
+                verify { storyDataMapper.toStoryViewItem(story, any(), any()) }
+                verify { observerStories.onChanged(StoryListViewState(listOf(storyViewItem), false)) }
+                verify { observerNetworkError.onChanged(any()) }
             }
         }
 

@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">HN</string>
 
-    <!-- Articles -->
+    <!-- Stories -->
     <string name="stories_title">Stories</string>
     <string name="days">d</string>
     <string name="hours">h</string>
@@ -12,6 +12,8 @@
         <item quantity="one">%d comment</item>
         <item quantity="other">%d comments</item>
     </plurals>
+
+    <string name="network_error">Error retrieving stories due to connection, showing cached stories</string>
 
     <!-- Comments -->
     <string name="comments_title">Comments</string>

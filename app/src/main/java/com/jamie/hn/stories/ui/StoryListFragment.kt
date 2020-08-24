@@ -7,7 +7,7 @@ import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+import com.google.android.material.snackbar.Snackbar
 import com.jamie.hn.R
 import com.jamie.hn.core.extensions.visibleOrGone
 import kotlinx.android.synthetic.main.story_list_fragment.*
@@ -37,7 +37,6 @@ class StoryListFragment : Fragment(R.layout.story_list_fragment) {
             articleSwipeLayout.isRefreshing = it.refreshing
             articleList.visibleOrGone(!it.refreshing)
             storyListAdapter.data(it.stories)
-            storyListAdapter.stateRestorationPolicy = PREVENT_WHEN_EMPTY
         })
 
         articleSwipeLayout.setOnRefreshListener {
@@ -57,5 +56,15 @@ class StoryListFragment : Fragment(R.layout.story_list_fragment) {
                 view.findNavController().navigate(action)
             }
         })
+
+        viewModel.networkError().observe(viewLifecycleOwner, Observer {
+            it.getContentIfNotHandled()?.let {
+                showNetworkFailureError(articleList)
+            }
+        })
+    }
+
+    private fun showNetworkFailureError(view: View) {
+        Snackbar.make(view, R.string.network_error, Snackbar.LENGTH_LONG).show()
     }
 }

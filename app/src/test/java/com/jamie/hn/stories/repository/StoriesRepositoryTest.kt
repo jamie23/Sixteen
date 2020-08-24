@@ -1,9 +1,11 @@
 package com.jamie.hn.stories.repository
 
+import com.jamie.hn.core.net.NetworkUtils
 import com.jamie.hn.core.net.hex.Hex
 import com.jamie.hn.stories.domain.model.Story
 import com.jamie.hn.stories.repository.local.LocalStorage
 import com.jamie.hn.stories.repository.model.ApiStory
+import com.jamie.hn.stories.repository.model.TopStoryResults
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerifyOrder
@@ -15,6 +17,7 @@ import kotlinx.coroutines.runBlocking
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -27,6 +30,9 @@ class StoriesRepositoryTest {
     @MockK
     private lateinit var apiToDomainMapper: ApiToDomainMapper
 
+    @MockK
+    private lateinit var networkUtils: NetworkUtils
+
     @RelaxedMockK
     private lateinit var localStorage: LocalStorage
 
@@ -35,8 +41,11 @@ class StoriesRepositoryTest {
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
+
+        every { networkUtils.isNetworkAvailable() } returns true
+
         storiesRepository =
-            StoriesRepository(webStorage, localStorage, apiToDomainMapper)
+            StoriesRepository(webStorage, localStorage, apiToDomainMapper, networkUtils)
     }
 
     @Nested
@@ -44,7 +53,7 @@ class StoriesRepositoryTest {
 
         @Test
         fun `when useCachedVersion is true and local storage is not empty then get the list of stories from local storage`() {
-            var topStories = listOf<Story>()
+            var topStories = TopStoryResults(emptyList())
             val storedList = listOf(Story(time = DateTime.now()))
 
             every { localStorage.storyList } returns storedList
@@ -53,7 +62,8 @@ class StoriesRepositoryTest {
                 topStories = storiesRepository.topStories(true)
             }
 
-            assertEquals(storedList, topStories)
+            assertEquals(storedList, topStories.stories)
+            assertFalse(topStories.networkFailure)
             verify(exactly = 0) { localStorage.storyList = any() }
         }
 
@@ -65,7 +75,7 @@ class StoriesRepositoryTest {
             )
             val apiStory = ApiStory(time = date.toString())
             val webList = listOf(apiStory)
-            var topStories = emptyList<Story>()
+            var topStories = TopStoryResults(emptyList())
 
             every { localStorage.storyList } returns listOf()
             coEvery { webStorage.topStories() } returns webList
@@ -77,7 +87,8 @@ class StoriesRepositoryTest {
 
             verify(exactly = 1) { localStorage.storyList }
             verify { localStorage.storyList = listOf(Story(time = date)) }
-            assertEquals(listOf(Story(time = date)), topStories)
+            assertFalse(topStories.networkFailure)
+            assertEquals(listOf(Story(time = date)), topStories.stories)
         }
 
         @Test
@@ -88,7 +99,7 @@ class StoriesRepositoryTest {
             )
             val apiStory = ApiStory(time = date.toString())
             val webList = listOf(apiStory)
-            var topStories = emptyList<Story>()
+            var topStories = TopStoryResults(emptyList())
 
             coEvery { webStorage.topStories() } returns webList
             every { apiToDomainMapper.toStoryDomainModel(apiStory) } returns Story(time = date)
@@ -100,7 +111,25 @@ class StoriesRepositoryTest {
             verify(exactly = 0) { localStorage.storyList }
             verify { localStorage.storyList = listOf(Story(time = date)) }
             verify { apiToDomainMapper.toStoryDomainModel(any(), false) }
-            assertEquals(listOf(Story(time = date)), topStories)
+            assertFalse(topStories.networkFailure)
+            assertEquals(listOf(Story(time = date)), topStories.stories)
+        }
+
+        @Test
+        fun `when useCached version is false but network is unavailable and there are cached stories then use local version with network failure as true`() {
+            var topStories = TopStoryResults(emptyList())
+            val storedList = listOf(Story(time = DateTime.now()))
+
+            every { networkUtils.isNetworkAvailable() } returns false
+            every { localStorage.storyList } returns storedList
+
+            runBlocking {
+                topStories = storiesRepository.topStories(false)
+            }
+
+            assertEquals(storedList, topStories.stories)
+            assertEquals(true, topStories.networkFailure)
+            verify(exactly = 0) { localStorage.storyList = any() }
         }
     }
 

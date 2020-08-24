@@ -22,6 +22,9 @@ class StoryListViewModel(
     private val navigateToArticle = MutableLiveData<Event<String>>()
     fun navigateToArticle(): LiveData<Event<String>> = navigateToArticle
 
+    private val networkError = MutableLiveData<Event<Unit>>()
+    fun networkError(): LiveData<Event<Unit>> = networkError
+
     fun userManuallyRefreshed() {
         refreshList(false)
     }
@@ -39,7 +42,7 @@ class StoryListViewModel(
         viewModelScope.launch {
             val results = storiesUseCase.getStories(useCachedVersion)
             storyListViewState.value = StoryListViewState(
-                stories = results.map {
+                stories = results.stories.map {
                     storyDataMapper.toStoryViewItem(
                         it,
                         ::commentsCallback,
@@ -48,6 +51,8 @@ class StoryListViewModel(
                 },
                 refreshing = false
             )
+
+            if (results.networkFailure) networkError.value = Event(Unit)
         }
     }
 
@@ -66,6 +71,7 @@ class StoryListViewModel(
 
     data class StoryListViewState(
         val stories: List<StoryViewItem>,
-        val refreshing: Boolean
+        val refreshing: Boolean,
+        val networkFailure: Boolean = false
     )
 }

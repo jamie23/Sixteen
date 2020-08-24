@@ -1,24 +1,32 @@
 package com.jamie.hn.stories.repository
 
+import com.jamie.hn.core.net.NetworkUtils
 import com.jamie.hn.stories.repository.local.LocalStorage
 import com.jamie.hn.core.net.hex.Hex
 import com.jamie.hn.stories.domain.model.Story
+import com.jamie.hn.stories.repository.model.TopStoryResults
 
 class StoriesRepository(
     private val webStorage: Hex,
     private val localStorage: LocalStorage,
-    private val mapper: ApiToDomainMapper
+    private val mapper: ApiToDomainMapper,
+    private val networkUtils: NetworkUtils
 ) : Repository {
 
-    override suspend fun topStories(useCachedVersion: Boolean): List<Story> {
-        if (useCachedVersion) {
+    override suspend fun topStories(useCachedVersion: Boolean): TopStoryResults {
+        if (useCachedVersion || !networkUtils.isNetworkAvailable()) {
             val localCopy = localStorage.storyList
-            if (localCopy.isNotEmpty()) return localCopy
+            if (localCopy.isNotEmpty()) {
+                return TopStoryResults(
+                    localCopy,
+                    !useCachedVersion && !networkUtils.isNetworkAvailable()
+                )
+            }
         }
 
         val newCopy = webStorage.topStories().map { mapper.toStoryDomainModel(it, false) }
         localStorage.storyList = newCopy
-        return newCopy
+        return TopStoryResults(newCopy)
     }
 
     override suspend fun story(
