@@ -13,11 +13,12 @@
         <item quantity="other">%d comments</item>
     </plurals>
 
-    <string name="network_error">Error retrieving stories due to connection, showing cached stories</string>
+    <string name="stories_network_error">Error retrieving stories due to connection, showing cached stories</string>
 
     <!-- Comments -->
     <string name="comments_title">Comments</string>
     <string name="comments_children">children</string>
+    <string name="comments_network_error">Error retrieving comments due to connection, showing cached comments</string>
 
     <!-- Article Viewer -->
     <string name="article_viewer_title">Article Viewer</string>

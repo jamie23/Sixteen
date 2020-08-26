@@ -5,6 +5,7 @@ import com.jamie.hn.comments.domain.model.CommentWithDepth
 import com.jamie.hn.core.BaseTest
 import com.jamie.hn.stories.domain.model.Story
 import com.jamie.hn.stories.repository.StoriesRepository
+import com.jamie.hn.stories.repository.model.StoryResults
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -28,10 +29,13 @@ class CommentsUseCaseTest : BaseTest() {
     private lateinit var repository: StoriesRepository
 
     @MockK
+    private lateinit var storyResults: StoryResults
+
+    @MockK
     private lateinit var story: Story
 
     @MockK
-    private lateinit var onResult: (List<CommentWithDepth>) -> Unit
+    private lateinit var onResult: (List<CommentWithDepth>, Boolean) -> Unit
 
     private lateinit var commentsUseCase: CommentsUseCase
     private lateinit var scope: CoroutineScope
@@ -40,7 +44,9 @@ class CommentsUseCaseTest : BaseTest() {
     fun setup() {
         MockKAnnotations.init(this)
 
-        coEvery { repository.story(any(), any(), any()) } returns story
+        coEvery { repository.story(any(), any(), any()) } returns storyResults
+        every { storyResults.story } returns story
+        every { storyResults.networkFailure } returns false
 
         commentsUseCase = CommentsUseCase(repository)
         scope = CoroutineScope(Unconfined)
@@ -49,7 +55,7 @@ class CommentsUseCaseTest : BaseTest() {
     @Test
     fun `when retrieveComments is called using cache true then fetch story from repository with cache true and requiring comments true and invoke callback`() {
         every { story.comments } returns emptyList()
-        every { onResult.invoke(any()) } returns Unit
+        every { onResult.invoke(any(), any()) } returns Unit
 
         runBlocking {
             commentsUseCase.retrieveComments(
@@ -61,13 +67,13 @@ class CommentsUseCaseTest : BaseTest() {
         }
 
         coVerify { repository.story(id = 1, useCachedVersion = true, requireComments = true) }
-        verify { onResult.invoke(any()) }
+        verify { onResult.invoke(any(), eq(false)) }
     }
 
     @Test
     fun `when retrieveComments is called using cache false then fetch story from repository with cache false and invoke callback`() {
         every { story.comments } returns emptyList()
-        every { onResult.invoke(any()) } returns Unit
+        every { onResult.invoke(any(), any()) } returns Unit
 
         runBlocking {
             commentsUseCase.retrieveComments(
@@ -79,7 +85,7 @@ class CommentsUseCaseTest : BaseTest() {
         }
 
         coVerify { repository.story(id = 1, useCachedVersion = false, requireComments = true) }
-        verify { onResult.invoke(any()) }
+        verify { onResult.invoke(any(), eq(false)) }
     }
 
     @Nested
@@ -89,8 +95,8 @@ class CommentsUseCaseTest : BaseTest() {
         fun `when the comment has no child comments then return a list containing only that comment with correct depth`() {
             val returnedComments = slot<List<CommentWithDepth>>()
 
-            every { onResult.invoke(any()) } returns Unit
-            coEvery { repository.story(any(), any(), any()) } returns story(singleComment())
+            every { onResult.invoke(any(), any()) } returns Unit
+            coEvery { repository.story(any(), any(), any()) } returns StoryResults(story(singleComment()))
 
             runBlocking {
                 commentsUseCase.retrieveComments(
@@ -101,7 +107,7 @@ class CommentsUseCaseTest : BaseTest() {
                 )
             }
 
-            verify { onResult.invoke(capture(returnedComments)) }
+            verify { onResult.invoke(capture(returnedComments), any()) }
 
             assertEquals(1, returnedComments.captured.size)
             assertEquals(0, returnedComments.captured[0].depth)
@@ -112,8 +118,10 @@ class CommentsUseCaseTest : BaseTest() {
         fun `when comment has multiple child comments then return the list containing those with their correct depth and removed their children`() {
             val returnedComments = slot<List<CommentWithDepth>>()
 
-            every { onResult.invoke(any()) } returns Unit
-            coEvery { repository.story(any(), any(), any()) } returns story(singleCommentNestedComment())
+            every { onResult.invoke(any(), any()) } returns Unit
+            coEvery { repository.story(any(), any(), any()) } returns StoryResults(story(
+                singleCommentNestedComment()
+            ))
 
             runBlocking {
                 commentsUseCase.retrieveComments(
@@ -124,7 +132,7 @@ class CommentsUseCaseTest : BaseTest() {
                 )
             }
 
-            verify { onResult.invoke(capture(returnedComments)) }
+            verify { onResult.invoke(capture(returnedComments), any()) }
 
             // We remove the nested child comments but keep the commentCount
             val firstComment = singleComment().copy(commentCount = 1)

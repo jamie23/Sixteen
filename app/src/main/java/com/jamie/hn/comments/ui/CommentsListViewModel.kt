@@ -12,6 +12,7 @@ import com.jamie.hn.comments.ui.repository.model.CurrentState
 import com.jamie.hn.comments.ui.repository.model.CurrentState.COLLAPSED
 import com.jamie.hn.comments.ui.repository.model.CurrentState.FULL
 import com.jamie.hn.comments.ui.repository.model.CurrentState.HIDDEN
+import com.jamie.hn.core.Event
 import kotlinx.coroutines.launch
 
 class CommentsListViewModel(
@@ -22,6 +23,9 @@ class CommentsListViewModel(
 
     private val listViewState = MutableLiveData<ListViewState>()
     fun commentsViewState(): LiveData<ListViewState> = listViewState
+
+    private val networkError = MutableLiveData<Event<Unit>>()
+    fun networkError(): LiveData<Event<Unit>> = networkError
 
     private lateinit var commentsViewRepository: CommentsViewRepository
 
@@ -71,7 +75,9 @@ class CommentsListViewModel(
     }
 
     // Transform list from API to a list with UI state, all items initialised with FULL state shown
-    private fun populateUiCommentRepository(listAllComments: List<CommentWithDepth>) {
+    private fun populateUiCommentRepository(listAllComments: List<CommentWithDepth>, networkFailure: Boolean) {
+        if (networkFailure) networkError.value = Event(Unit)
+
         commentsViewRepository.commentList = listAllComments.mapIndexed { index, commentWithDepth ->
             CommentCurrentState(comment = commentWithDepth.copy(id = index), state = FULL)
         }

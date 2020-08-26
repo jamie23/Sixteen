@@ -58,14 +58,14 @@ class StoryListViewModel(
 
     private fun commentsCallback(id: Long) {
         viewModelScope.launch {
-            navigateToComments.value = Event(storiesUseCase.getStory(id, true).id)
+            navigateToComments.value = Event(storiesUseCase.getStory(id, true).story.id)
         }
     }
 
     private fun articleViewerCallback(id: Long) {
         viewModelScope.launch {
             navigateToArticle.value =
-                Event(storiesUseCase.getStory(id, true).url)
+                Event(storiesUseCase.getStory(id, true).story.url)
         }
     }
 

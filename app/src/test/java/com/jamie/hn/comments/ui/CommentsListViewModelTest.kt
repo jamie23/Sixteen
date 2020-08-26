@@ -9,6 +9,7 @@ import com.jamie.hn.comments.ui.repository.model.CommentCurrentState
 import com.jamie.hn.comments.ui.repository.model.CurrentState.COLLAPSED
 import com.jamie.hn.comments.ui.repository.model.CurrentState.FULL
 import com.jamie.hn.core.BaseTest
+import com.jamie.hn.core.Event
 import com.jamie.hn.core.InstantExecutorExtension
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
@@ -75,7 +76,7 @@ class CommentsListViewModelTest : BaseTest() {
 
         @Test
         fun `when the repository is populated from the use case then the callback modifies the commentsViewRepository with a CommentCurrentState with the id as index and state as full`() {
-            val callback = slot<(List<CommentWithDepth>) -> Unit>()
+            val callback = slot<(List<CommentWithDepth>, Boolean) -> Unit>()
             val commentsToMapper = mutableListOf<CommentCurrentState>()
 
             coEvery {
@@ -95,7 +96,7 @@ class CommentsListViewModelTest : BaseTest() {
 
             commentsListViewModel.init()
 
-            callback.invoke(useCaseResponse())
+            callback.invoke(useCaseResponse(), false)
 
             assertEquals(2, commentsToMapper.size)
 
@@ -110,7 +111,7 @@ class CommentsListViewModelTest : BaseTest() {
 
         @Test
         fun `when the repository is populated from the use case, we map the comments from the repository, mapping via the mapper and posting the value with refreshing false`() {
-            val callback = slot<(List<CommentWithDepth>) -> Unit>()
+            val callback = slot<(List<CommentWithDepth>, Boolean) -> Unit>()
             val mockedCommentViewItem = mockk<CommentViewItem>()
             val observer = spyk<Observer<ListViewState>>()
 
@@ -129,7 +130,7 @@ class CommentsListViewModelTest : BaseTest() {
             commentsListViewModel.commentsViewState().observeForever(observer)
             commentsListViewModel.init()
 
-            callback.invoke(useCaseResponse())
+            callback.invoke(useCaseResponse(), false)
             verify {
                 observer.onChanged(
                     ListViewState(
@@ -141,6 +142,34 @@ class CommentsListViewModelTest : BaseTest() {
                 )
             }
         }
+
+        @Test
+        fun `when the repository is populated from the use case with network failure as true then emit an event for network failure`() {
+            val callback = slot<(List<CommentWithDepth>, Boolean) -> Unit>()
+            val observer = spyk<Observer<Event<Unit>>>()
+
+            commentsListViewModel.networkError().observeForever(observer)
+            coEvery {
+                commentsUseCase.retrieveComments(
+                    any(),
+                    any(),
+                    capture(callback),
+                    any()
+                )
+            } just Runs
+            coEvery {
+                commentDataMapper.toCommentViewItem(
+                    any(),
+                    any()
+                )
+            } returns mockk()
+
+            commentsListViewModel.init()
+
+            callback.invoke(useCaseResponse(), true)
+
+            verify { observer.onChanged(any()) }
+        }
     }
 
     @Nested
@@ -149,7 +178,7 @@ class CommentsListViewModelTest : BaseTest() {
         @Test
         fun `when comment state is full then set the state to be collapsed`() {
             val longClickListenerCallback = slot<(Int) -> Unit>()
-            val commentsUseCaseCallback = slot<(List<CommentWithDepth>) -> Unit>()
+            val commentsUseCaseCallback = slot<(List<CommentWithDepth>, Boolean) -> Unit>()
             val commentsPassedToMapper = mutableListOf<CommentCurrentState>()
 
             coEvery {
@@ -169,7 +198,7 @@ class CommentsListViewModelTest : BaseTest() {
 
             commentsListViewModel.init()
 
-            commentsUseCaseCallback.invoke(useCaseResponse())
+            commentsUseCaseCallback.invoke(useCaseResponse(), false)
             longClickListenerCallback.invoke(0)
 
             assertEquals(COLLAPSED, commentsPassedToMapper[2].state)
@@ -178,7 +207,7 @@ class CommentsListViewModelTest : BaseTest() {
         @Test
         fun `when comment state is collapsed then set the state to be full`() {
             val longClickListenerCallback = slot<(Int) -> Unit>()
-            val commentsUseCaseCallback = slot<(List<CommentWithDepth>) -> Unit>()
+            val commentsUseCaseCallback = slot<(List<CommentWithDepth>, Boolean) -> Unit>()
             val commentsPassedToMapper = mutableListOf<CommentCurrentState>()
 
             coEvery {
@@ -198,7 +227,7 @@ class CommentsListViewModelTest : BaseTest() {
 
             commentsListViewModel.init()
 
-            commentsUseCaseCallback.invoke(useCaseResponse())
+            commentsUseCaseCallback.invoke(useCaseResponse(), false)
             longClickListenerCallback.invoke(0)
 
             assertEquals(COLLAPSED, commentsPassedToMapper[2].state)
@@ -212,7 +241,7 @@ class CommentsListViewModelTest : BaseTest() {
         @Test
         fun `when comment is long clicked and is the last in the list then do not update any other children`() {
             val longClickListenerCallback = slot<(Int) -> Unit>()
-            val commentsUseCaseCallback = slot<(List<CommentWithDepth>) -> Unit>()
+            val commentsUseCaseCallback = slot<(List<CommentWithDepth>, Boolean) -> Unit>()
             val commentsPassedToMapper = mutableListOf<CommentCurrentState>()
 
             coEvery {
@@ -232,7 +261,7 @@ class CommentsListViewModelTest : BaseTest() {
 
             commentsListViewModel.init()
 
-            commentsUseCaseCallback.invoke(useCaseResponseWithChildren())
+            commentsUseCaseCallback.invoke(useCaseResponseWithChildren(), false)
 
             assertEquals(FULL, commentsPassedToMapper[0].state)
             assertEquals(FULL, commentsPassedToMapper[1].state)
@@ -246,7 +275,7 @@ class CommentsListViewModelTest : BaseTest() {
         @Test
         fun `when comment is long clicked, is not the last index and there is a sibling later then filter out all children before next sibling`() {
             val longClickListenerCallback = slot<(Int) -> Unit>()
-            val commentsUseCaseCallback = slot<(List<CommentWithDepth>) -> Unit>()
+            val commentsUseCaseCallback = slot<(List<CommentWithDepth>, Boolean) -> Unit>()
             val commentsPassedToMapper = mutableListOf<CommentCurrentState>()
 
             coEvery {
@@ -275,7 +304,7 @@ class CommentsListViewModelTest : BaseTest() {
                 )
             )
 
-            commentsUseCaseCallback.invoke(list)
+            commentsUseCaseCallback.invoke(list, false)
 
             assertEquals(FULL, commentsPassedToMapper[0].state)
             assertEquals(FULL, commentsPassedToMapper[1].state)
@@ -293,7 +322,7 @@ class CommentsListViewModelTest : BaseTest() {
         @Test
         fun `when comment is long clicked, is not the last index and there is no sibling or lower depth comments then filter results until end of list`() {
             val longClickListenerCallback = slot<(Int) -> Unit>()
-            val commentsUseCaseCallback = slot<(List<CommentWithDepth>) -> Unit>()
+            val commentsUseCaseCallback = slot<(List<CommentWithDepth>, Boolean) -> Unit>()
             val commentsPassedToMapper = mutableListOf<CommentCurrentState>()
 
             coEvery {
@@ -322,7 +351,7 @@ class CommentsListViewModelTest : BaseTest() {
                 )
             )
 
-            commentsUseCaseCallback.invoke(list)
+            commentsUseCaseCallback.invoke(list, false)
 
             assertEquals(FULL, commentsPassedToMapper[0].state)
             assertEquals(FULL, commentsPassedToMapper[1].state)

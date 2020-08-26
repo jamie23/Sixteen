@@ -6,6 +6,7 @@ import com.jamie.hn.core.BaseTest
 import com.jamie.hn.core.Event
 import com.jamie.hn.core.InstantExecutorExtension
 import com.jamie.hn.stories.domain.model.Story
+import com.jamie.hn.stories.repository.model.StoryResults
 import com.jamie.hn.stories.repository.model.TopStoryResults
 import com.jamie.hn.stories.ui.StoryListViewModel.StoryListViewState
 import io.mockk.MockKAnnotations
@@ -21,7 +22,7 @@ import io.mockk.spyk
 import io.mockk.verify
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
-import org.junit.jupiter.api.Assertions
+import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -46,6 +47,8 @@ class StoryListViewModelTest : BaseTest() {
         url = "url"
     )
 
+    private val storyResults = StoryResults(story)
+
     private val stories = listOf(story)
     private val storyViewItem = StoryViewItem(
         id = 0,
@@ -64,7 +67,7 @@ class StoryListViewModelTest : BaseTest() {
         MockKAnnotations.init(this)
 
         coEvery { storiesUseCase.getStories(any()) } returns TopStoryResults(stories)
-        coEvery { storiesUseCase.getStory(1, true) } returns story
+        coEvery { storiesUseCase.getStory(1, true) } returns storyResults
         every { storyDataMapper.toStoryViewItem(any(), any(), any()) } returns storyViewItem
 
         storyListViewModel = StoryListViewModel(storyDataMapper, storiesUseCase)
@@ -110,7 +113,14 @@ class StoryListViewModelTest : BaseTest() {
                 storyListViewModel.userManuallyRefreshed()
 
                 verify { storyDataMapper.toStoryViewItem(story, any(), any()) }
-                verify { observerStories.onChanged(StoryListViewState(listOf(storyViewItem), false)) }
+                verify {
+                    observerStories.onChanged(
+                        StoryListViewState(
+                            listOf(storyViewItem),
+                            false
+                        )
+                    )
+                }
                 verify { observerNetworkError.onChanged(any()) }
             }
         }
@@ -147,7 +157,13 @@ class StoryListViewModelTest : BaseTest() {
             val commentsCallback = slot<(id: Long) -> Unit>()
             val idEmitted = slot<Event<Long>>()
 
-            every { storyDataMapper.toStoryViewItem(any(), capture(commentsCallback), any()) } returns storyViewItem
+            every {
+                storyDataMapper.toStoryViewItem(
+                    any(),
+                    capture(commentsCallback),
+                    any()
+                )
+            } returns storyViewItem
             every { observer.onChanged(capture(idEmitted)) } just runs
 
             storyListViewModel.navigateToComments().observeForever(observer)
@@ -156,7 +172,7 @@ class StoryListViewModelTest : BaseTest() {
             commentsCallback.captured.invoke(1)
 
             coVerify { storiesUseCase.getStory(1, true) }
-            Assertions.assertEquals(23, idEmitted.captured.getContentIfNotHandled())
+            assertEquals(23L, idEmitted.captured.getContentIfNotHandled())
         }
 
         @Test
@@ -165,7 +181,13 @@ class StoryListViewModelTest : BaseTest() {
             val articleViewerCallback = slot<(id: Long) -> Unit>()
             val urlEmitted = slot<Event<String>>()
 
-            every { storyDataMapper.toStoryViewItem(any(), any(), capture(articleViewerCallback)) } returns storyViewItem
+            every {
+                storyDataMapper.toStoryViewItem(
+                    any(),
+                    any(),
+                    capture(articleViewerCallback)
+                )
+            } returns storyViewItem
             every { observer.onChanged(capture(urlEmitted)) } just runs
 
             storyListViewModel.navigateToArticle().observeForever(observer)
@@ -174,7 +196,7 @@ class StoryListViewModelTest : BaseTest() {
             articleViewerCallback.captured.invoke(1)
 
             coVerify { storiesUseCase.getStory(1, true) }
-            Assertions.assertEquals("url", urlEmitted.captured.getContentIfNotHandled())
+            assertEquals("url", urlEmitted.captured.getContentIfNotHandled())
         }
     }
 }

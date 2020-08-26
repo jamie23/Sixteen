@@ -3,7 +3,7 @@ package com.jamie.hn.stories.repository
 import com.jamie.hn.core.net.NetworkUtils
 import com.jamie.hn.stories.repository.local.LocalStorage
 import com.jamie.hn.core.net.hex.Hex
-import com.jamie.hn.stories.domain.model.Story
+import com.jamie.hn.stories.repository.model.StoryResults
 import com.jamie.hn.stories.repository.model.TopStoryResults
 
 class StoriesRepository(
@@ -33,11 +33,14 @@ class StoriesRepository(
         id: Long,
         useCachedVersion: Boolean,
         requireComments: Boolean
-    ): Story {
-        if (useCachedVersion) {
+    ): StoryResults {
+        if (useCachedVersion || !networkUtils.isNetworkAvailable()) {
             val localCopy = localStorage.storyList.find { it.id == id }
             if (localCopy != null && (!requireComments || localCopy.retrievedComments)) {
-                return localCopy
+                return StoryResults(
+                    localCopy,
+                    !useCachedVersion && !networkUtils.isNetworkAvailable()
+                )
             }
         }
 
@@ -52,6 +55,6 @@ class StoriesRepository(
         }
 
         localStorage.storyList = newList
-        return newCopy
+        return StoryResults(newCopy)
     }
 }

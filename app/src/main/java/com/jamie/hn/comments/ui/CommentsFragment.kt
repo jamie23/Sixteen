@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import com.jamie.hn.R
 import com.jamie.hn.core.extensions.visibleOrGone
 import kotlinx.android.synthetic.main.comment_list_fragment.*
@@ -41,8 +42,18 @@ class CommentsFragment : Fragment(R.layout.comment_list_fragment) {
             commentsListAdapter.data(it.comments)
         })
 
+        viewModel.networkError().observe(viewLifecycleOwner, Observer {
+            it.getContentIfNotHandled()?.let {
+                showNetworkFailureError(commentsList)
+            }
+        })
+
         commentSwipeLayout.setOnRefreshListener {
             viewModel.userManuallyRefreshed()
         }
+    }
+
+    private fun showNetworkFailureError(view: View) {
+        Snackbar.make(view, R.string.comments_network_error, Snackbar.LENGTH_LONG).show()
     }
 }

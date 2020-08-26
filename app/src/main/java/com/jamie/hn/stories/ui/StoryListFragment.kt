@@ -65,6 +65,6 @@ class StoryListFragment : Fragment(R.layout.story_list_fragment) {
     }
 
     private fun showNetworkFailureError(view: View) {
-        Snackbar.make(view, R.string.network_error, Snackbar.LENGTH_LONG).show()
+        Snackbar.make(view, R.string.stories_network_error, Snackbar.LENGTH_LONG).show()
     }
 }
