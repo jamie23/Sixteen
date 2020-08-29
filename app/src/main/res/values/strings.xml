@@ -13,7 +13,8 @@
         <item quantity="other">%d comments</item>
     </plurals>
 
-    <string name="stories_network_error">Error retrieving stories due to connection, showing cached stories</string>
+    <string name="stories_network_cached_error">Error retrieving stories due to connection, showing cached stories</string>
+    <string name="stories_network_none_cached_error">Error retrieving stories, please check internet connection</string>
 
     <!-- Comments -->
     <string name="comments_title">Comments</string>

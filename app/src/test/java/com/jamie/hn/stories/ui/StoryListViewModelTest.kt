@@ -86,7 +86,15 @@ class StoryListViewModelTest : BaseTest() {
                 storyListViewModel.storyListViewState().observeForever(observer)
                 storyListViewModel.userManuallyRefreshed()
 
-                verify { observer.onChanged(StoryListViewState(emptyList(), true)) }
+                verify {
+                    observer.onChanged(
+                        StoryListViewState(
+                            stories = emptyList(),
+                            refreshing = true,
+                            showNoCachedStoryNetworkError = false
+                        )
+                    )
+                }
             }
 
             @Test
@@ -98,30 +106,66 @@ class StoryListViewModelTest : BaseTest() {
 
                 coVerify { storiesUseCase.getStories(false) }
                 verify { storyDataMapper.toStoryViewItem(story, any(), any()) }
-                verify { observer.onChanged(StoryListViewState(listOf(storyViewItem), false)) }
+                verify {
+                    observer.onChanged(
+                        StoryListViewState(
+                            stories = listOf(storyViewItem),
+                            refreshing = false,
+                            showNoCachedStoryNetworkError = false
+                        )
+                    )
+                }
             }
 
             @Test
-            fun `when refresh is called but there is a network failure then emit event for network failure and show cached results`() {
+            fun `when refresh is called but there is a network failure and returns cached stories then emit event for network failure with cached results`() {
                 val observerStories = spyk<Observer<StoryListViewState>>()
                 val observerNetworkError = spyk<Observer<Event<Unit>>>()
 
                 coEvery { storiesUseCase.getStories(any()) } returns TopStoryResults(stories, true)
 
                 storyListViewModel.storyListViewState().observeForever(observerStories)
-                storyListViewModel.networkError().observeForever(observerNetworkError)
+                storyListViewModel.cachedStoriesNetworkError().observeForever(observerNetworkError)
                 storyListViewModel.userManuallyRefreshed()
 
                 verify { storyDataMapper.toStoryViewItem(story, any(), any()) }
                 verify {
                     observerStories.onChanged(
                         StoryListViewState(
-                            listOf(storyViewItem),
-                            false
+                            stories = listOf(storyViewItem),
+                            refreshing = false,
+                            showNoCachedStoryNetworkError = false
                         )
                     )
                 }
                 verify { observerNetworkError.onChanged(any()) }
+            }
+
+            @Test
+            fun `when refresh is called but there is a network failure and returns no stories then do not emit event for network failure with cached results but set NoCachedError to true`() {
+                val observerStories = spyk<Observer<StoryListViewState>>()
+                val observerNetworkError = spyk<Observer<Event<Unit>>>()
+
+                coEvery { storiesUseCase.getStories(any()) } returns TopStoryResults(
+                    emptyList(),
+                    true
+                )
+
+                storyListViewModel.storyListViewState().observeForever(observerStories)
+                storyListViewModel.cachedStoriesNetworkError().observeForever(observerNetworkError)
+                storyListViewModel.userManuallyRefreshed()
+
+                verify {
+                    observerStories.onChanged(
+                        StoryListViewState(
+                            stories = emptyList(),
+                            refreshing = false,
+                            showNoCachedStoryNetworkError = true
+                        )
+                    )
+                }
+                verify(exactly = 0) { storyDataMapper.toStoryViewItem(any(), any(), any()) }
+                verify(exactly = 0) { observerNetworkError.onChanged(any()) }
             }
         }
 
@@ -135,7 +179,15 @@ class StoryListViewModelTest : BaseTest() {
                 storyListViewModel.storyListViewState().observeForever(observer)
                 storyListViewModel.automaticallyRefreshed()
 
-                verify { observer.onChanged(StoryListViewState(emptyList(), true)) }
+                verify {
+                    observer.onChanged(
+                        StoryListViewState(
+                            stories = emptyList(),
+                            refreshing = true,
+                            showNoCachedStoryNetworkError = false
+                        )
+                    )
+                }
             }
 
             @Test
@@ -147,7 +199,15 @@ class StoryListViewModelTest : BaseTest() {
 
                 coVerify { storiesUseCase.getStories(true) }
                 verify { storyDataMapper.toStoryViewItem(story, any(), any()) }
-                verify { observer.onChanged(StoryListViewState(listOf(storyViewItem), false)) }
+                verify {
+                    observer.onChanged(
+                        StoryListViewState(
+                            stories = listOf(storyViewItem),
+                            refreshing = false,
+                            showNoCachedStoryNetworkError = false
+                        )
+                    )
+                }
             }
         }
 

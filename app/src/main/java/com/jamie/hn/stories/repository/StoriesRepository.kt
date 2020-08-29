@@ -14,12 +14,19 @@ class StoriesRepository(
 ) : Repository {
 
     override suspend fun topStories(useCachedVersion: Boolean): TopStoryResults {
-        if (useCachedVersion || !networkUtils.isNetworkAvailable()) {
+        if (!networkUtils.isNetworkAvailable()) {
+            return TopStoryResults(
+                localStorage.storyList,
+                true
+            )
+        }
+
+        if (useCachedVersion) {
             val localCopy = localStorage.storyList
             if (localCopy.isNotEmpty()) {
                 return TopStoryResults(
                     localCopy,
-                    !useCachedVersion && !networkUtils.isNetworkAvailable()
+                    false
                 )
             }
         }

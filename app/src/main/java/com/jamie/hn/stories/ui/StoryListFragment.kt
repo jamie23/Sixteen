@@ -24,7 +24,7 @@ class StoryListFragment : Fragment(R.layout.story_list_fragment) {
 
         storyListAdapter = StoryListAdapter()
 
-        view.articleList.apply {
+        view.storyList.apply {
             setHasFixedSize(true)
             layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
             adapter = storyListAdapter
@@ -34,12 +34,13 @@ class StoryListFragment : Fragment(R.layout.story_list_fragment) {
 
         viewModel.storyListViewState().observe(viewLifecycleOwner, Observer {
             progressBar.visibleOrGone(it.refreshing)
-            articleSwipeLayout.isRefreshing = it.refreshing
-            articleList.visibleOrGone(!it.refreshing)
+            storySwipeLayout.isRefreshing = it.refreshing
+            storyList.visibleOrGone(!it.refreshing)
+            storyListError.visibleOrGone(it.showNoCachedStoryNetworkError)
             storyListAdapter.data(it.stories)
         })
 
-        articleSwipeLayout.setOnRefreshListener {
+        storySwipeLayout.setOnRefreshListener {
             viewModel.userManuallyRefreshed()
         }
 
@@ -57,14 +58,14 @@ class StoryListFragment : Fragment(R.layout.story_list_fragment) {
             }
         })
 
-        viewModel.networkError().observe(viewLifecycleOwner, Observer {
+        viewModel.cachedStoriesNetworkError().observe(viewLifecycleOwner, Observer {
             it.getContentIfNotHandled()?.let {
-                showNetworkFailureError(articleList)
+                showNetworkFailureError(storyList)
             }
         })
     }
 
     private fun showNetworkFailureError(view: View) {
-        Snackbar.make(view, R.string.stories_network_error, Snackbar.LENGTH_LONG).show()
+        Snackbar.make(view, R.string.stories_network_cached_error, Snackbar.LENGTH_LONG).show()
     }
 }

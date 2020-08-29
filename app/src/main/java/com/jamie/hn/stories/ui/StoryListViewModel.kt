@@ -22,8 +22,8 @@ class StoryListViewModel(
     private val navigateToArticle = MutableLiveData<Event<String>>()
     fun navigateToArticle(): LiveData<Event<String>> = navigateToArticle
 
-    private val networkError = MutableLiveData<Event<Unit>>()
-    fun networkError(): LiveData<Event<Unit>> = networkError
+    private val cachedStoriesNetworkError = MutableLiveData<Event<Unit>>()
+    fun cachedStoriesNetworkError(): LiveData<Event<Unit>> = cachedStoriesNetworkError
 
     fun userManuallyRefreshed() {
         refreshList(false)
@@ -36,11 +36,13 @@ class StoryListViewModel(
     private fun refreshList(useCachedVersion: Boolean) {
         storyListViewState.value = StoryListViewState(
             stories = emptyList(),
-            refreshing = true
+            refreshing = true,
+            showNoCachedStoryNetworkError = false
         )
 
         viewModelScope.launch {
             val results = storiesUseCase.getStories(useCachedVersion)
+
             storyListViewState.value = StoryListViewState(
                 stories = results.stories.map {
                     storyDataMapper.toStoryViewItem(
@@ -49,10 +51,13 @@ class StoryListViewModel(
                         ::articleViewerCallback
                     )
                 },
-                refreshing = false
+                refreshing = false,
+                showNoCachedStoryNetworkError = results.stories.isEmpty() && results.networkFailure
             )
 
-            if (results.networkFailure) networkError.value = Event(Unit)
+            if (results.stories.isNotEmpty() && results.networkFailure && !useCachedVersion) {
+                cachedStoriesNetworkError.value = Event(Unit)
+            }
         }
     }
 
@@ -72,6 +77,6 @@ class StoryListViewModel(
     data class StoryListViewState(
         val stories: List<StoryViewItem>,
         val refreshing: Boolean,
-        val networkFailure: Boolean = false
+        val showNoCachedStoryNetworkError: Boolean
     )
 }

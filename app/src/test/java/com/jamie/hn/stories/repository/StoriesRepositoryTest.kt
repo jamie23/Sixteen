@@ -53,6 +53,23 @@ class StoriesRepositoryTest {
     inner class GetTopStories {
 
         @Test
+        fun `when network is unavailable then return local storage list and network failure as true`() {
+            var topStories = TopStoryResults(emptyList())
+            val storedList = listOf(Story(time = DateTime.now()))
+
+            every { networkUtils.isNetworkAvailable() } returns false
+            every { localStorage.storyList } returns storedList
+
+            runBlocking {
+                topStories = storiesRepository.topStories(false)
+            }
+
+            assertEquals(storedList, topStories.stories)
+            assertEquals(true, topStories.networkFailure)
+            verify(exactly = 0) { localStorage.storyList = any() }
+        }
+
+        @Test
         fun `when useCachedVersion is true and local storage is not empty then get the list of stories from local storage`() {
             var topStories = TopStoryResults(emptyList())
             val storedList = listOf(Story(time = DateTime.now()))
@@ -114,23 +131,6 @@ class StoriesRepositoryTest {
             verify { apiToDomainMapper.toStoryDomainModel(any(), false) }
             assertFalse(topStories.networkFailure)
             assertEquals(listOf(Story(time = date)), topStories.stories)
-        }
-
-        @Test
-        fun `when useCached version is false but network is unavailable and there are cached stories then use local version with network failure as true`() {
-            var topStories = TopStoryResults(emptyList())
-            val storedList = listOf(Story(time = DateTime.now()))
-
-            every { networkUtils.isNetworkAvailable() } returns false
-            every { localStorage.storyList } returns storedList
-
-            runBlocking {
-                topStories = storiesRepository.topStories(false)
-            }
-
-            assertEquals(storedList, topStories.stories)
-            assertEquals(true, topStories.networkFailure)
-            verify(exactly = 0) { localStorage.storyList = any() }
         }
     }
 
