@@ -24,8 +24,11 @@ class CommentsListViewModel(
     private val listViewState = MutableLiveData<ListViewState>()
     fun commentsViewState(): LiveData<ListViewState> = listViewState
 
-    private val networkError = MutableLiveData<Event<Unit>>()
-    fun networkError(): LiveData<Event<Unit>> = networkError
+    private val networkErrorCachedResults = MutableLiveData<Event<Unit>>()
+    fun networkErrorCachedResults(): LiveData<Event<Unit>> = networkErrorCachedResults
+
+    private val networkErrorNoCacheResults = MutableLiveData<Event<Unit>>()
+    fun networkErrorNoCacheResults(): LiveData<Event<Unit>> = networkErrorNoCacheResults
 
     private lateinit var commentsViewRepository: CommentsViewRepository
 
@@ -75,8 +78,19 @@ class CommentsListViewModel(
     }
 
     // Transform list from API to a list with UI state, all items initialised with FULL state shown
-    private fun populateUiCommentRepository(listAllComments: List<CommentWithDepth>, networkFailure: Boolean) {
-        if (networkFailure) networkError.value = Event(Unit)
+    private fun populateUiCommentRepository(
+        listAllComments: List<CommentWithDepth>,
+        networkFailure: Boolean,
+        useCachedVersion: Boolean
+    ) {
+        if (listAllComments.isEmpty() && networkFailure) {
+            networkErrorNoCacheResults.value = Event(Unit)
+            return
+        }
+
+        if (listAllComments.isNotEmpty() && networkFailure && !useCachedVersion) {
+            networkErrorCachedResults.value = Event(Unit)
+        }
 
         commentsViewRepository.commentList = listAllComments.mapIndexed { index, commentWithDepth ->
             CommentCurrentState(comment = commentWithDepth.copy(id = index), state = FULL)

@@ -9,7 +9,7 @@ data class Story(
     val commentCount: Int = 0,
     val commentsUrl: String = "",
     val domain: String = "",
-    val id: Long = 0,
+    val id: Long = -1,
     val score: Int = 0,
     val time: DateTime,
     val title: String = "",

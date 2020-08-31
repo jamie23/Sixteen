@@ -35,16 +35,29 @@ class CommentsFragment : Fragment(R.layout.comment_list_fragment) {
 
         viewModel.init()
 
+        initialiseLiveDataObservers()
+    }
+
+    private fun initialiseLiveDataObservers() {
         viewModel.commentsViewState().observe(viewLifecycleOwner, Observer {
             progressBar.visibleOrGone(it.refreshing)
             commentSwipeLayout.isRefreshing = it.refreshing
             commentsList.visibleOrGone(!it.refreshing)
             commentsListAdapter.data(it.comments)
+            commentListError.visibleOrGone(false)
         })
 
-        viewModel.networkError().observe(viewLifecycleOwner, Observer {
+        viewModel.networkErrorCachedResults().observe(viewLifecycleOwner, Observer {
             it.getContentIfNotHandled()?.let {
-                showNetworkFailureError(commentsList)
+                showNetworkFailureCachedResults(commentsList)
+            }
+        })
+
+        viewModel.networkErrorNoCacheResults().observe(viewLifecycleOwner, Observer {
+            it.getContentIfNotHandled()?.let {
+                progressBar.visibleOrGone(false)
+                commentSwipeLayout.isRefreshing = false
+                showNetworkFailureNoCacheResults()
             }
         })
 
@@ -53,7 +66,11 @@ class CommentsFragment : Fragment(R.layout.comment_list_fragment) {
         }
     }
 
-    private fun showNetworkFailureError(view: View) {
+    private fun showNetworkFailureCachedResults(view: View) {
         Snackbar.make(view, R.string.comments_network_error, Snackbar.LENGTH_LONG).show()
+    }
+
+    private fun showNetworkFailureNoCacheResults() {
+        commentListError.visibleOrGone(true)
     }
 }

@@ -158,34 +158,6 @@ class StoriesRepositoryTest {
         }
 
         @Test
-        fun `when useCachedVersion is true and local storage doesn't contain the story then get the story from web storage, update the local storage and return web copy`() {
-            val storedStory = Story(id = 1, time = DateTime.now())
-            var story = StoryResults(Story(time = DateTime.now()))
-            val apiStory = ApiStory(time = DateTime.now().toString())
-
-            every { localStorage.storyList } returns emptyList()
-            every { apiToDomainMapper.toStoryDomainModel(any(), true) } returns storedStory
-            coEvery { webStorage.story(1) } returns apiStory
-
-            runBlocking {
-                story = storiesRepository.story(
-                    id = 1,
-                    useCachedVersion = true,
-                    requireComments = false
-                )
-            }
-
-            coVerifyOrder {
-                localStorage.storyList
-                webStorage.story(1)
-                apiToDomainMapper.toStoryDomainModel(apiStory, true)
-                localStorage.storyList
-                localStorage.storyList = any()
-            }
-            assertEquals(storedStory, story.story)
-        }
-
-        @Test
         fun `when useCachedVersion is true and requireComments is true and localCopy has not retrieved comments then get the story from web storage and replace the local story with the new one`() {
             val storedStory = Story(id = 1, time = DateTime.now(), retrievedComments = false)
             val newStoredStory = Story(id = 1, time = DateTime.now(), retrievedComments = true)
@@ -263,9 +235,9 @@ class StoriesRepositoryTest {
         }
 
         @Test
-        fun `when useCachedVersion is false but network is unavailable and the story is cached then use local version with network failure as true`() {
+        fun `when network is unavailable, the story is cached and not requiring comments then use local version with network failure as true`() {
             var storyResults = StoryResults(Story(id = 2, time = DateTime.now()))
-            val storedStory = Story(id = 1, time = DateTime.now(), retrievedComments = true)
+            val storedStory = Story(id = 1, time = DateTime.now(), retrievedComments = false)
             val storedList = listOf(storedStory)
 
             every { localStorage.storyList } returns storedList
@@ -281,6 +253,50 @@ class StoriesRepositoryTest {
 
             verify(exactly = 0) { localStorage.storyList = any() }
             assertEquals(storedStory, storyResults.story)
+            assertEquals(true, storyResults.networkFailure)
+        }
+
+        @Test
+        fun `when network is unavailable, the story is cached and is requiring comments and stored story has comments then use local version with network failure as true`() {
+            var storyResults = StoryResults(Story(id = 2, time = DateTime.now()))
+            val storedStory = Story(id = 1, time = DateTime.now(), retrievedComments = true)
+            val storedList = listOf(storedStory)
+
+            every { localStorage.storyList } returns storedList
+            every { networkUtils.isNetworkAvailable() } returns false
+
+            runBlocking {
+                storyResults = storiesRepository.story(
+                    id = 1,
+                    useCachedVersion = false,
+                    requireComments = true
+                )
+            }
+
+            verify(exactly = 0) { localStorage.storyList = any() }
+            assertEquals(storedStory, storyResults.story)
+            assertEquals(true, storyResults.networkFailure)
+        }
+
+        @Test
+        fun `when network is unavailable, the story is cached but does not have comments when required then return story with id as -1 and network failure as true`() {
+            var storyResults = StoryResults(Story(id = 2, time = DateTime.now()))
+            val storedStory = Story(id = 1, time = DateTime.now(), retrievedComments = false)
+            val storedList = listOf(storedStory)
+
+            every { localStorage.storyList } returns storedList
+            every { networkUtils.isNetworkAvailable() } returns false
+
+            runBlocking {
+                storyResults = storiesRepository.story(
+                    id = 1,
+                    useCachedVersion = false,
+                    requireComments = true
+                )
+            }
+
+            verify(exactly = 0) { localStorage.storyList = any() }
+            assertEquals(-1L, storyResults.story.id)
             assertEquals(true, storyResults.networkFailure)
         }
     }

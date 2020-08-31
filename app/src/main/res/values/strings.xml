@@ -14,12 +14,13 @@
     </plurals>
 
     <string name="stories_network_cached_error">Error retrieving stories due to connection, showing cached stories</string>
-    <string name="stories_network_none_cached_error">Error retrieving stories, please check internet connection</string>
+    <string name="stories_none_cached_network_error">Error retrieving stories, please check internet connection</string>
 
     <!-- Comments -->
     <string name="comments_title">Comments</string>
     <string name="comments_children">children</string>
     <string name="comments_network_error">Error retrieving comments due to connection, showing cached comments</string>
+    <string name="comments_none_cached_network_error">Error retrieving comments, please check internet connection</string>
 
     <!-- Article Viewer -->
     <string name="article_viewer_title">Article Viewer</string>

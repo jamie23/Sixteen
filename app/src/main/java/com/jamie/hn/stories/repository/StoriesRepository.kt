@@ -3,8 +3,10 @@ package com.jamie.hn.stories.repository
 import com.jamie.hn.core.net.NetworkUtils
 import com.jamie.hn.stories.repository.local.LocalStorage
 import com.jamie.hn.core.net.hex.Hex
+import com.jamie.hn.stories.domain.model.Story
 import com.jamie.hn.stories.repository.model.StoryResults
 import com.jamie.hn.stories.repository.model.TopStoryResults
+import org.joda.time.DateTime
 
 class StoriesRepository(
     private val webStorage: Hex,
@@ -41,12 +43,32 @@ class StoriesRepository(
         useCachedVersion: Boolean,
         requireComments: Boolean
     ): StoryResults {
-        if (useCachedVersion || !networkUtils.isNetworkAvailable()) {
-            val localCopy = localStorage.storyList.find { it.id == id }
-            if (localCopy != null && (!requireComments || localCopy.retrievedComments)) {
+
+        if (!networkUtils.isNetworkAvailable()) {
+            val localCopy = localStorage.storyList.first { it.id == id }
+
+            if (!requireComments || requireComments && localCopy.retrievedComments) {
                 return StoryResults(
-                    localCopy,
-                    !useCachedVersion && !networkUtils.isNetworkAvailable()
+                    story = localCopy,
+                    networkFailure = true
+                )
+            }
+
+            return StoryResults(
+                story = Story(
+                    time = DateTime()
+                ),
+                networkFailure = true
+            )
+        }
+
+        if (useCachedVersion) {
+            val localCopy = localStorage.storyList.first { it.id == id }
+
+            if (!requireComments || localCopy.retrievedComments) {
+                return StoryResults(
+                    story = localCopy,
+                    networkFailure = false
                 )
             }
         }

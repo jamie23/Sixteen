@@ -10,7 +10,7 @@ class CommentsUseCase(
     suspend fun retrieveComments(
         storyId: Long,
         useCache: Boolean,
-        onResult: (List<CommentWithDepth>, Boolean) -> Unit,
+        onResult: (List<CommentWithDepth>, Boolean, Boolean) -> Unit,
         requireComments: Boolean
     ) {
         val storyResults = repository.story(storyId, useCache, requireComments)
@@ -20,7 +20,7 @@ class CommentsUseCase(
             listAllComments.addAll(it.allCommentsInChain())
         }
 
-        onResult(listAllComments, storyResults.networkFailure)
+        onResult(listAllComments, storyResults.networkFailure, useCache)
     }
 
     private fun Comment.allCommentsInChain(depth: Int = 0): List<CommentWithDepth> {

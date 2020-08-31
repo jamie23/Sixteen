@@ -35,7 +35,7 @@ class CommentsUseCaseTest : BaseTest() {
     private lateinit var story: Story
 
     @MockK
-    private lateinit var onResult: (List<CommentWithDepth>, Boolean) -> Unit
+    private lateinit var onResult: (List<CommentWithDepth>, Boolean, Boolean) -> Unit
 
     private lateinit var commentsUseCase: CommentsUseCase
     private lateinit var scope: CoroutineScope
@@ -55,7 +55,7 @@ class CommentsUseCaseTest : BaseTest() {
     @Test
     fun `when retrieveComments is called using cache true then fetch story from repository with cache true and requiring comments true and invoke callback`() {
         every { story.comments } returns emptyList()
-        every { onResult.invoke(any(), any()) } returns Unit
+        every { onResult.invoke(any(), any(), any()) } returns Unit
 
         runBlocking {
             commentsUseCase.retrieveComments(
@@ -67,13 +67,13 @@ class CommentsUseCaseTest : BaseTest() {
         }
 
         coVerify { repository.story(id = 1, useCachedVersion = true, requireComments = true) }
-        verify { onResult.invoke(any(), eq(false)) }
+        verify { onResult.invoke(any(), eq(false), eq(true)) }
     }
 
     @Test
     fun `when retrieveComments is called using cache false then fetch story from repository with cache false and invoke callback`() {
         every { story.comments } returns emptyList()
-        every { onResult.invoke(any(), any()) } returns Unit
+        every { onResult.invoke(any(), any(), any()) } returns Unit
 
         runBlocking {
             commentsUseCase.retrieveComments(
@@ -85,7 +85,7 @@ class CommentsUseCaseTest : BaseTest() {
         }
 
         coVerify { repository.story(id = 1, useCachedVersion = false, requireComments = true) }
-        verify { onResult.invoke(any(), eq(false)) }
+        verify { onResult.invoke(any(), eq(false), eq(false)) }
     }
 
     @Nested
@@ -95,7 +95,7 @@ class CommentsUseCaseTest : BaseTest() {
         fun `when the comment has no child comments then return a list containing only that comment with correct depth`() {
             val returnedComments = slot<List<CommentWithDepth>>()
 
-            every { onResult.invoke(any(), any()) } returns Unit
+            every { onResult.invoke(any(), any(), any()) } returns Unit
             coEvery { repository.story(any(), any(), any()) } returns StoryResults(story(singleComment()))
 
             runBlocking {
@@ -107,7 +107,7 @@ class CommentsUseCaseTest : BaseTest() {
                 )
             }
 
-            verify { onResult.invoke(capture(returnedComments), any()) }
+            verify { onResult.invoke(capture(returnedComments), any(), any()) }
 
             assertEquals(1, returnedComments.captured.size)
             assertEquals(0, returnedComments.captured[0].depth)
@@ -118,7 +118,7 @@ class CommentsUseCaseTest : BaseTest() {
         fun `when comment has multiple child comments then return the list containing those with their correct depth and removed their children`() {
             val returnedComments = slot<List<CommentWithDepth>>()
 
-            every { onResult.invoke(any(), any()) } returns Unit
+            every { onResult.invoke(any(), any(), any()) } returns Unit
             coEvery { repository.story(any(), any(), any()) } returns StoryResults(story(
                 singleCommentNestedComment()
             ))
@@ -132,7 +132,7 @@ class CommentsUseCaseTest : BaseTest() {
                 )
             }
 
-            verify { onResult.invoke(capture(returnedComments), any()) }
+            verify { onResult.invoke(capture(returnedComments), any(), any()) }
 
             // We remove the nested child comments but keep the commentCount
             val firstComment = singleComment().copy(commentCount = 1)
