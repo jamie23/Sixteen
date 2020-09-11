@@ -5,7 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.jamie.hn.R
-import kotlinx.android.synthetic.main.article_action_bar.view.*
+import kotlinx.android.synthetic.main.story_action_bar.view.*
 import kotlinx.android.synthetic.main.story_item.view.*
 
 class StoryListAdapter : RecyclerView.Adapter<StoryListAdapter.ArticleListHolder>() {
@@ -40,7 +40,7 @@ class StoryListAdapter : RecyclerView.Adapter<StoryListAdapter.ArticleListHolder
                 data[position].storyViewerCallback(data[position].id)
             }
 
-            linkActionBar.setOnClickListener {
+            articleButton.setOnClickListener {
                 data[position].storyViewerCallback(data[position].id)
             }
 
@@ -48,7 +48,7 @@ class StoryListAdapter : RecyclerView.Adapter<StoryListAdapter.ArticleListHolder
                 data[position].commentsCallback(data[position].id)
             }
 
-            commentsActionBar.setOnClickListener {
+            commentsButton.setOnClickListener {
                 data[position].commentsCallback(data[position].id)
             }
         }
