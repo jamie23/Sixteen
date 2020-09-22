@@ -31,8 +31,9 @@ class StoryListAdapter : RecyclerView.Adapter<StoryListAdapter.ArticleListHolder
     override fun onBindViewHolder(holder: ArticleListHolder, position: Int) {
         holder.itemView.run {
             author.text = data[position].author
-            comments.text = data[position].comments
+            commentsButton.text = data[position].comments
             score.text = data[position].score
+            scoreText.text = data[position].scoreText
             time.text = data[position].time
             title.text = data[position].title
             url.text = data[position].url
@@ -42,10 +43,6 @@ class StoryListAdapter : RecyclerView.Adapter<StoryListAdapter.ArticleListHolder
 
             articleButton.setOnClickListener {
                 data[position].storyViewerCallback(data[position].id)
-            }
-
-            comments.setOnClickListener {
-                data[position].commentsCallback(data[position].id)
             }
 
             commentsButton.setOnClickListener {

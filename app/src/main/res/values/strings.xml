@@ -13,6 +13,11 @@
         <item quantity="other">%d comments</item>
     </plurals>
 
+    <plurals name="score_plural">
+        <item quantity="one">point</item>
+        <item quantity="other">points</item>
+    </plurals>
+
     <string name="stories_network_cached_error">Error retrieving stories due to connection, showing cached stories</string>
     <string name="stories_none_cached_network_error">Error retrieving stories, please check internet connection</string>
 

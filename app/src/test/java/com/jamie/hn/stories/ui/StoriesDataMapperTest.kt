@@ -27,6 +27,7 @@ class StoriesDataMapperTest {
         MockKAnnotations.init(this)
 
         every { storyResourceProvider.comments(any()) } returns "1 comment"
+        every { storyResourceProvider.score(any()) } returns "point"
         every { coreDataMapper.time(any()) } returns "1d"
         storyDataMapper = StoryDataMapper(coreDataMapper, storyResourceProvider)
     }
@@ -60,6 +61,7 @@ class StoriesDataMapperTest {
         assertEquals("1 comment", storyViewItem.comments)
         assertEquals("Jamie", storyViewItem.author)
         assertEquals("3", storyViewItem.score)
+        assertEquals("point", storyViewItem.scoreText)
         assertEquals("1d", storyViewItem.time)
         assertEquals("title", storyViewItem.title)
         assertEquals("domain", storyViewItem.url)

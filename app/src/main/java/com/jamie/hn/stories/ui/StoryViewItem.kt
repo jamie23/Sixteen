@@ -5,6 +5,7 @@ data class StoryViewItem(
     val author: String,
     val comments: String,
     val score: String,
+    val scoreText: String,
     val time: String,
     val title: String,
     val url: String,

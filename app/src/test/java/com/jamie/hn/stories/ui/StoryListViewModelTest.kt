@@ -55,6 +55,7 @@ class StoryListViewModelTest : BaseTest() {
         author = "Jamie",
         comments = "1",
         score = "2",
+        scoreText = "points",
         time = "3",
         title = "title",
         url = "url",

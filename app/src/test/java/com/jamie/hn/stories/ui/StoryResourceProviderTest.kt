@@ -24,6 +24,7 @@ class StoryResourceProviderTest : BaseTest() {
         MockKAnnotations.init(this)
 
         every { resources.getQuantityString(any(), any(), any()) } returns "quantity"
+        every { resources.getQuantityString(any(), any()) } returns "quantity"
         storyResourceProvider = StoryResourceProvider(resources)
     }
 
@@ -32,5 +33,12 @@ class StoryResourceProviderTest : BaseTest() {
         storyResourceProvider.comments(4)
 
         verify { resources.getQuantityString(any(), 4, 4) }
+    }
+
+    @Test
+    fun `when score is called then get quantity string with correct number`() {
+        storyResourceProvider.score(5)
+
+        verify { resources.getQuantityString(any(), 5) }
     }
 }

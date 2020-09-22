@@ -76,17 +76,14 @@
             tools:text="8040" />
 
         <TextView
-            android:id="@+id/comments"
+            android:id="@+id/scoreText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:background="?selectableItemBackground"
+            android:layout_marginStart="4dp"
             android:textColor="@color/text"
             app:layout_constraintBottom_toBottomOf="@id/score"
             app:layout_constraintStart_toEndOf="@id/score"
-            app:layout_constraintTop_toTopOf="@id/score"
-            app:layout_constraintVertical_bias="0.629"
-            tools:text="6722 comments" />
+            tools:text="points" />
 
         <ImageView
             android:id="@+id/icon"
@@ -94,20 +91,20 @@
             android:layout_height="50dp"
             android:contentDescription="@string/icon_description"
             android:visibility="invisible"
-            app:layout_constraintBottom_toBottomOf="@id/comments"
+            app:layout_constraintBottom_toBottomOf="@id/score"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/time"
             tools:src="@drawable/ic_unknown_black_24dp" />
 
         <include
-            android:id="@+id/action_bar"
+            android:id="@+id/actionBar"
             layout="@layout/story_action_bar"
             android:layout_width="match_parent"
             android:layout_height="32dp"
             android:layout_marginTop="22dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/comments" />
+            app:layout_constraintTop_toBottomOf="@id/score" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

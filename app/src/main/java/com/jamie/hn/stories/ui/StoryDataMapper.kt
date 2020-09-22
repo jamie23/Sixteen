@@ -18,6 +18,7 @@ class StoryDataMapper(
             story.author,
             comments(story.commentCount),
             story.score.toString(),
+            scoreText(story.score),
             coreDataMapper.time(story.time),
             story.title,
             story.domain,
@@ -27,4 +28,5 @@ class StoryDataMapper(
     }
 
     private fun comments(numComments: Int) = resourceProvider.comments(numComments)
+    private fun scoreText(score: Int) = resourceProvider.score(score)
 }
