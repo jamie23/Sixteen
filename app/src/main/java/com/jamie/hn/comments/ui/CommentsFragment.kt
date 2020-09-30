@@ -1,5 +1,7 @@
 package com.jamie.hn.comments.ui
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import androidx.fragment.app.Fragment
@@ -26,6 +28,7 @@ class CommentsFragment : Fragment(R.layout.comment_list_fragment) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         commentsListAdapter = CommentsListAdapter()
+        commentsListAdapter.urlClickedCallback = ::urlClickedCallback
 
         view.commentsList.apply {
             setHasFixedSize(true)
@@ -72,5 +75,10 @@ class CommentsFragment : Fragment(R.layout.comment_list_fragment) {
 
     private fun showNetworkFailureNoCacheResults() {
         commentListError.visibleOrGone(true)
+    }
+
+    private fun urlClickedCallback(url: String) {
+        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        startActivity(browserIntent)
     }
 }

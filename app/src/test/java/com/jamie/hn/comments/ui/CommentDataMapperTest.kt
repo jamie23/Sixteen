@@ -9,7 +9,9 @@ import com.jamie.hn.core.ui.CoreDataMapper
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
+import io.mockk.mockk
 import io.mockk.spyk
+import io.mockk.verify
 import org.joda.time.DateTime
 import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -33,15 +35,15 @@ class CommentDataMapperTest : BaseTest() {
     fun setup() {
         MockKAnnotations.init(this)
 
+        commentDataMapper = spyk(CommentDataMapper(commentsResourceProvider, coreDataMapper))
+
         every { coreDataMapper.time(any()) } returns "1d"
         every { commentsResourceProvider.children() } returns "children"
-
-        commentDataMapper = spyk(CommentDataMapper(commentsResourceProvider, coreDataMapper))
+        every { commentDataMapper.htmlTextParser(any()) } returns mockk()
     }
 
     @Test
     fun `when toCommentViewItem is called then correctly map basic fields`() {
-        every { commentDataMapper.htmlTextParser("") } returns "text"
         val commentCurrentState = CommentCurrentState(
             CommentWithDepth(
                 comment = Comment(
@@ -70,33 +72,7 @@ class CommentDataMapperTest : BaseTest() {
     inner class Text {
 
         @Test
-        fun `when text is empty on comment passed in then text is empty on comment returned`() {
-            every { commentDataMapper.htmlTextParser("") } returns ""
-
-            val commentWithDepth = CommentCurrentState(
-                CommentWithDepth(
-                    comment = Comment(
-                        author = "author",
-                        commentCount = 0,
-                        text = "",
-                        time = DateTime.now()
-                    ),
-                    depth = 2,
-                    id = 1
-                ),
-                state = FULL
-            )
-
-            val commentViewItem =
-                commentDataMapper.toCommentViewItem(commentWithDepth, collapseCallback)
-
-            assertEquals("", commentViewItem.text)
-        }
-
-        @Test
-        fun `when text does not in blank lines then return text correctly`() {
-            every { commentDataMapper.htmlTextParser("text") } returns "text"
-
+        fun `when text does not end in blank lines then return text correctly`() {
             val commentWithDepth = CommentCurrentState(
                 CommentWithDepth(
                     comment = Comment(
@@ -111,16 +87,13 @@ class CommentDataMapperTest : BaseTest() {
                 state = FULL
             )
 
-            val commentViewItem =
-                commentDataMapper.toCommentViewItem(commentWithDepth, collapseCallback)
+            commentDataMapper.toCommentViewItem(commentWithDepth, collapseCallback)
 
-            assertEquals("text", commentViewItem.text)
+            verify { commentDataMapper.htmlTextParser("text") }
         }
 
         @Test
-        fun `when text does end in 2 blank line then return the text without the 2 blank line`() {
-            every { commentDataMapper.htmlTextParser("text\n\n") } returns "text\n\n"
-
+        fun `when text does end in 2 blank line then return the text without the 2 blank lines`() {
             val commentWithDepth = CommentCurrentState(
                 CommentWithDepth(
                     comment = Comment(
@@ -135,10 +108,9 @@ class CommentDataMapperTest : BaseTest() {
                 state = FULL
             )
 
-            val commentViewItem =
-                commentDataMapper.toCommentViewItem(commentWithDepth, collapseCallback)
+            commentDataMapper.toCommentViewItem(commentWithDepth, collapseCallback)
 
-            assertEquals("text", commentViewItem.text)
+            verify { commentDataMapper.htmlTextParser("text") }
         }
     }
 
@@ -147,8 +119,6 @@ class CommentDataMapperTest : BaseTest() {
 
         @Test
         fun `when depth is 0 then showTopDivider is true`() {
-            every { commentDataMapper.htmlTextParser("text") } returns "text"
-
             val commentWithDepth = CommentCurrentState(
                 CommentWithDepth(
                     comment = Comment(
@@ -171,8 +141,6 @@ class CommentDataMapperTest : BaseTest() {
 
         @Test
         fun `when depth is more than 0 then showTopDivider is false`() {
-            every { commentDataMapper.htmlTextParser("text") } returns "text"
-
             val commentWithDepth = CommentCurrentState(
                 CommentWithDepth(
                     comment = Comment(
@@ -199,8 +167,6 @@ class CommentDataMapperTest : BaseTest() {
 
         @Test
         fun `when toCommentView is called then correctly map authorAndHiddenChildren`() {
-            every { commentDataMapper.htmlTextParser("text") } returns "text"
-
             val commentWithDepth = CommentCurrentState(
                 CommentWithDepth(
                     comment = Comment(

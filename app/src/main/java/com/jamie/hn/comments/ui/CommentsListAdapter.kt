@@ -1,7 +1,11 @@
 package com.jamie.hn.comments.ui
 
 import android.content.Context
+import android.text.SpannableStringBuilder
+import android.text.Spanned
 import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
+import android.text.style.URLSpan
 import android.text.util.Linkify
 import android.view.LayoutInflater
 import android.view.View
@@ -9,6 +13,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.text.getSpans
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
@@ -18,15 +23,16 @@ import com.jamie.hn.comments.ui.repository.model.CurrentState.FULL
 import com.jamie.hn.core.extensions.visibleOrInvisible
 import com.jamie.hn.core.ui.convertDpToPixels
 import kotlinx.android.synthetic.main.comment_item_collapsed.view.*
-import kotlinx.android.synthetic.main.story_item.view.author
-import kotlinx.android.synthetic.main.story_item.view.time
 import kotlinx.android.synthetic.main.comment_item_full.view.*
 import kotlinx.android.synthetic.main.comment_item_full.view.divider
-import kotlin.IllegalArgumentException
+import kotlinx.android.synthetic.main.story_item.view.author
+import kotlinx.android.synthetic.main.story_item.view.time
 
 class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     class FullCommentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
     class CollapsedCommentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
+
+    lateinit var urlClickedCallback: (String) -> Unit
 
     private var differ = AsyncListDiffer(this, DiffCallback)
     private val globalMarginIds = mutableListOf<Int>()
@@ -78,7 +84,7 @@ class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             author.text = item.author
             time.text = item.time
             divider.visibleOrInvisible(item.showTopDivider)
-            text.text = item.text
+            text.text = fixURLSpans(item.text)
             makeLinksClickable(text)
             text.setOnLongClickListener {
                 // Adding Linkify stops on click listeners on the text view so we add one if the
@@ -239,6 +245,27 @@ class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             oldItem: CommentViewItem,
             newItem: CommentViewItem
         ) = oldItem == newItem
+    }
+
+    private fun fixURLSpans(spannable: Spanned): SpannableStringBuilder {
+        val spannableStringBuilder = SpannableStringBuilder(spannable)
+        spannableStringBuilder.removeSpan(spannable)
+
+        val urls = spannableStringBuilder.getSpans<URLSpan>()
+        urls.forEach {
+            val start = spannableStringBuilder.getSpanStart(it)
+            val end = spannableStringBuilder.getSpanEnd(it)
+            val flags = spannableStringBuilder.getSpanFlags(it)
+
+            val clickableSpan = object : ClickableSpan() {
+                override fun onClick(widget: View) {
+                    urlClickedCallback.invoke(it.url)
+                }
+            }
+
+            spannableStringBuilder.setSpan(clickableSpan, start, end, flags)
+        }
+        return spannableStringBuilder
     }
 
     companion object {

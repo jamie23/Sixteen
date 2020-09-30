@@ -20,7 +20,7 @@ class CommentDataMapper(
 
         return CommentViewItem(
             author = comment.author,
-            text = htmlTextParser(comment.text).removeAppendedNewLines(),
+            text = htmlTextParser(comment.text.removeAppendedNewLines()),
             time = coreDataMapper.time(comment.time),
             depth = depth,
             showTopDivider = depth == 0,
@@ -39,7 +39,7 @@ class CommentDataMapper(
         }
 
     fun htmlTextParser(text: String) =
-        HtmlCompat.fromHtml(text, FROM_HTML_MODE_LEGACY).toString()
+        HtmlCompat.fromHtml(text, FROM_HTML_MODE_LEGACY)
 
     private fun authorAndHiddenChildren(comment: Comment) =
         "${comment.author} [${comment.commentCount} ${commentsResourceProvider.children()}]"
