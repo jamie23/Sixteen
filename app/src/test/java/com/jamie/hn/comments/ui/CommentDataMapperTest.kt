@@ -39,7 +39,7 @@ class CommentDataMapperTest : BaseTest() {
 
         every { coreDataMapper.time(any()) } returns "1d"
         every { commentsResourceProvider.children() } returns "children"
-        every { commentDataMapper.htmlTextParser(any()) } returns mockk()
+        every { commentDataMapper.htmlTextParser(any(), urlClickedCallback) } returns mockk()
     }
 
     @Test
@@ -89,7 +89,7 @@ class CommentDataMapperTest : BaseTest() {
 
             commentDataMapper.toCommentViewItem(commentWithDepth, collapseCallback)
 
-            verify { commentDataMapper.htmlTextParser("text") }
+            verify { commentDataMapper.htmlTextParser("text", urlClickedCallback) }
         }
 
         @Test
@@ -110,7 +110,7 @@ class CommentDataMapperTest : BaseTest() {
 
             commentDataMapper.toCommentViewItem(commentWithDepth, collapseCallback)
 
-            verify { commentDataMapper.htmlTextParser("text") }
+            verify { commentDataMapper.htmlTextParser("text", urlClickedCallback) }
         }
     }
 

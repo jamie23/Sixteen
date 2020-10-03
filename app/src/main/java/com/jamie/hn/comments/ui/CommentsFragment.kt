@@ -28,7 +28,6 @@ class CommentsFragment : Fragment(R.layout.comment_list_fragment) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         commentsListAdapter = CommentsListAdapter()
-        commentsListAdapter.urlClickedCallback = ::urlClickedCallback
 
         view.commentsList.apply {
             setHasFixedSize(true)
@@ -64,6 +63,10 @@ class CommentsFragment : Fragment(R.layout.comment_list_fragment) {
             }
         })
 
+        viewModel.urlClicked().observe(viewLifecycleOwner, Observer<Uri> {
+            urlClickedCallback(it)
+        })
+
         commentSwipeLayout.setOnRefreshListener {
             viewModel.userManuallyRefreshed()
         }
@@ -77,8 +80,8 @@ class CommentsFragment : Fragment(R.layout.comment_list_fragment) {
         commentListError.visibleOrGone(true)
     }
 
-    private fun urlClickedCallback(url: String) {
-        val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+    private fun urlClickedCallback(uri: Uri) {
+        val browserIntent = Intent(Intent.ACTION_VIEW, uri)
         startActivity(browserIntent)
     }
 }

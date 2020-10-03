@@ -1,5 +1,6 @@
 package com.jamie.hn.comments.ui
 
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -29,6 +30,9 @@ class CommentsListViewModel(
 
     private val networkErrorNoCacheResults = MutableLiveData<Event<Unit>>()
     fun networkErrorNoCacheResults(): LiveData<Event<Unit>> = networkErrorNoCacheResults
+
+    private val urlClicked = MutableLiveData<Uri>()
+    fun urlClicked(): LiveData<Uri> = urlClicked
 
     private lateinit var commentsViewRepository: CommentsViewRepository
 
@@ -73,7 +77,8 @@ class CommentsListViewModel(
     private fun commentsToViewItems(comments: List<CommentCurrentState>) = comments.map {
         commentDataMapper.toCommentViewItem(
             it,
-            ::longClickCommentListener
+            ::longClickCommentListener,
+            ::urlClicked
         )
     }
 
@@ -136,6 +141,10 @@ class CommentsListViewModel(
                 newStateList[i].state = newState
             }
         }
+    }
+
+    private fun urlClicked(url: String) {
+        urlClicked.value = Uri.parse(url)
     }
 
     data class ListViewState(
