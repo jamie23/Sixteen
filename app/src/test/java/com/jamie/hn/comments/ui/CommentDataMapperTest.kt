@@ -11,7 +11,6 @@ import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import io.mockk.spyk
-import io.mockk.verify
 import org.joda.time.DateTime
 import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -27,6 +26,9 @@ class CommentDataMapperTest : BaseTest() {
     private lateinit var collapseCallback: (Int) -> Unit
 
     @MockK
+    private lateinit var urlClickedCallback: (String) -> Unit
+
+    @MockK
     private lateinit var commentsResourceProvider: CommentsResourceProvider
 
     private lateinit var commentDataMapper: CommentDataMapper
@@ -39,7 +41,7 @@ class CommentDataMapperTest : BaseTest() {
 
         every { coreDataMapper.time(any()) } returns "1d"
         every { commentsResourceProvider.children() } returns "children"
-        every { commentDataMapper.htmlTextParser(any(), urlClickedCallback) } returns mockk()
+        every { commentDataMapper.processText(any(), any()) } returns mockk()
     }
 
     @Test
@@ -58,7 +60,11 @@ class CommentDataMapperTest : BaseTest() {
         )
 
         val commentViewItem =
-            commentDataMapper.toCommentViewItem(commentCurrentState, collapseCallback)
+            commentDataMapper.toCommentViewItem(
+                commentCurrentState,
+                collapseCallback,
+                urlClickedCallback
+            )
 
         assertEquals("author", commentViewItem.author)
         assertEquals("1d", commentViewItem.time)
@@ -70,9 +76,15 @@ class CommentDataMapperTest : BaseTest() {
 
     @Nested
     inner class Text {
-
         @Test
-        fun `when text does not end in blank lines then return text correctly`() {
+        fun `when we map the text then we use the return value of processText`() {
+            every {
+                commentDataMapper.processText(
+                    "text",
+                    urlClickedCallback
+                )
+            } returns "returned chars"
+
             val commentWithDepth = CommentCurrentState(
                 CommentWithDepth(
                     comment = Comment(
@@ -81,36 +93,16 @@ class CommentDataMapperTest : BaseTest() {
                         text = "text",
                         time = DateTime.now()
                     ),
-                    depth = 2,
+                    depth = 0,
                     id = 1
                 ),
                 state = FULL
             )
 
-            commentDataMapper.toCommentViewItem(commentWithDepth, collapseCallback)
+            val commentViewItem =
+                commentDataMapper.toCommentViewItem(commentWithDepth, collapseCallback, urlClickedCallback)
 
-            verify { commentDataMapper.htmlTextParser("text", urlClickedCallback) }
-        }
-
-        @Test
-        fun `when text does end in 2 blank line then return the text without the 2 blank lines`() {
-            val commentWithDepth = CommentCurrentState(
-                CommentWithDepth(
-                    comment = Comment(
-                        author = "author",
-                        commentCount = 0,
-                        text = "text\n\n",
-                        time = DateTime.now()
-                    ),
-                    depth = 2,
-                    id = 1
-                ),
-                state = FULL
-            )
-
-            commentDataMapper.toCommentViewItem(commentWithDepth, collapseCallback)
-
-            verify { commentDataMapper.htmlTextParser("text", urlClickedCallback) }
+            assertEquals("returned chars", commentViewItem.text)
         }
     }
 
@@ -134,7 +126,7 @@ class CommentDataMapperTest : BaseTest() {
             )
 
             val commentViewItem =
-                commentDataMapper.toCommentViewItem(commentWithDepth, collapseCallback)
+                commentDataMapper.toCommentViewItem(commentWithDepth, collapseCallback, urlClickedCallback)
 
             assertEquals(true, commentViewItem.showTopDivider)
         }
@@ -156,7 +148,7 @@ class CommentDataMapperTest : BaseTest() {
             )
 
             val commentViewItem =
-                commentDataMapper.toCommentViewItem(commentWithDepth, collapseCallback)
+                commentDataMapper.toCommentViewItem(commentWithDepth, collapseCallback, urlClickedCallback)
 
             assertEquals(false, commentViewItem.showTopDivider)
         }
@@ -182,7 +174,7 @@ class CommentDataMapperTest : BaseTest() {
             )
 
             val commentViewItem =
-                commentDataMapper.toCommentViewItem(commentWithDepth, collapseCallback)
+                commentDataMapper.toCommentViewItem(commentWithDepth, collapseCallback, urlClickedCallback)
 
             assertEquals(commentViewItem.authorAndHiddenChildren, "author [0 children]")
         }

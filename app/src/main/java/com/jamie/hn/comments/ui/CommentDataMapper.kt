@@ -33,7 +33,7 @@ class CommentDataMapper(
         )
     }
 
-    private fun processText(text: String, urlClickedCallback: (String) -> Unit) =
+    fun processText(text: String, urlClickedCallback: (String) -> Unit) =
         text.fixUrlSpans(urlClickedCallback)
             .italiciseQuotes()
             .removeAppendedNewLines()

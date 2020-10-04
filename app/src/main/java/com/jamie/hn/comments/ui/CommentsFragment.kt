@@ -63,8 +63,8 @@ class CommentsFragment : Fragment(R.layout.comment_list_fragment) {
             }
         })
 
-        viewModel.urlClicked().observe(viewLifecycleOwner, Observer<Uri> {
-            urlClickedCallback(it)
+        viewModel.urlClicked().observe(viewLifecycleOwner, Observer<String> {
+            urlClickedCallback(Uri.parse(it))
         })
 
         commentSwipeLayout.setOnRefreshListener {

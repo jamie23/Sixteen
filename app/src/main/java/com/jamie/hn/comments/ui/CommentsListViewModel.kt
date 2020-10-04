@@ -1,6 +1,5 @@
 package com.jamie.hn.comments.ui
 
-import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -31,8 +30,8 @@ class CommentsListViewModel(
     private val networkErrorNoCacheResults = MutableLiveData<Event<Unit>>()
     fun networkErrorNoCacheResults(): LiveData<Event<Unit>> = networkErrorNoCacheResults
 
-    private val urlClicked = MutableLiveData<Uri>()
-    fun urlClicked(): LiveData<Uri> = urlClicked
+    private val urlClicked = MutableLiveData<String>()
+    fun urlClicked(): LiveData<String> = urlClicked
 
     private lateinit var commentsViewRepository: CommentsViewRepository
 
@@ -144,7 +143,7 @@ class CommentsListViewModel(
     }
 
     private fun urlClicked(url: String) {
-        urlClicked.value = Uri.parse(url)
+        urlClicked.value = url
     }
 
     data class ListViewState(
