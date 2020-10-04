@@ -90,6 +90,7 @@ class CommentsListViewModelTest : BaseTest() {
             coEvery {
                 commentDataMapper.toCommentViewItem(
                     capture(commentsToMapper),
+                    any(),
                     any()
                 )
             } returns mockk()
@@ -124,7 +125,7 @@ class CommentsListViewModelTest : BaseTest() {
                 )
             } just Runs
             coEvery {
-                commentDataMapper.toCommentViewItem(any(), any())
+                commentDataMapper.toCommentViewItem(any(), any(), any())
             } returns mockedCommentViewItem
 
             commentsListViewModel.commentsViewState().observeForever(observer)
@@ -165,6 +166,7 @@ class CommentsListViewModelTest : BaseTest() {
             coEvery {
                 commentDataMapper.toCommentViewItem(
                     any(),
+                    any(),
                     any()
                 )
             } returns mockk()
@@ -200,7 +202,7 @@ class CommentsListViewModelTest : BaseTest() {
                 )
             } just Runs
             coEvery {
-                commentDataMapper.toCommentViewItem(any(), any())
+                commentDataMapper.toCommentViewItem(any(), any(), any())
             } returns mockedCommentViewItem
 
             commentsListViewModel.init()
@@ -245,7 +247,7 @@ class CommentsListViewModelTest : BaseTest() {
                 )
             } just Runs
             coEvery {
-                commentDataMapper.toCommentViewItem(any(), any())
+                commentDataMapper.toCommentViewItem(any(), any(), any())
             } returns mockedCommentViewItem
 
             commentsListViewModel.init()
@@ -288,7 +290,8 @@ class CommentsListViewModelTest : BaseTest() {
             coEvery {
                 commentDataMapper.toCommentViewItem(
                     capture(commentsPassedToMapper),
-                    capture(longClickListenerCallback)
+                    capture(longClickListenerCallback),
+                    any()
                 )
             } returns mockk()
 
@@ -317,7 +320,8 @@ class CommentsListViewModelTest : BaseTest() {
             coEvery {
                 commentDataMapper.toCommentViewItem(
                     capture(commentsPassedToMapper),
-                    capture(longClickListenerCallback)
+                    capture(longClickListenerCallback),
+                    any()
                 )
             } returns mockk()
 
@@ -351,7 +355,8 @@ class CommentsListViewModelTest : BaseTest() {
             coEvery {
                 commentDataMapper.toCommentViewItem(
                     capture(commentsPassedToMapper),
-                    capture(longClickListenerCallback)
+                    capture(longClickListenerCallback),
+                    any()
                 )
             } returns mockk()
 
@@ -385,7 +390,8 @@ class CommentsListViewModelTest : BaseTest() {
             coEvery {
                 commentDataMapper.toCommentViewItem(
                     capture(commentsPassedToMapper),
-                    capture(longClickListenerCallback)
+                    capture(longClickListenerCallback),
+                    any()
                 )
             } returns mockk()
 
@@ -432,7 +438,8 @@ class CommentsListViewModelTest : BaseTest() {
             coEvery {
                 commentDataMapper.toCommentViewItem(
                     capture(commentsPassedToMapper),
-                    capture(longClickListenerCallback)
+                    capture(longClickListenerCallback),
+                    any()
                 )
             } returns mockk()
 
@@ -458,6 +465,40 @@ class CommentsListViewModelTest : BaseTest() {
             assertEquals(4, commentsPassedToMapper.size)
             assertEquals(COLLAPSED, commentsPassedToMapper[3].state)
             assertEquals(0, commentsPassedToMapper[3].comment.id)
+        }
+    }
+
+    @Test
+    fun `when urlClicked callback is called from an item then post the url`() {
+        val observer = spyk<Observer<String>>()
+        val commentsUseCaseCallback = slot<(List<CommentWithDepth>, Boolean, Boolean) -> Unit>()
+        val urlClickedCallback = slot<(String) -> Unit>()
+
+        commentsListViewModel.urlClicked().observeForever(observer)
+
+        coEvery {
+            commentsUseCase.retrieveComments(
+                any(),
+                any(),
+                capture(commentsUseCaseCallback),
+                any()
+            )
+        } just Runs
+        coEvery {
+            commentDataMapper.toCommentViewItem(
+                any(),
+                any(),
+                capture(urlClickedCallback)
+            )
+        } returns mockk()
+
+        commentsListViewModel.init()
+
+        commentsUseCaseCallback.invoke(useCaseResponse(), false, false)
+        urlClickedCallback.invoke("url")
+
+        verify {
+            observer.onChanged("url")
         }
     }
 

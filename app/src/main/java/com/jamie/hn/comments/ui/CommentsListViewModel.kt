@@ -30,6 +30,9 @@ class CommentsListViewModel(
     private val networkErrorNoCacheResults = MutableLiveData<Event<Unit>>()
     fun networkErrorNoCacheResults(): LiveData<Event<Unit>> = networkErrorNoCacheResults
 
+    private val urlClicked = MutableLiveData<String>()
+    fun urlClicked(): LiveData<String> = urlClicked
+
     private lateinit var commentsViewRepository: CommentsViewRepository
 
     fun userManuallyRefreshed() {
@@ -73,7 +76,8 @@ class CommentsListViewModel(
     private fun commentsToViewItems(comments: List<CommentCurrentState>) = comments.map {
         commentDataMapper.toCommentViewItem(
             it,
-            ::longClickCommentListener
+            ::longClickCommentListener,
+            ::urlClicked
         )
     }
 
@@ -136,6 +140,10 @@ class CommentsListViewModel(
                 newStateList[i].state = newState
             }
         }
+    }
+
+    private fun urlClicked(url: String) {
+        urlClicked.value = url
     }
 
     data class ListViewState(
