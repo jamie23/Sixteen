@@ -8,5 +8,5 @@ data class CommentCurrentState(
 )
 
 enum class CurrentState {
-    FULL, COLLAPSED, HIDDEN
+    FULL, COLLAPSED, HIDDEN, HEADER
 }

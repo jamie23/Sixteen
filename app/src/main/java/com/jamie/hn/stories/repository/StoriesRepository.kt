@@ -39,7 +39,7 @@ class StoriesRepository(
     }
 
     override suspend fun story(
-        id: Long,
+        id: Int,
         useCachedVersion: Boolean,
         requireComments: Boolean
     ): StoryResults {

@@ -214,9 +214,9 @@ class StoryListViewModelTest : BaseTest() {
 
         @Test
         fun `when comments callback is called then we get the story using cache version and post the id to correct live data`() {
-            val observer = spyk<Observer<Event<Long>>>()
-            val commentsCallback = slot<(id: Long) -> Unit>()
-            val idEmitted = slot<Event<Long>>()
+            val observer = spyk<Observer<Event<Int>>>()
+            val commentsCallback = slot<(id: Int) -> Unit>()
+            val idEmitted = slot<Event<Int>>()
 
             every {
                 storyDataMapper.toStoryViewItem(
@@ -233,13 +233,13 @@ class StoryListViewModelTest : BaseTest() {
             commentsCallback.captured.invoke(1)
 
             coVerify { storiesUseCase.getStory(1, true) }
-            assertEquals(23L, idEmitted.captured.getContentIfNotHandled())
+            assertEquals(23, idEmitted.captured.getContentIfNotHandled())
         }
 
         @Test
         fun `when article viewer callback is called then we get the story using cache and post the url to the correct live data`() {
             val observer = spyk<Observer<Event<String>>>()
-            val articleViewerCallback = slot<(id: Long) -> Unit>()
+            val articleViewerCallback = slot<(id: Int) -> Unit>()
             val urlEmitted = slot<Event<String>>()
 
             every {

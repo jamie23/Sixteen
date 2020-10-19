@@ -296,7 +296,7 @@ class StoriesRepositoryTest {
             }
 
             verify(exactly = 0) { localStorage.storyList = any() }
-            assertEquals(-1L, storyResults.story.id)
+            assertEquals(-1, storyResults.story.id)
             assertEquals(true, storyResults.networkFailure)
         }
     }

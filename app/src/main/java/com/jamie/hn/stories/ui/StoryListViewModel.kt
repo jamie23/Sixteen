@@ -16,8 +16,8 @@ class StoryListViewModel(
     private val storyListViewState = MutableLiveData<StoryListViewState>()
     fun storyListViewState(): LiveData<StoryListViewState> = storyListViewState
 
-    private val navigateToComments = MutableLiveData<Event<Long>>()
-    fun navigateToComments(): LiveData<Event<Long>> = navigateToComments
+    private val navigateToComments = MutableLiveData<Event<Int>>()
+    fun navigateToComments(): LiveData<Event<Int>> = navigateToComments
 
     private val navigateToArticle = MutableLiveData<Event<String>>()
     fun navigateToArticle(): LiveData<Event<String>> = navigateToArticle
@@ -61,13 +61,13 @@ class StoryListViewModel(
         }
     }
 
-    private fun commentsCallback(id: Long) {
+    private fun commentsCallback(id: Int) {
         viewModelScope.launch {
             navigateToComments.value = Event(storiesUseCase.getStory(id, true).story.id)
         }
     }
 
-    private fun articleViewerCallback(id: Long) {
+    private fun articleViewerCallback(id: Int) {
         viewModelScope.launch {
             navigateToArticle.value =
                 Event(storiesUseCase.getStory(id, true).story.url)

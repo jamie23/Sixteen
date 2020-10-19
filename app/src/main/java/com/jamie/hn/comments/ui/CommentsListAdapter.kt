@@ -15,30 +15,36 @@ import androidx.recyclerview.widget.RecyclerView
 import com.jamie.hn.R
 import com.jamie.hn.comments.ui.repository.model.CurrentState.COLLAPSED
 import com.jamie.hn.comments.ui.repository.model.CurrentState.FULL
+import com.jamie.hn.comments.ui.repository.model.CurrentState.HEADER
+import com.jamie.hn.core.extensions.visibleOrGone
 import com.jamie.hn.core.extensions.visibleOrInvisible
 import com.jamie.hn.core.ui.convertDpToPixels
 import kotlinx.android.synthetic.main.comment_item_collapsed.view.*
 import kotlinx.android.synthetic.main.comment_item_full.view.*
 import kotlinx.android.synthetic.main.comment_item_full.view.divider
-import kotlinx.android.synthetic.main.story_item.view.author
-import kotlinx.android.synthetic.main.story_item.view.time
+import kotlinx.android.synthetic.main.story_item_action_bar.view.*
+import kotlinx.android.synthetic.main.story_item_complete.view.*
+import kotlinx.android.synthetic.main.story_item_complete.view.author
+import kotlinx.android.synthetic.main.story_item_complete.view.time
 
 class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     class FullCommentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
     class CollapsedCommentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
+    class HeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
     private var differ = AsyncListDiffer(this, DiffCallback)
     private val globalMarginIds = mutableListOf<Int>()
 
-    fun data(newData: List<CommentViewItem>) {
+    fun data(newData: List<ViewItem>) {
         differ.submitList(newData)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val layout = if (viewType == TYPE_FULL) {
-            R.layout.comment_item_full
-        } else {
-            R.layout.comment_item_collapsed
+        val layout = when (viewType) {
+            TYPE_FULL -> R.layout.comment_item_full
+            TYPE_COLLAPSED -> R.layout.comment_item_collapsed
+            TYPE_HEADER -> R.layout.story_item_complete
+            else -> throw IllegalArgumentException("Unsupported View Type")
         }
 
         val view = LayoutInflater.from(parent.context)
@@ -47,6 +53,7 @@ class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         return when (viewType) {
             TYPE_FULL -> FullCommentViewHolder(view)
             TYPE_COLLAPSED -> CollapsedCommentViewHolder(view)
+            TYPE_HEADER -> HeaderViewHolder(view)
             else -> throw IllegalArgumentException("Do not support this view type")
         }
     }
@@ -57,21 +64,20 @@ class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         when (differ.currentList[position].state) {
             FULL -> TYPE_FULL
             COLLAPSED -> TYPE_COLLAPSED
-            else -> throw IllegalArgumentException()
+            HEADER -> TYPE_HEADER
+            else -> throw IllegalArgumentException("${differ.currentList[position].state}")
         }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val type = getItemViewType(position)
-
-        if (type == TYPE_FULL) {
-            bindFullCommentViewHolder(holder, position)
-        } else {
-            bindCollapsedCommentViewHolder(holder, position)
+        when (getItemViewType(position)) {
+            TYPE_FULL -> bindFullCommentViewHolder(holder, position)
+            TYPE_COLLAPSED -> bindCollapsedCommentViewHolder(holder, position)
+            TYPE_HEADER -> bindHeaderViewHolder(holder, position)
         }
     }
 
     private fun bindFullCommentViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val item = differ.currentList[position]
+        val item = differ.currentList[position] as CommentViewItem
 
         holder.itemView.run {
             author.text = item.author
@@ -97,7 +103,7 @@ class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     private fun bindCollapsedCommentViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        val item = differ.currentList[position]
+        val item = differ.currentList[position] as CommentViewItem
 
         holder.itemView.run {
             authorAndHiddenChildren.text = item.authorAndHiddenChildren
@@ -112,16 +118,35 @@ class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
     }
 
+    private fun bindHeaderViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        val item = differ.currentList[position] as HeaderViewItem
+
+        holder.itemView.run {
+            author.text = item.author
+            commentsButton.text = item.comments
+            score.text = item.score
+            scoreText.text = item.scoreText
+            time.text = item.time
+            title.text = item.title
+            url.text = item.url
+            commentsButton.visibleOrGone(false)
+            articleButton.setOnClickListener {
+                item.storyViewerCallback(item.id)
+            }
+        }
+    }
+
     private fun makeLinksClickable(textView: TextView) {
         Linkify.addLinks(textView, Linkify.WEB_URLS)
         textView.movementMethod = LinkMovementMethod.getInstance()
     }
 
     private fun getLayoutFromViewType(view: View, type: Int) =
-        if (type == TYPE_FULL) {
-            view.findViewById(R.id.commentItem) as ConstraintLayout
-        } else {
-            view.findViewById(R.id.commentItemCollapsed) as ConstraintLayout
+        when (type) {
+            TYPE_FULL -> view.findViewById(R.id.commentItem) as ConstraintLayout
+            TYPE_COLLAPSED -> view.findViewById(R.id.commentItemCollapsed) as ConstraintLayout
+            TYPE_HEADER -> view.findViewById(R.id.storyItemMain) as ConstraintLayout
+            else -> throw IllegalArgumentException("Do not support $type")
         }
 
     private fun removeRecycledDepthMargins(
@@ -229,14 +254,14 @@ class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private fun TextView.isNotLink() =
         this.selectionStart == -1 && this.selectionEnd == -1
 
-    private object DiffCallback : DiffUtil.ItemCallback<CommentViewItem>() {
+    private object DiffCallback : DiffUtil.ItemCallback<ViewItem>() {
 
-        override fun areItemsTheSame(oldItem: CommentViewItem, newItem: CommentViewItem) =
+        override fun areItemsTheSame(oldItem: ViewItem, newItem: ViewItem) =
             oldItem.id == newItem.id
 
         override fun areContentsTheSame(
-            oldItem: CommentViewItem,
-            newItem: CommentViewItem
+            oldItem: ViewItem,
+            newItem: ViewItem
         ) = oldItem == newItem
     }
 
@@ -246,5 +271,6 @@ class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         // View types
         const val TYPE_FULL = 1
         const val TYPE_COLLAPSED = 2
+        const val TYPE_HEADER = 3
     }
 }

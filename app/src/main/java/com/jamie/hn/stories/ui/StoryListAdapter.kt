@@ -5,8 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.jamie.hn.R
-import kotlinx.android.synthetic.main.story_action_bar.view.*
-import kotlinx.android.synthetic.main.story_item.view.*
+import kotlinx.android.synthetic.main.story_item_action_bar.view.*
+import kotlinx.android.synthetic.main.story_item_complete.view.*
 
 class StoryListAdapter : RecyclerView.Adapter<StoryListAdapter.ArticleListHolder>() {
 
@@ -16,7 +16,7 @@ class StoryListAdapter : RecyclerView.Adapter<StoryListAdapter.ArticleListHolder
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArticleListHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.story_item, parent, false)
+            .inflate(R.layout.story_item_complete, parent, false)
 
         return ArticleListHolder(view)
     }

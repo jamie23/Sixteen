@@ -11,19 +11,25 @@ import com.jamie.hn.comments.ui.repository.model.CurrentState.FULL
 import com.jamie.hn.core.BaseTest
 import com.jamie.hn.core.Event
 import com.jamie.hn.core.InstantExecutorExtension
+import com.jamie.hn.stories.domain.StoriesUseCase
+import com.jamie.hn.stories.domain.model.Story
+import com.jamie.hn.stories.repository.model.StoryResults
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.coVerifySequence
+import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.invoke
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
 import org.junit.Assert.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
@@ -39,16 +45,36 @@ class CommentsListViewModelTest : BaseTest() {
     @MockK
     private lateinit var commentsUseCase: CommentsUseCase
 
+    @MockK
+    private lateinit var storiesUseCase: StoriesUseCase
+
+    @MockK
+    private lateinit var storyHeaderItem: HeaderViewItem
+
     private lateinit var commentsListViewModel: CommentsListViewModel
+
+    private val story = Story(
+        id = 23,
+        time = DateTime.parse(
+            "23/08/2020 09:00:00",
+            DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss")
+        ),
+        url = "url"
+    )
+    private val storyResults = StoryResults(story)
 
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
 
+        coEvery { storiesUseCase.getStory(any(), any()) } returns storyResults
+        every { commentDataMapper.toStoryHeaderViewItem(any(), any()) } returns storyHeaderItem
+
         commentsListViewModel = CommentsListViewModel(
             commentDataMapper = commentDataMapper,
             storyId = 1,
-            commentsUseCase = commentsUseCase
+            commentsUseCase = commentsUseCase,
+            storiesUseCase = storiesUseCase
         )
     }
 
@@ -111,7 +137,7 @@ class CommentsListViewModelTest : BaseTest() {
         }
 
         @Test
-        fun `when the repository is populated from the use case, we map the comments from the repository, mapping via the mapper and posting the value with refreshing false`() {
+        fun `when the repository is populated from the use case, we map the comments from the repository, mapping via the mapper, adding the header and posting the value with refreshing false`() {
             val callback = slot<(List<CommentWithDepth>, Boolean, Boolean) -> Unit>()
             val mockedCommentViewItem = mockk<CommentViewItem>()
             val observer = spyk<Observer<ListViewState>>()
@@ -136,6 +162,7 @@ class CommentsListViewModelTest : BaseTest() {
                 observer.onChanged(
                     ListViewState(
                         listOf(
+                            storyHeaderItem,
                             mockedCommentViewItem,
                             mockedCommentViewItem
                         ), false
@@ -216,6 +243,7 @@ class CommentsListViewModelTest : BaseTest() {
                 observerViewState.onChanged(
                     ListViewState(
                         listOf(
+                            storyHeaderItem,
                             mockedCommentViewItem,
                             mockedCommentViewItem
                         ), false
@@ -261,12 +289,46 @@ class CommentsListViewModelTest : BaseTest() {
                 observerViewState.onChanged(
                     ListViewState(
                         listOf(
+                            storyHeaderItem,
                             mockedCommentViewItem,
                             mockedCommentViewItem
                         ), false
                     )
                 )
             }
+        }
+
+        @Test
+        fun `when headerItem article viewer callback is called then we get the story using cache and post the url to the correct live data`() {
+            val callback = slot<(List<CommentWithDepth>, Boolean, Boolean) -> Unit>()
+            val articleViewerCallback = slot<(Int) -> Unit>()
+            val mockedCommentViewItem = mockk<CommentViewItem>()
+            val observer = spyk<Observer<Event<String>>>()
+            val urlEmitted = slot<Event<String>>()
+
+            coEvery {
+                commentsUseCase.retrieveComments(
+                    any(),
+                    any(),
+                    capture(callback),
+                    any()
+                )
+            } just Runs
+            coEvery {
+                commentDataMapper.toCommentViewItem(any(), any(), any())
+            } returns mockedCommentViewItem
+            every { commentDataMapper.toStoryHeaderViewItem(any(), capture(articleViewerCallback)) } returns storyHeaderItem
+            every { observer.onChanged(capture(urlEmitted)) } just runs
+
+            commentsListViewModel.navigateToArticle().observeForever(observer)
+            commentsListViewModel.init()
+
+            callback.invoke(useCaseResponse(), false, false)
+
+            articleViewerCallback.invoke(2)
+
+            coVerify { storiesUseCase.getStory(1, true) }
+            assertEquals("url", urlEmitted.captured.getContentIfNotHandled())
         }
     }
 

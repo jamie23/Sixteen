@@ -10,22 +10,21 @@ class StoryDataMapper(
 
     fun toStoryViewItem(
         story: Story,
-        commentsCallback: (Long) -> Unit,
-        storyViewerCallback: (Long) -> Unit
-    ): StoryViewItem {
-        return StoryViewItem(
-            story.id,
-            story.author,
-            comments(story.commentCount),
-            story.score.toString(),
-            scoreText(story.score),
-            coreDataMapper.time(story.time),
-            story.title,
-            story.domain,
-            commentsCallback,
-            storyViewerCallback
+        commentsCallback: (Int) -> Unit,
+        storyViewerCallback: (Int) -> Unit
+    ) =
+        StoryViewItem(
+            id = story.id,
+            author = story.author,
+            comments = comments(story.commentCount),
+            score = story.score.toString(),
+            scoreText = scoreText(story.score),
+            time = coreDataMapper.time(story.time),
+            title = story.title,
+            url = story.domain,
+            commentsCallback = commentsCallback,
+            storyViewerCallback = storyViewerCallback
         )
-    }
 
     private fun comments(numComments: Int) = resourceProvider.comments(numComments)
     private fun scoreText(score: Int) = resourceProvider.score(score)

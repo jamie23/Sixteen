@@ -13,12 +13,14 @@ import com.jamie.hn.comments.ui.repository.model.CurrentState.COLLAPSED
 import com.jamie.hn.comments.ui.repository.model.CurrentState.FULL
 import com.jamie.hn.comments.ui.repository.model.CurrentState.HIDDEN
 import com.jamie.hn.core.Event
+import com.jamie.hn.stories.domain.StoriesUseCase
 import kotlinx.coroutines.launch
 
 class CommentsListViewModel(
     private val commentDataMapper: CommentDataMapper,
-    private val storyId: Long,
-    private val commentsUseCase: CommentsUseCase
+    private val storyId: Int,
+    private val commentsUseCase: CommentsUseCase,
+    private val storiesUseCase: StoriesUseCase
 ) : ViewModel() {
 
     private val listViewState = MutableLiveData<ListViewState>()
@@ -32,6 +34,9 @@ class CommentsListViewModel(
 
     private val urlClicked = MutableLiveData<String>()
     fun urlClicked(): LiveData<String> = urlClicked
+
+    private val navigateToArticle = MutableLiveData<Event<String>>()
+    fun navigateToArticle(): LiveData<Event<String>> = navigateToArticle
 
     private lateinit var commentsViewRepository: CommentsViewRepository
 
@@ -69,16 +74,22 @@ class CommentsListViewModel(
     }
 
     private fun viewStateUpdate(commentList: List<CommentCurrentState>) {
-        listViewState.value =
-            ListViewState(commentsToViewItems(commentList.filter { it.state != HIDDEN }), false)
+        viewModelScope.launch {
+            listViewState.value =
+                ListViewState(commentsToViewItems(commentList.filter { it.state != HIDDEN }), false)
+        }
     }
 
-    private fun commentsToViewItems(comments: List<CommentCurrentState>) = comments.map {
-        commentDataMapper.toCommentViewItem(
-            it,
-            ::longClickCommentListener,
-            ::urlClicked
-        )
+    private suspend fun commentsToViewItems(comments: List<CommentCurrentState>): List<ViewItem> {
+        val viewStateComments = comments.map {
+            commentDataMapper.toCommentViewItem(
+                it,
+                ::longClickCommentListener,
+                ::urlClicked
+            )
+        }
+
+        return addHeader(viewStateComments)
     }
 
     // Transform list from API to a list with UI state, all items initialised with FULL state shown
@@ -87,6 +98,7 @@ class CommentsListViewModel(
         networkFailure: Boolean,
         useCachedVersion: Boolean
     ) {
+
         if (listAllComments.isEmpty() && networkFailure) {
             networkErrorNoCacheResults.value = Event(Unit)
             return
@@ -98,6 +110,25 @@ class CommentsListViewModel(
 
         commentsViewRepository.commentList = listAllComments.mapIndexed { index, commentWithDepth ->
             CommentCurrentState(comment = commentWithDepth.copy(id = index), state = FULL)
+        }
+    }
+
+    private suspend fun addHeader(listAllComments: List<ViewItem>): List<ViewItem> {
+        val result = storiesUseCase.getStory(storyId, true).story
+
+        val headerItem = commentDataMapper.toStoryHeaderViewItem(
+            story = result,
+            storyViewerCallback = ::articleViewerCallback
+        )
+
+        // Place the header item at the start of a new list followed by comments
+        return listOf(headerItem) + listAllComments
+    }
+
+    private fun articleViewerCallback(id: Int) {
+        viewModelScope.launch {
+            navigateToArticle.value =
+                Event(storiesUseCase.getStory(id, true).story.url)
         }
     }
 
@@ -147,7 +178,7 @@ class CommentsListViewModel(
     }
 
     data class ListViewState(
-        val comments: List<CommentViewItem>,
+        val comments: List<ViewItem>,
         val refreshing: Boolean
     )
 }

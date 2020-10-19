@@ -9,8 +9,8 @@ import org.koin.dsl.module
 
 val commentsModule =
     module {
-        viewModel { (storyId: Long) -> CommentsListViewModel(get(), storyId, get()) }
-        single { CommentDataMapper(get(), get()) }
+        viewModel { (storyId: Int) -> CommentsListViewModel(get(), storyId, get(), get()) }
+        single { CommentDataMapper(get(), get(), get()) }
         single { CommentsResourceProvider(get()) }
         single { CommentsUseCase(get()) }
     }

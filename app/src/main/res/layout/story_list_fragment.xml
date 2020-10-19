@@ -41,7 +41,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:itemCount="3"
-            tools:listitem="@layout/story_item" />
+            tools:listitem="@layout/story_item_complete" />
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
