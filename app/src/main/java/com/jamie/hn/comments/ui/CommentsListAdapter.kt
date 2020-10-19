@@ -119,7 +119,6 @@ class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     private fun bindHeaderViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        // BIND TO HEADER VIEWHOLDER
         val item = differ.currentList[position] as HeaderViewItem
 
         holder.itemView.run {

@@ -48,8 +48,8 @@ class StoriesDataMapperTest {
             url = "url"
         )
 
-        val commentsCallback = mockk<(Long) -> Unit>()
-        val storyViewerCallback = mockk<(Long) -> Unit>()
+        val commentsCallback = mockk<(Int) -> Unit>()
+        val storyViewerCallback = mockk<(Int) -> Unit>()
 
         val storyViewItem = storyDataMapper.toStoryViewItem(
             story,

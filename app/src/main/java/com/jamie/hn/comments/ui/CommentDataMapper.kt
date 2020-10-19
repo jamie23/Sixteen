@@ -40,20 +40,18 @@ class CommentDataMapper(
     fun toStoryHeaderViewItem(
         story: Story,
         storyViewerCallback: (Int) -> Unit
-    ): HeaderViewItem {
-        return HeaderViewItem(
-            id = story.id,
-            state = HEADER,
-            author = story.author,
-            time = coreDataMapper.time(story.time),
-            comments = comments(story.commentCount),
-            score = story.score.toString(),
-            scoreText = scoreText(story.score),
-            title = story.title,
-            url = story.domain,
-            storyViewerCallback = storyViewerCallback
-        )
-    }
+    ) = HeaderViewItem(
+        id = story.id,
+        state = HEADER,
+        author = story.author,
+        time = coreDataMapper.time(story.time),
+        comments = comments(story.commentCount),
+        score = story.score.toString(),
+        scoreText = scoreText(story.score),
+        title = story.title,
+        url = story.domain,
+        storyViewerCallback = storyViewerCallback
+    )
 
     fun processText(text: String, urlClickedCallback: (String) -> Unit) =
         text.fixUrlSpans(urlClickedCallback)
