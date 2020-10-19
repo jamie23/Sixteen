@@ -9,5 +9,5 @@ interface Hex {
     suspend fun topStories(): List<ApiStory>
 
     @GET("story/{id}")
-    suspend fun story(@Path("id") id: Long): ApiStory
+    suspend fun story(@Path("id") id: Int): ApiStory
 }

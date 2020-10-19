@@ -2,6 +2,7 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/storyItemMain"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:cardElevation="4dp"
@@ -98,7 +99,7 @@
 
         <include
             android:id="@+id/actionBar"
-            layout="@layout/story_action_bar"
+            layout="@layout/story_item_action_bar"
             android:layout_width="match_parent"
             android:layout_height="32dp"
             android:layout_marginTop="22dp"

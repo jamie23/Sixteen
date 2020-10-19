@@ -12,10 +12,10 @@
         tools:layout="@layout/story_list_fragment">
         <action
             android:id="@+id/action_storiesList_to_commentsList"
-            app:destination="@id/commentsFragment">
+            app:destination="@id/commentsListFragment">
             <argument
                 android:name="storyId"
-                app:argType="long" />
+                app:argType="integer" />
         </action>
         <action
             android:id="@+id/action_storiesList_to_articleViewer"
@@ -29,10 +29,21 @@
     </fragment>
 
     <fragment
-        android:id="@+id/commentsFragment"
-        android:name="com.jamie.hn.comments.ui.CommentsFragment"
+        android:id="@+id/commentsListFragment"
+        android:name="com.jamie.hn.comments.ui.CommentsListFragment"
         android:label="@string/comments_title"
-        tools:layout="@layout/comment_list_fragment" />
+        tools:layout="@layout/comment_list_fragment" >
+
+        <action
+            android:id="@+id/action_commentsList_to_articleViewer"
+            app:destination="@id/articleViewerFragment">
+            <argument
+                android:name="url"
+                android:defaultValue="@null"
+                app:argType="string"
+                app:nullable="true" />
+        </action>
+    </fragment>
 
     <fragment
         android:id="@+id/articleViewerFragment"

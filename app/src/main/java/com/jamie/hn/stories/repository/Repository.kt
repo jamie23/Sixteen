@@ -5,5 +5,5 @@ import com.jamie.hn.stories.repository.model.TopStoryResults
 
 interface Repository {
     suspend fun topStories(useCachedVersion: Boolean): TopStoryResults
-    suspend fun story(id: Long, useCachedVersion: Boolean, requireComments: Boolean): StoryResults
+    suspend fun story(id: Int, useCachedVersion: Boolean, requireComments: Boolean): StoryResults
 }

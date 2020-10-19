@@ -113,7 +113,7 @@ class CommentsListViewModelTest : BaseTest() {
         @Test
         fun `when the repository is populated from the use case, we map the comments from the repository, mapping via the mapper and posting the value with refreshing false`() {
             val callback = slot<(List<CommentWithDepth>, Boolean, Boolean) -> Unit>()
-            val mockedCommentViewItem = mockk<CommentViewItem>()
+            val mockedCommentViewItem = mockk<ViewItem>()
             val observer = spyk<Observer<ListViewState>>()
 
             coEvery {
@@ -185,7 +185,7 @@ class CommentsListViewModelTest : BaseTest() {
             val observerErrorNoCacheResults = spyk<Observer<Event<Unit>>>()
             val observerErrorCachedResults = spyk<Observer<Event<Unit>>>()
             val observerViewState = spyk<Observer<ListViewState>>()
-            val mockedCommentViewItem = mockk<CommentViewItem>()
+            val mockedCommentViewItem = mockk<ViewItem>()
 
             commentsListViewModel.networkErrorNoCacheResults()
                 .observeForever(observerErrorNoCacheResults)
@@ -230,7 +230,7 @@ class CommentsListViewModelTest : BaseTest() {
             val observerErrorNoCacheResults = spyk<Observer<Event<Unit>>>()
             val observerErrorCachedResults = spyk<Observer<Event<Unit>>>()
             val observerViewState = spyk<Observer<ListViewState>>()
-            val mockedCommentViewItem = mockk<CommentViewItem>()
+            val mockedCommentViewItem = mockk<ViewItem>()
 
             commentsListViewModel.networkErrorNoCacheResults()
                 .observeForever(observerErrorNoCacheResults)

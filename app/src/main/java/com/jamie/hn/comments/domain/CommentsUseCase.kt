@@ -8,7 +8,7 @@ class CommentsUseCase(
     private val repository: StoriesRepository
 ) {
     suspend fun retrieveComments(
-        storyId: Long,
+        storyId: Int,
         useCache: Boolean,
         onResult: (List<CommentWithDepth>, Boolean, Boolean) -> Unit,
         requireComments: Boolean
