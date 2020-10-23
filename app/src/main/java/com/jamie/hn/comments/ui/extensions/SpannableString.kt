@@ -7,6 +7,9 @@ fun SpannableString.italiciseQuotes(): SpannableString {
     val indexes = mutableListOf<Int>()
 
     this.forEachIndexed { index, element ->
+        // TODO: Fix this which breaks this code:
+        //Maybe, but one big difference I notice between the two is that a search for <brand> on Google often has the top result as an ad for that brand, whereas on DDG it will be the same result but not an ad. It seems that brands don't have to “defend their turf” on DDG by buying ads on their own name as they do for Google.
+
         if (element == '>') {
             indexes.add(index)
         }
@@ -19,7 +22,11 @@ fun SpannableString.italiciseQuotes(): SpannableString {
             string = "\n",
             startIndex = startIndex
         )
-        this.setSpan(Typeface.ITALIC, startIndex, endIndex, 0)
+        try {
+            this.setSpan(Typeface.ITALIC, startIndex, endIndex, 0)
+        } catch (e: IndexOutOfBoundsException) {
+            println(e)
+        }
     }
 
     return this

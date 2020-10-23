@@ -38,5 +38,5 @@ data class CommentViewItem(
     val depth: Int,
     val authorAndHiddenChildren: String,
     val showTopDivider: Boolean,
-    val longClickCommentListener: (position: Int) -> Unit
+    val clickCommentListener: (position: Int) -> Unit
 ) : ViewItem

@@ -1,24 +1,21 @@
 package com.jamie.hn.stories.ui
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.jamie.hn.R
-import kotlinx.android.synthetic.main.story_item_action_bar.view.*
-import kotlinx.android.synthetic.main.story_item_complete.view.*
+import com.jamie.hn.databinding.StoryItemCompleteBinding
 
 class StoryListAdapter : RecyclerView.Adapter<StoryListAdapter.ArticleListHolder>() {
 
-    class ArticleListHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
+    class ArticleListHolder(val viewBinding: StoryItemCompleteBinding) :
+        RecyclerView.ViewHolder(viewBinding.root)
 
     private var data = listOf<StoryViewItem>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ArticleListHolder {
-        val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.story_item_complete, parent, false)
-
-        return ArticleListHolder(view)
+        val viewBinding =
+            StoryItemCompleteBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        return ArticleListHolder(viewBinding)
     }
 
     fun data(newData: List<StoryViewItem>) {
@@ -29,23 +26,21 @@ class StoryListAdapter : RecyclerView.Adapter<StoryListAdapter.ArticleListHolder
     override fun getItemCount() = data.size
 
     override fun onBindViewHolder(holder: ArticleListHolder, position: Int) {
-        holder.itemView.run {
+        holder.viewBinding.run {
             author.text = data[position].author
-            commentsButton.text = data[position].comments
+            actionBar.commentsButton.text = data[position].comments
             score.text = data[position].score
             scoreText.text = data[position].scoreText
             time.text = data[position].time
             title.text = data[position].title
             url.text = data[position].url
-            setOnClickListener {
+            storyItemMain.setOnClickListener {
                 data[position].storyViewerCallback(data[position].id)
             }
-
-            articleButton.setOnClickListener {
+            actionBar.articleButton.setOnClickListener {
                 data[position].storyViewerCallback(data[position].id)
             }
-
-            commentsButton.setOnClickListener {
+            actionBar.commentsButton.setOnClickListener {
                 data[position].commentsCallback(data[position].id)
             }
         }

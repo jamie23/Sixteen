@@ -33,7 +33,7 @@ class CommentDataMapper(
             depth = depth,
             authorAndHiddenChildren = authorAndHiddenChildren(comment),
             showTopDivider = depth == 0,
-            longClickCommentListener = collapseCallback
+            clickCommentListener = collapseCallback
         )
     }
 
