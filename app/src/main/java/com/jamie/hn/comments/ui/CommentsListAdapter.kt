@@ -19,18 +19,19 @@ import com.jamie.hn.comments.ui.repository.model.CurrentState.HEADER
 import com.jamie.hn.core.extensions.visibleOrGone
 import com.jamie.hn.core.extensions.visibleOrInvisible
 import com.jamie.hn.core.ui.convertDpToPixels
-import kotlinx.android.synthetic.main.comment_item_collapsed.view.*
-import kotlinx.android.synthetic.main.comment_item_full.view.*
-import kotlinx.android.synthetic.main.comment_item_full.view.divider
-import kotlinx.android.synthetic.main.story_item_action_bar.view.*
-import kotlinx.android.synthetic.main.story_item_complete.view.*
-import kotlinx.android.synthetic.main.story_item_complete.view.author
-import kotlinx.android.synthetic.main.story_item_complete.view.time
+import com.jamie.hn.databinding.CommentItemCollapsedBinding
+import com.jamie.hn.databinding.CommentItemFullBinding
+import com.jamie.hn.databinding.StoryItemCompleteBinding
 
 class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    class FullCommentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
-    class CollapsedCommentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
-    class HeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
+    class FullCommentViewHolder(val viewBinding: CommentItemFullBinding) :
+        RecyclerView.ViewHolder(viewBinding.root)
+
+    class CollapsedCommentViewHolder(val viewBinding: CommentItemCollapsedBinding) :
+        RecyclerView.ViewHolder(viewBinding.root)
+
+    class HeaderViewHolder(val viewBinding: StoryItemCompleteBinding) :
+        RecyclerView.ViewHolder(viewBinding.root)
 
     private var differ = AsyncListDiffer(this, DiffCallback)
     private val globalMarginIds = mutableListOf<Int>()
@@ -40,20 +41,29 @@ class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val layout = when (viewType) {
-            TYPE_FULL -> R.layout.comment_item_full
-            TYPE_COLLAPSED -> R.layout.comment_item_collapsed
-            TYPE_HEADER -> R.layout.story_item_complete
+        val viewBinding = when (viewType) {
+            TYPE_FULL -> CommentItemFullBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            )
+            TYPE_COLLAPSED -> CommentItemCollapsedBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            )
+            TYPE_HEADER -> StoryItemCompleteBinding.inflate(
+                LayoutInflater.from(parent.context),
+                parent,
+                false
+            )
             else -> throw IllegalArgumentException("Unsupported View Type")
         }
 
-        val view = LayoutInflater.from(parent.context)
-            .inflate(layout, parent, false)
-
         return when (viewType) {
-            TYPE_FULL -> FullCommentViewHolder(view)
-            TYPE_COLLAPSED -> CollapsedCommentViewHolder(view)
-            TYPE_HEADER -> HeaderViewHolder(view)
+            TYPE_FULL -> FullCommentViewHolder(viewBinding as CommentItemFullBinding)
+            TYPE_COLLAPSED -> CollapsedCommentViewHolder(viewBinding as CommentItemCollapsedBinding)
+            TYPE_HEADER -> HeaderViewHolder(viewBinding as StoryItemCompleteBinding)
             else -> throw IllegalArgumentException("Do not support this view type")
         }
     }
@@ -70,16 +80,19 @@ class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (getItemViewType(position)) {
-            TYPE_FULL -> bindFullCommentViewHolder(holder, position)
-            TYPE_COLLAPSED -> bindCollapsedCommentViewHolder(holder, position)
-            TYPE_HEADER -> bindHeaderViewHolder(holder, position)
+            TYPE_FULL -> bindFullCommentViewHolder(holder as FullCommentViewHolder, position)
+            TYPE_COLLAPSED -> bindCollapsedCommentViewHolder(
+                holder as CollapsedCommentViewHolder,
+                position
+            )
+            TYPE_HEADER -> bindHeaderViewHolder(holder as HeaderViewHolder, position)
         }
     }
 
-    private fun bindFullCommentViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+    private fun bindFullCommentViewHolder(holder: FullCommentViewHolder, position: Int) {
         val item = differ.currentList[position] as CommentViewItem
 
-        holder.itemView.run {
+        holder.viewBinding.run {
             author.text = item.author
             time.text = item.time
             divider.visibleOrInvisible(item.showTopDivider)
@@ -89,48 +102,57 @@ class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 // Adding Linkify stops on click listeners on the text view so we add one if the
                 // cursor is not on text
                 if (text.isNotLink()) {
-                    item.longClickCommentListener.invoke(item.id)
+                    item.clickCommentListener.invoke(item.id)
                 }
                 true
             }
-            setOnLongClickListener {
-                item.longClickCommentListener.invoke(item.id)
+            commentItem.setOnLongClickListener {
+                item.clickCommentListener.invoke(item.id)
                 true
             }
 
-            addDepthMargins(item.depth, context, this, TYPE_FULL, R.id.author)
+            addDepthMargins(item.depth, commentItem.context, commentItem, TYPE_FULL, R.id.author)
         }
     }
 
-    private fun bindCollapsedCommentViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+    private fun bindCollapsedCommentViewHolder(holder: CollapsedCommentViewHolder, position: Int) {
         val item = differ.currentList[position] as CommentViewItem
 
-        holder.itemView.run {
+        holder.viewBinding.run {
             authorAndHiddenChildren.text = item.authorAndHiddenChildren
             time.text = item.time
             divider.visibleOrInvisible(item.showTopDivider)
-            setOnLongClickListener {
-                item.longClickCommentListener.invoke(item.id)
+            commentItemCollapsed.setOnClickListener {
+                item.clickCommentListener.invoke(item.id)
                 true
             }
-
-            addDepthMargins(item.depth, context, this, TYPE_COLLAPSED, R.id.authorAndHiddenChildren)
+            commentItemCollapsed.setOnLongClickListener {
+                item.clickCommentListener.invoke(item.id)
+                true
+            }
+            addDepthMargins(
+                item.depth,
+                commentItemCollapsed.context,
+                commentItemCollapsed,
+                TYPE_COLLAPSED,
+                R.id.authorAndHiddenChildren
+            )
         }
     }
 
-    private fun bindHeaderViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+    private fun bindHeaderViewHolder(holder: HeaderViewHolder, position: Int) {
         val item = differ.currentList[position] as HeaderViewItem
 
-        holder.itemView.run {
+        holder.viewBinding.run {
             author.text = item.author
-            commentsButton.text = item.comments
+            actionBar.commentsButton.text = item.comments
             score.text = item.score
             scoreText.text = item.scoreText
             time.text = item.time
             title.text = item.title
             url.text = item.url
-            commentsButton.visibleOrGone(false)
-            articleButton.setOnClickListener {
+            actionBar.commentsButton.visibleOrGone(false)
+            actionBar.articleButton.setOnClickListener {
                 item.storyViewerCallback(item.id)
             }
         }

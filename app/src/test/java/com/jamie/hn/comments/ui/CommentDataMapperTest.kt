@@ -77,7 +77,7 @@ class CommentDataMapperTest : BaseTest() {
         assertEquals("author", commentViewItem.author)
         assertEquals("1d", commentViewItem.time)
         assertEquals(2, commentViewItem.depth)
-        assertEquals(collapseCallback, commentViewItem.longClickCommentListener)
+        assertEquals(collapseCallback, commentViewItem.clickCommentListener)
         assertEquals(1, commentViewItem.id)
         assertEquals(FULL, commentViewItem.state)
     }
