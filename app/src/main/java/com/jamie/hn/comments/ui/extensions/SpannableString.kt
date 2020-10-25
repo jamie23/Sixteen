@@ -1,17 +1,19 @@
 package com.jamie.hn.comments.ui.extensions
 
-import android.graphics.Typeface
+import android.graphics.Typeface.ITALIC
 import android.text.SpannableString
+import android.text.style.StyleSpan
 
 fun SpannableString.italiciseQuotes(): SpannableString {
     val indexes = mutableListOf<Int>()
+    var containsSmaller = false
 
     this.forEachIndexed { index, element ->
-        // TODO: Fix this which breaks this code:
-        //Maybe, but one big difference I notice between the two is that a search for <brand> on Google often has the top result as an ad for that brand, whereas on DDG it will be the same result but not an ad. It seems that brands don't have to “defend their turf” on DDG by buying ads on their own name as they do for Google.
-
-        if (element == '>') {
-            indexes.add(index)
+        when {
+            element == '>' && !containsSmaller -> indexes.add(index)
+            // If people wrap text in <> we do not want to italicise
+            element == '<' -> containsSmaller = true
+            element == '\n' -> containsSmaller = false
         }
     }
 
@@ -22,11 +24,11 @@ fun SpannableString.italiciseQuotes(): SpannableString {
             string = "\n",
             startIndex = startIndex
         )
-        try {
-            this.setSpan(Typeface.ITALIC, startIndex, endIndex, 0)
-        } catch (e: IndexOutOfBoundsException) {
-            println(e)
-        }
+
+        // User has the quote on the same line as his reply so do not italicise
+        if (endIndex == -1) return this
+
+        this.setSpan(StyleSpan(ITALIC), startIndex, endIndex, 0)
     }
 
     return this
