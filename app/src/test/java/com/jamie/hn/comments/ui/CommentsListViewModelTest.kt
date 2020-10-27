@@ -59,6 +59,7 @@ class CommentsListViewModelTest : BaseTest() {
             "23/08/2020 09:00:00",
             DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss")
         ),
+        title = "title",
         url = "url"
     )
     private val storyResults = StoryResults(story)
@@ -334,6 +335,19 @@ class CommentsListViewModelTest : BaseTest() {
 
             coVerify { storiesUseCase.getStory(1, true) }
             assertEquals("url", urlEmitted.captured.getContentIfNotHandled())
+        }
+
+        @Test
+        fun `when init is called then we post the title`() {
+            coEvery { commentsUseCase.retrieveComments(any(), any(), any(), any()) } just Runs
+            val observer = spyk<Observer<String>>()
+
+            commentsListViewModel.articleTitle().observeForever(observer)
+            commentsListViewModel.init()
+
+            coVerify {
+                observer.onChanged("title")
+            }
         }
     }
 

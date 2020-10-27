@@ -38,25 +38,34 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
         return binding?.root
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        binding = null
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         commentsListAdapter = CommentsListAdapter()
 
-        binding?.commentsList?.apply {
-            setHasFixedSize(true)
-            layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
-            adapter = commentsListAdapter
-        }
+        binding?.let {
+            it.commentsList.apply {
+                setHasFixedSize(true)
+                layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
+                adapter = commentsListAdapter
+            }
 
-        binding?.topAppBar?.setOnMenuItemClickListener {
-            when (it.itemId) {
-                R.id.openArticle -> {
-                    viewModel.openArticle()
-                    true
+            it.topAppBar.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.openArticle -> {
+                        viewModel.openArticle()
+                        true
+                    }
+                    R.id.share -> true
+                    else -> false
                 }
-                R.id.share -> {
-                    true
-                }
-                else -> false
+            }
+
+            it.commentSwipeLayout.setOnRefreshListener {
+                viewModel.userManuallyRefreshed()
             }
         }
 
@@ -94,15 +103,15 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
             urlClickedCallback(Uri.parse(it))
         })
 
-        binding?.commentSwipeLayout?.setOnRefreshListener {
-            viewModel.userManuallyRefreshed()
-        }
-
         viewModel.navigateToArticle().observe(viewLifecycleOwner, Observer {
             it.getContentIfNotHandled()?.let { url ->
                 val action = CommentsListFragmentDirections.actionCommentsListToArticleViewer(url)
                 view.findNavController().navigate(action)
             }
+        })
+
+        viewModel.articleTitle().observe(viewLifecycleOwner, Observer {
+            binding?.topAppBar?.title = it
         })
     }
 

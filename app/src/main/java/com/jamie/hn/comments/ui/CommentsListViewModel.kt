@@ -38,6 +38,9 @@ class CommentsListViewModel(
     private val navigateToArticle = MutableLiveData<Event<String>>()
     fun navigateToArticle(): LiveData<Event<String>> = navigateToArticle
 
+    private val articleTitle = MutableLiveData<String>()
+    fun articleTitle(): LiveData<String> = articleTitle
+
     private lateinit var commentsViewRepository: CommentsViewRepository
 
     fun userManuallyRefreshed() {
@@ -55,6 +58,14 @@ class CommentsListViewModel(
             )
 
         automaticallyRefreshed()
+        updateTitleWithArticleTitle()
+    }
+
+    private fun updateTitleWithArticleTitle() {
+        viewModelScope.launch {
+            articleTitle.value =
+                storiesUseCase.getStory(storyId, true).story.title
+        }
     }
 
     private fun refreshList(useCachedVersion: Boolean) {

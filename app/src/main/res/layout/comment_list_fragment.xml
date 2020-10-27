@@ -17,6 +17,7 @@
             app:layout_scrollFlags="scroll|enterAlways|snap"
             app:menu="@menu/comments_top_app_bar"
             app:navigationIcon="@drawable/ic_menu_24"
+            app:title="@string/top_app_bar_title"
             tools:title="Refactoring LISP" />
 
     </com.google.android.material.appbar.AppBarLayout>
