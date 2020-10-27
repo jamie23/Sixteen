@@ -1,6 +1,9 @@
 package com.jamie.hn.comments.ui
 
 import android.content.Intent
+import android.content.Intent.ACTION_SEND
+import android.content.Intent.ACTION_VIEW
+import android.content.Intent.EXTRA_TEXT
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -59,7 +62,10 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
                         viewModel.openArticle()
                         true
                     }
-                    R.id.share -> true
+                    R.id.share -> {
+                        viewModel.shareURL()
+                        true
+                    }
                     else -> false
                 }
             }
@@ -113,6 +119,19 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
         viewModel.articleTitle().observe(viewLifecycleOwner, Observer {
             binding?.topAppBar?.title = it
         })
+
+        viewModel.shareUrl().observe(viewLifecycleOwner, Observer {
+            it.getContentIfNotHandled()?.let { text ->
+                val sendIntent = Intent().apply {
+                    action = ACTION_SEND
+                    putExtra(EXTRA_TEXT, text)
+                    type = "text/plain"
+                }
+
+                val shareIntent = Intent.createChooser(sendIntent, null)
+                startActivity(shareIntent)
+            }
+        })
     }
 
     private fun showNetworkFailureCachedResults(view: View?) {
@@ -125,7 +144,7 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
     }
 
     private fun urlClickedCallback(uri: Uri) {
-        val browserIntent = Intent(Intent.ACTION_VIEW, uri)
+        val browserIntent = Intent(ACTION_VIEW, uri)
         startActivity(browserIntent)
     }
 }
