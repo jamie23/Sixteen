@@ -153,7 +153,7 @@ class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             url.text = item.url
             actionBar.commentsButton.visibleOrGone(false)
             actionBar.articleButton.setOnClickListener {
-                item.storyViewerCallback(item.id)
+                item.storyViewerCallback()
             }
         }
     }

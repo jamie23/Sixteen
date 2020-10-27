@@ -29,4 +29,11 @@
 
     <!-- Article Viewer -->
     <string name="article_viewer_title">Article Viewer</string>
+    
+    <!-- Menu -->
+    <string name="top_app_bar_title">Title</string>
+    <string name="top_app_bar_share">Share</string>
+    <string name="content_description_share">Share</string>
+    <string name="top_app_bar_article">Article</string>
+    <string name="content_description_article">Open article</string>
 </resources>

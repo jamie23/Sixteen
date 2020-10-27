@@ -38,6 +38,9 @@ class CommentsListViewModel(
     private val navigateToArticle = MutableLiveData<Event<String>>()
     fun navigateToArticle(): LiveData<Event<String>> = navigateToArticle
 
+    private val articleTitle = MutableLiveData<String>()
+    fun articleTitle(): LiveData<String> = articleTitle
+
     private lateinit var commentsViewRepository: CommentsViewRepository
 
     fun userManuallyRefreshed() {
@@ -55,6 +58,14 @@ class CommentsListViewModel(
             )
 
         automaticallyRefreshed()
+        updateTitleWithArticleTitle()
+    }
+
+    private fun updateTitleWithArticleTitle() {
+        viewModelScope.launch {
+            articleTitle.value =
+                storiesUseCase.getStory(storyId, true).story.title
+        }
     }
 
     private fun refreshList(useCachedVersion: Boolean) {
@@ -92,6 +103,13 @@ class CommentsListViewModel(
         return addHeader(viewStateComments)
     }
 
+    fun openArticle() {
+        viewModelScope.launch {
+            navigateToArticle.value =
+                Event(storiesUseCase.getStory(storyId, true).story.url)
+        }
+    }
+
     // Transform list from API to a list with UI state, all items initialised with FULL state shown
     private fun populateUiCommentRepository(
         listAllComments: List<CommentWithDepth>,
@@ -125,17 +143,14 @@ class CommentsListViewModel(
         return listOf(headerItem) + listAllComments
     }
 
-    private fun articleViewerCallback(id: Int) {
-        viewModelScope.launch {
-            navigateToArticle.value =
-                Event(storiesUseCase.getStory(id, true).story.url)
-        }
+    private fun articleViewerCallback() {
+        openArticle()
     }
 
     private fun longClickCommentListener(id: Int) {
         val newStateList = commentsViewRepository.commentList.toMutableList()
         val commentWithState = newStateList[id]
-        var childrenNewState: CurrentState
+        val childrenNewState: CurrentState
 
         if (commentWithState.state == FULL) {
             commentWithState.state = COLLAPSED

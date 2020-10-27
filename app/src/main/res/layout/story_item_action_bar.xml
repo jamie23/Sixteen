@@ -10,12 +10,13 @@
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textSize="14sp"
+        android:textSize="12sp"
         android:background="?selectableItemBackground"
         android:foreground="?android:attr/selectableItemBackgroundBorderless"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/commentsButton"
         app:layout_constraintStart_toStartOf="parent"
+        android:textColor="@color/text"
         android:text="Article"
         tools:text="Article" />
 
@@ -24,12 +25,13 @@
         style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textSize="14sp"
+        android:textSize="12sp"
         android:background="?selectableItemBackground"
         android:foreground="?android:attr/selectableItemBackgroundBorderless"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/articleButton"
+        android:textColor="@color/text"
         android:text="Comments"
         tools:text="Comments" />
 
