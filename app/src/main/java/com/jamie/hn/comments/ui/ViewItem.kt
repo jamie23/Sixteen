@@ -25,7 +25,7 @@ data class HeaderViewItem(
     val scoreText: String,
     val title: String,
     val url: String,
-    val storyViewerCallback: (Int) -> Unit
+    val storyViewerCallback: () -> Unit
 ) : ViewItem
 
 // Used by both collapsed and full comment views

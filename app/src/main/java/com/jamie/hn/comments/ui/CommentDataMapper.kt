@@ -39,7 +39,7 @@ class CommentDataMapper(
 
     fun toStoryHeaderViewItem(
         story: Story,
-        storyViewerCallback: (Int) -> Unit
+        storyViewerCallback: () -> Unit
     ) = HeaderViewItem(
         id = story.id,
         state = HEADER,

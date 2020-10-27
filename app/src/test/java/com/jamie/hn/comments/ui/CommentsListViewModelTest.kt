@@ -301,7 +301,7 @@ class CommentsListViewModelTest : BaseTest() {
         @Test
         fun `when headerItem article viewer callback is called then we get the story using cache and post the url to the correct live data`() {
             val callback = slot<(List<CommentWithDepth>, Boolean, Boolean) -> Unit>()
-            val articleViewerCallback = slot<(Int) -> Unit>()
+            val articleViewerCallback = slot<() -> Unit>()
             val mockedCommentViewItem = mockk<CommentViewItem>()
             val observer = spyk<Observer<Event<String>>>()
             val urlEmitted = slot<Event<String>>()
@@ -317,7 +317,12 @@ class CommentsListViewModelTest : BaseTest() {
             coEvery {
                 commentDataMapper.toCommentViewItem(any(), any(), any())
             } returns mockedCommentViewItem
-            every { commentDataMapper.toStoryHeaderViewItem(any(), capture(articleViewerCallback)) } returns storyHeaderItem
+            every {
+                commentDataMapper.toStoryHeaderViewItem(
+                    any(),
+                    capture(articleViewerCallback)
+                )
+            } returns storyHeaderItem
             every { observer.onChanged(capture(urlEmitted)) } just runs
 
             commentsListViewModel.navigateToArticle().observeForever(observer)
@@ -325,7 +330,7 @@ class CommentsListViewModelTest : BaseTest() {
 
             callback.invoke(useCaseResponse(), false, false)
 
-            articleViewerCallback.invoke(2)
+            articleViewerCallback.invoke()
 
             coVerify { storiesUseCase.getStory(1, true) }
             assertEquals("url", urlEmitted.captured.getContentIfNotHandled())
@@ -578,6 +583,19 @@ class CommentsListViewModelTest : BaseTest() {
                 requireComments = true
             )
         }
+    }
+
+    @Test
+    fun `when openArticle is called then post the url to the correct live data`() {
+        val observer = spyk<Observer<Event<String>>>()
+        val urlEmitted = slot<Event<String>>()
+
+        every { observer.onChanged(capture(urlEmitted)) } just runs
+
+        commentsListViewModel.navigateToArticle().observeForever(observer)
+        commentsListViewModel.openArticle()
+
+        assertEquals("url", urlEmitted.captured.getContentIfNotHandled())
     }
 
     private fun useCaseResponse() = mutableListOf(

@@ -203,7 +203,7 @@ class CommentDataMapperTest : BaseTest() {
             title = "title",
             url = "url"
         )
-        val storyViewerCallback = mockk<(Int) -> Unit>()
+        val storyViewerCallback = mockk<() -> Unit>()
 
         val headerViewItem =
             commentDataMapper.toStoryHeaderViewItem(

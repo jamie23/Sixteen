@@ -47,6 +47,19 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
             adapter = commentsListAdapter
         }
 
+        binding?.topAppBar?.setOnMenuItemClickListener {
+            when (it.itemId) {
+                R.id.openArticle -> {
+                    viewModel.openArticle()
+                    true
+                }
+                R.id.share -> {
+                    true
+                }
+                else -> false
+            }
+        }
+
         viewModel.init()
 
         initialiseLiveDataObservers(view)
