@@ -605,11 +605,31 @@ class CommentsListViewModelTest : BaseTest() {
         val urlEmitted = slot<Event<String>>()
 
         every { observer.onChanged(capture(urlEmitted)) } just runs
+        coEvery { commentsUseCase.retrieveComments(any(), any(), any(), any()) } just Runs
 
+        commentsListViewModel.init()
         commentsListViewModel.navigateToArticle().observeForever(observer)
         commentsListViewModel.openArticle()
 
         assertEquals("url", urlEmitted.captured.getContentIfNotHandled())
+    }
+
+    @Test
+    fun `when share is called then post the correctly formatted title and url with story id`() {
+        val observer = spyk<Observer<Event<String>>>()
+        val shareText = slot<Event<String>>()
+
+        coEvery { commentsUseCase.retrieveComments(any(), any(), any(), any()) } just Runs
+        every { observer.onChanged(capture(shareText)) } just runs
+
+        commentsListViewModel.shareUrl().observeForever(observer)
+        commentsListViewModel.init()
+        commentsListViewModel.shareURL()
+
+        assertEquals(
+            "title - https://news.ycombinator.com/item?id=23",
+            shareText.captured.getContentIfNotHandled()
+        )
     }
 
     private fun useCaseResponse() = mutableListOf(
