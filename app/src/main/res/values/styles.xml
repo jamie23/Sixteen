@@ -8,4 +8,20 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+
+    <style name="Toolbar" parent="Widget.MaterialComponents.Toolbar.Primary">
+        <item name="titleTextAppearance">@style/ToolbarText</item>
+        <item name="subtitleTextAppearance">@style/ToolbarSubText</item>
+        <item name="layout_scrollFlags">scroll|enterAlways|snap</item>
+        <item name="title">@string/top_app_bar_title</item>
+        <item name="navigationIcon">@drawable/ic_menu_24</item>
+    </style>
+
+    <style name="ToolbarText">
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="ToolbarSubText">
+        <item name="android:textSize">12sp</item>
+    </style>
 </resources>
