@@ -6,7 +6,7 @@
         android:id="@+id/openArticle"
         android:contentDescription="@string/content_description_article"
         android:icon="@drawable/ic_article_24"
-        android:title="@string/top_app_bar_article"
+        android:title="@string/comments_app_bar_article"
         app:showAsAction="ifRoom" />
 
     <item
