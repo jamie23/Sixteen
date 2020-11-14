@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:id="@+id/group_stories">
+        <item
+            android:id="@+id/drawerTopStories"
+            android:icon="@drawable/ic_top_stories_24"
+            android:title="@string/drawer_top_stories" />
+        <item
+            android:id="@+id/drawerAskHN"
+            android:icon="@drawable/ic_ask_24"
+            android:title="@string/drawer_ask_hn" />
+        <item
+            android:id="@+id/drawerJobStories"
+            android:icon="@drawable/ic_work_24"
+            android:title="@string/drawer_job_stories" />
+        <item
+            android:id="@+id/drawerNewStories"
+            android:icon="@drawable/new_stories_24"
+            android:title="@string/drawer_new_stories" />
+        <item
+            android:id="@+id/drawerShowHN"
+            android:icon="@drawable/ic_show_24"
+            android:title="@string/drawer_show_hn" />
+    </group>
+
+    <group android:id="@+id/group_extra_stories">
+        <item
+            android:id="@+id/drawerSavedStories"
+            android:icon="@drawable/ic_saved_stories_24"
+            android:title="@string/drawer_saved_stories" />
+        <item
+            android:id="@+id/drawerFollowedUsers"
+            android:icon="@drawable/ic_followed_users"
+            android:title="@string/drawer_followed_users" />
+    </group>
+
+    <group android:id="@+id/group_search">
+        <item
+            android:id="@+id/drawerSearchUsers"
+            android:icon="@drawable/ic_search_users_24"
+            android:title="@string/drawer_search_users" />
+        <item
+            android:id="@+id/drawerSearchStories"
+            android:icon="@drawable/ic_search_stories_24"
+            android:title="@string/drawer_search_stories" />
+    </group>
+
+</menu>

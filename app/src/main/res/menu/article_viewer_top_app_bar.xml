@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- WIP: Material Toolbar doesn't seemt to work well with WebView, need to find workaround -->
+    
+<!--    <item-->
+<!--        android:id="@+id/openComments"-->
+<!--        android:contentDescription="@string/content_description_comments"-->
+<!--        android:icon="@drawable/ic_comment_24"-->
+<!--        android:title="@string/article_app_bar_comments"-->
+<!--        app:showAsAction="ifRoom" />-->
+
+<!--    <item-->
+<!--        android:id="@+id/share"-->
+<!--        android:contentDescription="@string/content_description_share"-->
+<!--        android:icon="@drawable/ic_share_24"-->
+<!--        android:title="@string/top_app_bar_share"-->
+<!--        app:showAsAction="ifRoom" />-->
+
+<!--    <item-->
+<!--        android:id="@+id/defaultBrowser"-->
+<!--        android:contentDescription="@string/content_description_default_browser"-->
+<!--        android:title="@string/article_app_bar_default_browser"-->
+<!--        app:showAsAction="never" />-->
+</menu>

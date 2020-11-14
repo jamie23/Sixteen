@@ -21,19 +21,43 @@
     <string name="stories_network_cached_error">Error retrieving stories due to connection, showing cached stories</string>
     <string name="stories_none_cached_network_error">Error retrieving stories, please check internet connection</string>
 
+    <!-- Stories Menu -->
+    <string name="stories_app_bar_sort">Sort</string>
+    <string name="content_description_sort">Sort stories</string>
+
+    <!-- Common app bar -->
+    <string name="top_app_bar_title">Title</string>
+    <string name="top_app_bar_share">Share</string>
+    <string name="content_description_share">Share</string>
+
     <!-- Comments -->
     <string name="comments_title">Comments</string>
     <string name="comments_children">children</string>
     <string name="comments_network_error">Error retrieving comments due to connection, showing cached comments</string>
     <string name="comments_none_cached_network_error">Error retrieving comments, please check internet connection</string>
 
+    <!-- Comments Menu -->
+    <string name="comments_app_bar_article">Article</string>
+    <string name="content_description_article">Open article</string>
+
     <!-- Article Viewer -->
     <string name="article_viewer_title">Article Viewer</string>
-    
-    <!-- Menu -->
-    <string name="top_app_bar_title">Title</string>
-    <string name="top_app_bar_share">Share</string>
-    <string name="content_description_share">Share</string>
-    <string name="top_app_bar_article">Article</string>
-    <string name="content_description_article">Open article</string>
+
+    <!-- Article Viewer menu -->
+    <string name="article_app_bar_comments">Comments</string>
+    <string name="content_description_comments">Open comments</string>
+    <string name="article_app_bar_default_browser">Open in default browser</string>
+    <string name="content_description_default_browser">Open in default browser</string>
+
+    <!-- Drawer menu -->
+    <string name="drawer_top_stories">Top Stories</string>
+    <string name="drawer_ask_hn">Ask HN</string>
+    <string name="drawer_job_stories">Job Stories</string>
+    <string name="drawer_new_stories">New Stories</string>
+    <string name="drawer_show_hn">Show HN</string>
+    <string name="drawer_saved_stories">Saved Offline Stories</string>
+    <string name="drawer_followed_users">Followed Users</string>
+    <string name="drawer_search_users">User Lookup</string>
+    <string name="drawer_search_stories">Search Stories</string>
+
 </resources>
