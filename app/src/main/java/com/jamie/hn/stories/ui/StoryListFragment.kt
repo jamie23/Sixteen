@@ -9,6 +9,7 @@ import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.jamie.hn.R
 import com.jamie.hn.core.extensions.visibleOrGone
@@ -21,6 +22,7 @@ class StoryListFragment : Fragment(R.layout.story_list_fragment) {
     private var binding: StoryListFragmentBinding? = null
 
     private lateinit var storyListAdapter: StoryListAdapter
+    private var currentSortState: Int = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,6 +44,19 @@ class StoryListFragment : Fragment(R.layout.story_list_fragment) {
             it.storyList.adapter = storyListAdapter
         }
 
+        binding?.storySwipeLayout?.setOnRefreshListener {
+            viewModel.userManuallyRefreshed()
+        }
+
+        binding?.topAppBar?.setOnMenuItemClickListener { item ->
+            if (item.itemId == R.id.sortStories) {
+                showSortStories()
+                true
+            } else {
+                false
+            }
+        }
+
         viewModel.automaticallyRefreshed()
 
         viewModel.storyListViewState().observe(viewLifecycleOwner, Observer {
@@ -52,13 +67,10 @@ class StoryListFragment : Fragment(R.layout.story_list_fragment) {
             storyListAdapter.data(it.stories)
         })
 
-        binding?.storySwipeLayout?.setOnRefreshListener {
-            viewModel.userManuallyRefreshed()
-        }
-
         viewModel.navigateToComments().observe(viewLifecycleOwner, Observer {
             it.getContentIfNotHandled()?.let { storyId ->
-                val action = StoryListFragmentDirections.actionStoriesListToCommentsList(storyId)
+                val action =
+                    StoryListFragmentDirections.actionStoriesListToCommentsList(storyId)
                 view.findNavController().navigate(action)
             }
         })
@@ -72,9 +84,36 @@ class StoryListFragment : Fragment(R.layout.story_list_fragment) {
 
         viewModel.cachedStoriesNetworkError().observe(viewLifecycleOwner, Observer {
             it.getContentIfNotHandled()?.let {
-                Snackbar.make(view, R.string.stories_network_cached_error, Snackbar.LENGTH_LONG).show()
+                Snackbar.make(view, R.string.stories_network_cached_error, Snackbar.LENGTH_LONG)
+                    .show()
             }
         })
+
+        viewModel.sortState().observe(viewLifecycleOwner, Observer<Int> {
+            currentSortState = it
+        })
+    }
+
+    private fun showSortStories() {
+        val context = context ?: return
+        val sortOptions = arrayOf(
+            getString(R.string.stories_standard),
+            getString(R.string.stories_newest),
+            getString(R.string.stories_oldest)
+        )
+        var sortSelected: Int = -1
+
+        MaterialAlertDialogBuilder(context)
+            .setTitle(resources.getString(R.string.stories_app_bar_sort))
+            .setNeutralButton(resources.getString(R.string.cancel)) { _, _ -> }
+            .setPositiveButton(resources.getString(R.string.submit)) { _, _ ->
+                // We sort at the point of VM retrieving the stories from the repository
+                viewModel.updateSortState(sortSelected)
+                viewModel.userManuallyRefreshed()
+            }
+            .setSingleChoiceItems(sortOptions, currentSortState) { _, which ->
+                sortSelected = which
+            }.show()
     }
 
     override fun onDestroyView() {

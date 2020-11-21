@@ -6,6 +6,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jamie.hn.stories.domain.StoriesUseCase
 import com.jamie.hn.core.Event
+import com.jamie.hn.stories.domain.model.Story
+import com.jamie.hn.stories.ui.StoryListViewModel.SortChoice.OLDEST
+import com.jamie.hn.stories.ui.StoryListViewModel.SortChoice.NEWEST
+import com.jamie.hn.stories.ui.StoryListViewModel.SortChoice.STANDARD
 import kotlinx.coroutines.launch
 
 class StoryListViewModel(
@@ -25,6 +29,9 @@ class StoryListViewModel(
     private val cachedStoriesNetworkError = MutableLiveData<Event<Unit>>()
     fun cachedStoriesNetworkError(): LiveData<Event<Unit>> = cachedStoriesNetworkError
 
+    private val sortState = MutableLiveData(0)
+    fun sortState(): LiveData<Int> = sortState
+
     fun userManuallyRefreshed() {
         refreshList(false)
     }
@@ -42,15 +49,21 @@ class StoryListViewModel(
 
         viewModelScope.launch {
             val results = storiesUseCase.getStories(useCachedVersion)
-
             storyListViewState.value = StoryListViewState(
-                stories = results.stories.map {
-                    storyDataMapper.toStoryViewItem(
-                        it,
-                        ::commentsCallback,
-                        ::articleViewerCallback
-                    )
-                },
+                stories = results.stories
+                    .sortedWith(
+                        when (getSortEnum(sortState.value ?: -1)) {
+                            STANDARD -> sortByServerOrder()
+                            NEWEST -> sortByOldestTime().reversed()
+                            OLDEST -> sortByOldestTime()
+                        })
+                    .map {
+                        storyDataMapper.toStoryViewItem(
+                            it,
+                            ::commentsCallback,
+                            ::articleViewerCallback
+                        )
+                    },
                 refreshing = false,
                 showNoCachedStoryNetworkError = results.stories.isEmpty() && results.networkFailure
             )
@@ -74,9 +87,28 @@ class StoryListViewModel(
         }
     }
 
+    fun updateSortState(which: Int) {
+        sortState.value = which
+    }
+
+    private fun getSortEnum(order: Int) =
+        when (order) {
+            0 -> STANDARD
+            1 -> NEWEST
+            2 -> OLDEST
+            else -> throw IllegalArgumentException("Erroneous sort option chosen")
+        }
+
+    private fun sortByOldestTime() = compareBy<Story> { it.time }
+    private fun sortByServerOrder() = compareBy<Story> { it.serverSortedOrder }
+
     data class StoryListViewState(
         val stories: List<StoryViewItem>,
         val refreshing: Boolean,
         val showNoCachedStoryNetworkError: Boolean
     )
+
+    enum class SortChoice {
+        STANDARD, NEWEST, OLDEST
+    }
 }

@@ -14,5 +14,6 @@ data class Story(
     val time: DateTime,
     val title: String = "",
     val url: String = "",
-    val retrievedComments: Boolean = false
+    val retrievedComments: Boolean = false,
+    val serverSortedOrder: Int
 )

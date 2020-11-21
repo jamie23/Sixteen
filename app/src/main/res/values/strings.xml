@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">HN</string>
 
+    <!-- Common -->
+    <string name="submit">Submit</string>
+    <string name="cancel">Cancel</string>
+
     <!-- Stories -->
     <string name="stories_title">Stories</string>
     <string name="days">d</string>
@@ -21,8 +25,12 @@
     <string name="stories_network_cached_error">Error retrieving stories due to connection, showing cached stories</string>
     <string name="stories_none_cached_network_error">Error retrieving stories, please check internet connection</string>
 
+    <string name="stories_standard">Standard</string>
+    <string name="stories_oldest">Oldest</string>
+    <string name="stories_newest">Newest</string>
+
     <!-- Stories Menu -->
-    <string name="stories_app_bar_sort">Sort</string>
+    <string name="stories_app_bar_sort">Sort Current Stories</string>
     <string name="content_description_sort">Sort stories</string>
 
     <!-- Common app bar -->
