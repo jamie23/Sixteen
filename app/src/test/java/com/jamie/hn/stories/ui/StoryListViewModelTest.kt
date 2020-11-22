@@ -20,6 +20,7 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
+import io.mockk.verifyOrder
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.junit.Assert.assertEquals
@@ -30,6 +31,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 
 @ExtendWith(InstantExecutorExtension::class)
 class StoryListViewModelTest : BaseTest() {
+
     @RelaxedMockK
     private lateinit var storyDataMapper: StoryDataMapper
 
@@ -38,30 +40,15 @@ class StoryListViewModelTest : BaseTest() {
 
     private lateinit var storyListViewModel: StoryListViewModel
 
-    private val story = Story(
-        id = 23,
-        time = DateTime.parse(
-            "23/08/2020 09:00:00",
-            DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss")
-        ),
-        url = "url"
-    )
+    private val story = generateStory(0, "23/08/2020 09:00:00", 0)
+    private val olderStory = generateStory(1, "23/08/2020 08:00:00", 2)
+    private val newerStory = generateStory(2, "23/08/2020 10:00:00", 1)
+    private val storyViewItem = generateStoryViewItem(0)
+    private val olderStoryViewItem = generateStoryViewItem(1)
+    private val newerStoryViewItem = generateStoryViewItem(2)
 
     private val storyResults = StoryResults(story)
-
     private val stories = listOf(story)
-    private val storyViewItem = StoryViewItem(
-        id = 0,
-        author = "Jamie",
-        comments = "1",
-        score = "2",
-        scoreText = "points",
-        time = "3",
-        title = "title",
-        url = "url",
-        commentsCallback = { },
-        storyViewerCallback = { }
-    )
 
     @BeforeEach
     fun setup() {
@@ -69,7 +56,21 @@ class StoryListViewModelTest : BaseTest() {
 
         coEvery { storiesUseCase.getStories(any()) } returns TopStoryResults(stories)
         coEvery { storiesUseCase.getStory(1, true) } returns storyResults
-        every { storyDataMapper.toStoryViewItem(any(), any(), any()) } returns storyViewItem
+        every { storyDataMapper.toStoryViewItem(story, any(), any()) } returns storyViewItem
+        every {
+            storyDataMapper.toStoryViewItem(
+                olderStory,
+                any(),
+                any()
+            )
+        } returns olderStoryViewItem
+        every {
+            storyDataMapper.toStoryViewItem(
+                newerStory,
+                any(),
+                any()
+            )
+        } returns newerStoryViewItem
 
         storyListViewModel = StoryListViewModel(storyDataMapper, storiesUseCase)
     }
@@ -212,52 +213,198 @@ class StoryListViewModelTest : BaseTest() {
             }
         }
 
-        @Test
-        fun `when comments callback is called then we get the story using cache version and post the id to correct live data`() {
-            val observer = spyk<Observer<Event<Int>>>()
-            val commentsCallback = slot<(id: Int) -> Unit>()
-            val idEmitted = slot<Event<Int>>()
+        @Nested
+        inner class Sorting {
 
-            every {
-                storyDataMapper.toStoryViewItem(
-                    any(),
-                    capture(commentsCallback),
-                    any()
+            @Test
+            fun `when sorting is set to 0 then sort by the servers ordering`() {
+                val observer = spyk<Observer<StoryListViewState>>()
+                coEvery { storiesUseCase.getStories(any()) } returns TopStoryResults(
+                    listOf(
+                        story,
+                        olderStory,
+                        newerStory
+                    )
                 )
-            } returns storyViewItem
-            every { observer.onChanged(capture(idEmitted)) } just runs
 
-            storyListViewModel.navigateToComments().observeForever(observer)
-            storyListViewModel.automaticallyRefreshed()
+                storyListViewModel.storyListViewState().observeForever(observer)
+                storyListViewModel.updateSortState(0)
+                storyListViewModel.userManuallyRefreshed()
 
-            commentsCallback.captured.invoke(1)
+                verifyOrder {
+                    observer.onChanged(
+                        StoryListViewState(
+                            stories = emptyList(),
+                            refreshing = true,
+                            showNoCachedStoryNetworkError = false
+                        )
+                    )
+                    storyDataMapper.toStoryViewItem(story, any(), any())
+                    storyDataMapper.toStoryViewItem(newerStory, any(), any())
+                    storyDataMapper.toStoryViewItem(olderStory, any(), any())
+                    observer.onChanged(
+                        StoryListViewState(
+                            stories = listOf(storyViewItem, newerStoryViewItem, olderStoryViewItem),
+                            refreshing = false,
+                            showNoCachedStoryNetworkError = false
+                        )
+                    )
+                }
+            }
 
-            coVerify { storiesUseCase.getStory(1, true) }
-            assertEquals(23, idEmitted.captured.getContentIfNotHandled())
-        }
-
-        @Test
-        fun `when article viewer callback is called then we get the story using cache and post the url to the correct live data`() {
-            val observer = spyk<Observer<Event<String>>>()
-            val articleViewerCallback = slot<(id: Int) -> Unit>()
-            val urlEmitted = slot<Event<String>>()
-
-            every {
-                storyDataMapper.toStoryViewItem(
-                    any(),
-                    any(),
-                    capture(articleViewerCallback)
+            @Test
+            fun `when sorting is set to 1 then sort by newest stories`() {
+                val observer = spyk<Observer<StoryListViewState>>()
+                coEvery { storiesUseCase.getStories(any()) } returns TopStoryResults(
+                    listOf(
+                        story,
+                        olderStory,
+                        newerStory
+                    )
                 )
-            } returns storyViewItem
-            every { observer.onChanged(capture(urlEmitted)) } just runs
 
-            storyListViewModel.navigateToArticle().observeForever(observer)
-            storyListViewModel.automaticallyRefreshed()
+                storyListViewModel.storyListViewState().observeForever(observer)
+                storyListViewModel.updateSortState(1)
+                storyListViewModel.userManuallyRefreshed()
 
-            articleViewerCallback.captured.invoke(1)
+                verifyOrder {
+                    observer.onChanged(
+                        StoryListViewState(
+                            stories = emptyList(),
+                            refreshing = true,
+                            showNoCachedStoryNetworkError = false
+                        )
+                    )
+                    storyDataMapper.toStoryViewItem(newerStory, any(), any())
+                    storyDataMapper.toStoryViewItem(story, any(), any())
+                    storyDataMapper.toStoryViewItem(olderStory, any(), any())
+                    observer.onChanged(
+                        StoryListViewState(
+                            stories = listOf(newerStoryViewItem, storyViewItem, olderStoryViewItem),
+                            refreshing = false,
+                            showNoCachedStoryNetworkError = false
+                        )
+                    )
+                }
+            }
 
-            coVerify { storiesUseCase.getStory(1, true) }
-            assertEquals("url", urlEmitted.captured.getContentIfNotHandled())
+            @Test
+            fun `when sorting is set to 2 then sort by the oldest stories`() {
+                val observer = spyk<Observer<StoryListViewState>>()
+                coEvery { storiesUseCase.getStories(any()) } returns TopStoryResults(
+                    listOf(
+                        story,
+                        olderStory,
+                        newerStory
+                    )
+                )
+
+                storyListViewModel.storyListViewState().observeForever(observer)
+                storyListViewModel.updateSortState(2)
+                storyListViewModel.userManuallyRefreshed()
+
+                verifyOrder {
+                    observer.onChanged(
+                        StoryListViewState(
+                            stories = emptyList(),
+                            refreshing = true,
+                            showNoCachedStoryNetworkError = false
+                        )
+                    )
+                    storyDataMapper.toStoryViewItem(olderStory, any(), any())
+                    storyDataMapper.toStoryViewItem(story, any(), any())
+                    storyDataMapper.toStoryViewItem(newerStory, any(), any())
+                    observer.onChanged(
+                        StoryListViewState(
+                            stories = listOf(olderStoryViewItem, storyViewItem, newerStoryViewItem),
+                            refreshing = false,
+                            showNoCachedStoryNetworkError = false
+                        )
+                    )
+                }
+            }
         }
     }
+
+    @Test
+    fun `when comments callback is called then we get the story using cache version and post the id to correct live data`() {
+        val observer = spyk<Observer<Event<Int>>>()
+        val commentsCallback = slot<(id: Int) -> Unit>()
+        val idEmitted = slot<Event<Int>>()
+
+        every {
+            storyDataMapper.toStoryViewItem(
+                any(),
+                capture(commentsCallback),
+                any()
+            )
+        } returns storyViewItem
+        every { observer.onChanged(capture(idEmitted)) } just runs
+
+        storyListViewModel.navigateToComments().observeForever(observer)
+        storyListViewModel.automaticallyRefreshed()
+
+        commentsCallback.captured.invoke(1)
+
+        coVerify { storiesUseCase.getStory(1, true) }
+        assertEquals(0, idEmitted.captured.getContentIfNotHandled())
+    }
+
+    @Test
+    fun `when article viewer callback is called then we get the story using cache and post the url to the correct live data`() {
+        val observer = spyk<Observer<Event<String>>>()
+        val articleViewerCallback = slot<(id: Int) -> Unit>()
+        val urlEmitted = slot<Event<String>>()
+
+        every {
+            storyDataMapper.toStoryViewItem(
+                any(),
+                any(),
+                capture(articleViewerCallback)
+            )
+        } returns storyViewItem
+        every { observer.onChanged(capture(urlEmitted)) } just runs
+
+        storyListViewModel.navigateToArticle().observeForever(observer)
+        storyListViewModel.automaticallyRefreshed()
+
+        articleViewerCallback.captured.invoke(1)
+
+        coVerify { storiesUseCase.getStory(1, true) }
+        assertEquals("url", urlEmitted.captured.getContentIfNotHandled())
+    }
+
+    @Test
+    fun `when sortState is updated then post new sorted state`() {
+        val observer = spyk<Observer<Int>>()
+
+        storyListViewModel.sortState().observeForever(observer)
+        storyListViewModel.updateSortState(2)
+
+        verify { observer.onChanged(2) }
+    }
+
+    private fun generateStory(id: Int, time: String, serverSortOrder: Int) = Story(
+        id = id,
+        time = DateTime.parse(
+            time,
+            DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss")
+        ),
+        url = "url",
+        serverSortedOrder = serverSortOrder
+    )
+
+    private fun generateStoryViewItem(id: Int) =
+        StoryViewItem(
+            id = id,
+            author = "Jamie",
+            comments = "1",
+            score = "2",
+            scoreText = "points",
+            time = "3",
+            title = "title",
+            url = "url",
+            commentsCallback = { },
+            storyViewerCallback = { }
+        )
 }

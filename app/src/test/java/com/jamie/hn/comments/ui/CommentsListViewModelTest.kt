@@ -60,7 +60,8 @@ class CommentsListViewModelTest : BaseTest() {
             DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss")
         ),
         title = "title",
-        url = "url"
+        url = "url",
+        serverSortedOrder = 0
     )
     private val storyResults = StoryResults(story)
 

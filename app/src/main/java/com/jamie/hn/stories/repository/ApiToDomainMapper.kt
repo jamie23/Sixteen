@@ -8,7 +8,11 @@ import org.joda.time.DateTime
 
 class ApiToDomainMapper {
 
-    fun toStoryDomainModel(apiStory: ApiStory, retrievedComments: Boolean = false): Story {
+    fun toStoryDomainModel(
+        apiStory: ApiStory,
+        retrievedComments: Boolean = false,
+        serverSortedOrder: Int
+    ): Story {
         return Story(
             apiStory.author,
             apiStory.comments?.map { toCommentDomainModel(it) } ?: emptyList(),
@@ -20,7 +24,8 @@ class ApiToDomainMapper {
             DateTime.parse(apiStory.time),
             apiStory.title,
             apiStory.url,
-            retrievedComments
+            retrievedComments,
+            serverSortedOrder
         )
     }
 
