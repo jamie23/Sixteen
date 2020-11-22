@@ -201,7 +201,8 @@ class CommentDataMapperTest : BaseTest() {
             score = 3,
             time = DateTime.now(),
             title = "title",
-            url = "url"
+            url = "url",
+            serverSortedOrder = 0
         )
         val storyViewerCallback = mockk<() -> Unit>()
 

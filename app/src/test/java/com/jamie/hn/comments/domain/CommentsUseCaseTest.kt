@@ -151,7 +151,8 @@ class CommentsUseCaseTest : BaseTest() {
             time = DateTime.parse(
                 "23/08/2020 09:00:00",
                 DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss")
-            )
+            ),
+            serverSortedOrder = 0
         )
 
     private fun singleCommentNestedComment() =
