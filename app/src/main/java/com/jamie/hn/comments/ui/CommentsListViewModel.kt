@@ -6,6 +6,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jamie.hn.comments.domain.CommentsUseCase
 import com.jamie.hn.comments.domain.model.CommentWithDepth
+import com.jamie.hn.comments.ui.CommentsListViewModel.ShareChoice.ARTICLE_COMMENTS
+import com.jamie.hn.comments.ui.CommentsListViewModel.ShareChoice.ARTICLE
+import com.jamie.hn.comments.ui.CommentsListViewModel.ShareChoice.COMMENTS
 import com.jamie.hn.comments.ui.repository.CommentsViewRepository
 import com.jamie.hn.comments.ui.repository.model.CommentCurrentState
 import com.jamie.hn.comments.ui.repository.model.CurrentState
@@ -21,7 +24,8 @@ class CommentsListViewModel(
     private val commentDataMapper: CommentDataMapper,
     private val storyId: Int,
     private val commentsUseCase: CommentsUseCase,
-    private val storiesUseCase: StoriesUseCase
+    private val storiesUseCase: StoriesUseCase,
+    private val commentsResourceProvider: CommentsResourceProvider
 ) : ViewModel() {
 
     private val listViewState = MutableLiveData<ListViewState>()
@@ -191,12 +195,36 @@ class CommentsListViewModel(
         urlClicked.value = url
     }
 
-    fun shareURL() {
-        shareUrl.value = Event(getShareText())
+    fun share(item: Int) {
+        shareUrl.value = when (getShareEnum(item)) {
+            ARTICLE -> Event(getShareArticleText())
+            COMMENTS -> Event(getShareCommentsText())
+            ARTICLE_COMMENTS -> Event(getShareArticleCommentsText())
+        }
     }
 
-    private fun getShareText() =
+    private fun getShareArticleText() =
+        "${story.title} - ${story.url}"
+
+    private fun getShareCommentsText() =
         "${story.title} - ${COMMENTS_URL}${story.id}"
+
+    private fun getShareArticleCommentsText() =
+        """${story.title}
+            |${commentsResourceProvider.article()} - ${story.url}
+            |${commentsResourceProvider.comments()} - ${COMMENTS_URL}${story.id}""".trimMargin()
+
+    private fun getShareEnum(order: Int) =
+        when (order) {
+            0 -> ARTICLE
+            1 -> COMMENTS
+            2 -> ARTICLE_COMMENTS
+            else -> throw IllegalArgumentException("Erroneous share option chosen")
+        }
+
+    enum class ShareChoice {
+        ARTICLE, COMMENTS, ARTICLE_COMMENTS
+    }
 
     data class ListViewState(
         val comments: List<ViewItem>,

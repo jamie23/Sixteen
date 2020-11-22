@@ -35,8 +35,6 @@
 
     <!-- Common app bar -->
     <string name="top_app_bar_title">Title</string>
-    <string name="top_app_bar_share">Share</string>
-    <string name="content_description_share">Share</string>
 
     <!-- Comments -->
     <string name="comments_title">Comments</string>
@@ -46,8 +44,15 @@
 
     <!-- Comments Menu -->
     <string name="comments_app_bar_article">Article</string>
+    <string name="comments_app_bar_comments">Comments</string>
     <string name="content_description_article">Open article</string>
-
+    <string name="comments_app_bar_share">Share</string>
+    <string name="content_description_share">Share</string>
+    <string name="comments_app_bar_share_article">Share article</string>
+    <string name="comments_app_bar_share_comments">Share comments</string>
+    <string name="comments_app_bar_share_article_comments">Share article and comments</string>
+    <string name="comments_share_article">Article</string>
+    <string name="comments_share_comments">Comments</string>
     <!-- Article Viewer -->
     <string name="article_viewer_title">Article Viewer</string>
 

@@ -13,7 +13,7 @@
         android:id="@+id/share"
         android:contentDescription="@string/content_description_share"
         android:icon="@drawable/ic_share_24"
-        android:title="@string/top_app_bar_share"
+        android:title="@string/comments_app_bar_share"
         app:showAsAction="ifRoom" />
 
 </menu>
