@@ -7,4 +7,6 @@ class CommentsResourceProvider(
     private val resources: Resources
 ) {
     fun children() = resources.getString(R.string.comments_children)
+    fun article() = resources.getString(R.string.comments_share_article)
+    fun comments() = resources.getString(R.string.comments_share_comments)
 }

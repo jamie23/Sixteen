@@ -14,6 +14,7 @@ import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.jamie.hn.R
 import com.jamie.hn.core.extensions.visibleOrGone
@@ -63,7 +64,7 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
                         true
                     }
                     R.id.share -> {
-                        viewModel.shareURL()
+                        showShareOptions()
                         true
                     }
                     else -> false
@@ -146,5 +147,20 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
     private fun urlClickedCallback(uri: Uri) {
         val browserIntent = Intent(ACTION_VIEW, uri)
         startActivity(browserIntent)
+    }
+
+    private fun showShareOptions() {
+        val context = context ?: return
+        val shareOptions = arrayOf(
+            getString(R.string.comments_app_bar_share_article),
+            getString(R.string.comments_app_bar_share_comments),
+            getString(R.string.comments_app_bar_share_article_comments)
+        )
+
+        MaterialAlertDialogBuilder(context)
+            .setTitle(resources.getString(R.string.comments_app_bar_share))
+            .setItems(shareOptions) { _, which ->
+                viewModel.share(which)
+            }.show()
     }
 }

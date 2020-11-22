@@ -51,6 +51,9 @@ class CommentsListViewModelTest : BaseTest() {
     @MockK
     private lateinit var storyHeaderItem: HeaderViewItem
 
+    @MockK
+    private lateinit var commentsResourceProvider: CommentsResourceProvider
+
     private lateinit var commentsListViewModel: CommentsListViewModel
 
     private val story = Story(
@@ -71,12 +74,15 @@ class CommentsListViewModelTest : BaseTest() {
 
         coEvery { storiesUseCase.getStory(any(), any()) } returns storyResults
         every { commentDataMapper.toStoryHeaderViewItem(any(), any()) } returns storyHeaderItem
+        every { commentsResourceProvider.article() } returns "Article"
+        every { commentsResourceProvider.comments() } returns "Comments"
 
         commentsListViewModel = CommentsListViewModel(
             commentDataMapper = commentDataMapper,
             storyId = 1,
             commentsUseCase = commentsUseCase,
-            storiesUseCase = storiesUseCase
+            storiesUseCase = storiesUseCase,
+            commentsResourceProvider = commentsResourceProvider
         )
     }
 
@@ -615,22 +621,63 @@ class CommentsListViewModelTest : BaseTest() {
         assertEquals("url", urlEmitted.captured.getContentIfNotHandled())
     }
 
-    @Test
-    fun `when share is called then post the correctly formatted title and url with story id`() {
-        val observer = spyk<Observer<Event<String>>>()
-        val shareText = slot<Event<String>>()
+    @Nested
+    inner class Share {
+        @Test
+        fun `when share is called with 0 (share article) then post the correctly formatted title and url`() {
+            val observer = spyk<Observer<Event<String>>>()
+            val shareText = slot<Event<String>>()
 
-        coEvery { commentsUseCase.retrieveComments(any(), any(), any(), any()) } just Runs
-        every { observer.onChanged(capture(shareText)) } just runs
+            coEvery { commentsUseCase.retrieveComments(any(), any(), any(), any()) } just Runs
+            every { observer.onChanged(capture(shareText)) } just runs
 
-        commentsListViewModel.shareUrl().observeForever(observer)
-        commentsListViewModel.init()
-        commentsListViewModel.shareURL()
+            commentsListViewModel.shareUrl().observeForever(observer)
+            commentsListViewModel.init()
+            commentsListViewModel.share(0)
 
-        assertEquals(
-            "title - https://news.ycombinator.com/item?id=23",
-            shareText.captured.getContentIfNotHandled()
-        )
+            assertEquals(
+                "title - url",
+                shareText.captured.getContentIfNotHandled()
+            )
+        }
+
+        @Test
+        fun `when share is called with 1 (share comments) then post the correctly formatted title and url`() {
+            val observer = spyk<Observer<Event<String>>>()
+            val shareText = slot<Event<String>>()
+
+            coEvery { commentsUseCase.retrieveComments(any(), any(), any(), any()) } just Runs
+            every { observer.onChanged(capture(shareText)) } just runs
+
+            commentsListViewModel.shareUrl().observeForever(observer)
+            commentsListViewModel.init()
+            commentsListViewModel.share(1)
+
+            assertEquals(
+                "title - https://news.ycombinator.com/item?id=23",
+                shareText.captured.getContentIfNotHandled()
+            )
+        }
+
+        @Test
+        fun `when share is called with 2 (share article and comments) then post the correctly formatted title, article url and comments url`() {
+            val observer = spyk<Observer<Event<String>>>()
+            val shareText = slot<Event<String>>()
+
+            coEvery { commentsUseCase.retrieveComments(any(), any(), any(), any()) } just Runs
+            every { observer.onChanged(capture(shareText)) } just runs
+
+            commentsListViewModel.shareUrl().observeForever(observer)
+            commentsListViewModel.init()
+            commentsListViewModel.share(2)
+
+            assertEquals(
+                """title
+                    |Article - url
+                    |Comments - https://news.ycombinator.com/item?id=23""".trimMargin(),
+                shareText.captured.getContentIfNotHandled()
+            )
+        }
     }
 
     private fun useCaseResponse() = mutableListOf(
