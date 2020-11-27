@@ -21,7 +21,6 @@ import com.jamie.hn.comments.ui.repository.model.CurrentState.HIDDEN
 import com.jamie.hn.core.Event
 import com.jamie.hn.stories.domain.StoriesUseCase
 import com.jamie.hn.stories.domain.model.Story
-import com.jamie.hn.stories.ui.StoryListViewModel
 import kotlinx.coroutines.launch
 
 class CommentsListViewModel(
@@ -138,7 +137,10 @@ class CommentsListViewModel(
             networkErrorCachedResults.value = Event(Unit)
         }
 
-        val sortedList = sortList(listAllComments)
+        val sortedList = when (getSortEnum(sortState.value ?: 0)) {
+            STANDARD -> listAllComments
+            else -> sortList(listAllComments)
+        }
 
         commentsViewRepository.commentList = sortedList.mapIndexed { index, commentWithDepth ->
             CommentCurrentState(comment = commentWithDepth.copy(id = index), state = FULL)
@@ -146,33 +148,36 @@ class CommentsListViewModel(
     }
 
     private fun sortList(listAllComments: List<CommentWithDepth>): List<CommentWithDepth> {
-        // Returns a list containing each top level parent and its index sorted by users choice
-        // The list comes sorted so the index holds the state of the sorted list from the server
-        val sortedListTopLevelComments =
-            listAllComments
-                .withIndex()
-                .filter { it.value.depth == 0 }
-                .sortedWith(
-                    when (getSortEnum(sortState.value ?: -1)) {
-                        STANDARD -> sortByServerOrder()
-                        NEWEST -> sortByOldestTime().reversed()
-                        OLDEST -> sortByOldestTime()
-                        else -> throw IllegalArgumentException("Erroneous sort option chosen")
-                    }
-                )
-
+        val sortedListTopLevelComments = getTopLevelSortedComments(listAllComments)
         val sortedFullList = mutableListOf<CommentWithDepth>()
 
-        sortedListTopLevelComments.forEach {
-            sortedFullList.add(it.value)
-            if (addChildren(it.value)) {
-                val children = listAllComments.subList(it.index + 1, (it.index + 1) + it.value.comment.commentCount)
+        sortedListTopLevelComments.forEach { parentComment ->
+            sortedFullList.add(parentComment.value)
+            if (addChildren(parentComment.value)) {
+                val children = listAllComments.subList(
+                    fromIndex = parentComment.index + 1,
+                    toIndex = (parentComment.index + 1) + parentComment.value.comment.commentCount
+                )
                 sortedFullList.addAll(children)
             }
         }
 
         return sortedFullList
     }
+
+    // Returns a list containing each top level parent and its index sorted by users choice
+    // The list comes sorted so the index holds the state of the sorted list from the server
+    private fun getTopLevelSortedComments(listAllComments: List<CommentWithDepth>) =
+        listAllComments
+            .withIndex()
+            .filter { it.value.depth == 0 }
+            .sortedWith(
+                when (getSortEnum(sortState.value ?: -1)) {
+                    NEWEST -> sortByOldestTime().reversed()
+                    OLDEST -> sortByOldestTime()
+                    else -> throw IllegalArgumentException("Erroneous sort option chosen")
+                }
+            )
 
     private fun getSortEnum(order: Int) =
         when (order) {
@@ -184,10 +189,6 @@ class CommentsListViewModel(
 
     private fun sortByOldestTime() =
         compareBy<IndexedValue<CommentWithDepth>> { it.value.comment.time }
-
-    // Repository stores the list in the server sorted time, index here represents the sort order from the server
-    private fun sortByServerOrder() =
-        compareBy<IndexedValue<CommentWithDepth>> { it.index }
 
     private fun addChildren(comment: CommentWithDepth) =
         comment.comment.commentCount > 0
