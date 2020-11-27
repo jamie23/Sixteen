@@ -2,7 +2,7 @@
     <string name="app_name">HN</string>
 
     <!-- Common -->
-    <string name="submit">Submit</string>
+    <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
 
     <!-- Stories -->
@@ -30,8 +30,8 @@
     <string name="stories_newest">Newest</string>
 
     <!-- Stories Menu -->
-    <string name="stories_app_bar_sort">Sort Current Stories</string>
-    <string name="content_description_sort">Sort stories</string>
+    <string name="stories_app_bar_sort">Sort stories</string>
+    <string name="stories_content_description_sort">Sort stories</string>
 
     <!-- Common app bar -->
     <string name="top_app_bar_title">Title</string>
@@ -42,12 +42,18 @@
     <string name="comments_network_error">Error retrieving comments due to connection, showing cached comments</string>
     <string name="comments_none_cached_network_error">Error retrieving comments, please check internet connection</string>
 
+    <string name="comments_standard">Standard</string>
+    <string name="comments_oldest">Oldest</string>
+    <string name="comments_newest">Newest</string>
+
     <!-- Comments Menu -->
     <string name="comments_app_bar_article">Article</string>
     <string name="comments_app_bar_comments">Comments</string>
     <string name="content_description_article">Open article</string>
     <string name="comments_app_bar_share">Share</string>
     <string name="content_description_share">Share</string>
+    <string name="comments_app_bar_sort">Sort comments</string>
+    <string name="comments_description_sort">Sort comments</string>
     <string name="comments_app_bar_share_article">Share article</string>
     <string name="comments_app_bar_share_comments">Share comments</string>
     <string name="comments_app_bar_share_article_comments">Share article and comments</string>

@@ -52,6 +52,7 @@ class StoryListViewModel(
             storyListViewState.value = StoryListViewState(
                 stories = results.stories
                     .sortedWith(
+                        // MAYBE WE DONT NEED TO SORT HERE? WE COULD CHECK IF WE NEED WITH A MAP OR SOMETHING?
                         when (getSortEnum(sortState.value ?: -1)) {
                             STANDARD -> sortByServerOrder()
                             NEWEST -> sortByOldestTime().reversed()

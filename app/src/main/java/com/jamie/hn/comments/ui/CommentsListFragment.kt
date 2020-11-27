@@ -28,6 +28,7 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
 
     private var binding: CommentListFragmentBinding? = null
     private lateinit var commentsListAdapter: CommentsListAdapter
+    private var currentSortState: Int = 0
 
     private val viewModel: CommentsListViewModel by viewModel {
         parametersOf(storyId)
@@ -61,6 +62,10 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
                 when (item.itemId) {
                     R.id.openArticle -> {
                         viewModel.openArticle()
+                        true
+                    }
+                    R.id.sort -> {
+                        showSortComments()
                         true
                     }
                     R.id.share -> {
@@ -133,6 +138,10 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
                 startActivity(shareIntent)
             }
         })
+
+        viewModel.sortState().observe(viewLifecycleOwner, Observer<Int> {
+            currentSortState = it
+        })
     }
 
     private fun showNetworkFailureCachedResults(view: View?) {
@@ -161,6 +170,28 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
             .setTitle(resources.getString(R.string.comments_app_bar_share))
             .setItems(shareOptions) { _, which ->
                 viewModel.share(which)
+            }.show()
+    }
+
+    private fun showSortComments() {
+        val context = context ?: return
+        val sortOptions = arrayOf(
+            getString(R.string.comments_standard),
+            getString(R.string.comments_newest),
+            getString(R.string.comments_oldest)
+        )
+        var sortSelected: Int = -1
+
+        MaterialAlertDialogBuilder(context)
+            .setTitle(resources.getString(R.string.comments_app_bar_sort))
+            .setNeutralButton(resources.getString(R.string.cancel)) { _, _ -> }
+            .setPositiveButton(resources.getString(R.string.confirm)) { _, _ ->
+                // We sort at the point of VM retrieving the comments from the repository
+                viewModel.updateSortState(sortSelected)
+                viewModel.automaticallyRefreshed()
+            }
+            .setSingleChoiceItems(sortOptions, currentSortState) { _, which ->
+                sortSelected = which
             }.show()
     }
 }

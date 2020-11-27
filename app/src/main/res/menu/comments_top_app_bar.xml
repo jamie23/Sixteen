@@ -10,6 +10,13 @@
         app:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/sort"
+        android:contentDescription="@string/comments_description_sort"
+        android:icon="@drawable/ic_sort_24"
+        android:title="@string/comments_app_bar_sort"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/share"
         android:contentDescription="@string/content_description_share"
         android:icon="@drawable/ic_share_24"
