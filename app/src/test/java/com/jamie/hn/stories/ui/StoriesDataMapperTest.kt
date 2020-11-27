@@ -45,8 +45,7 @@ class StoriesDataMapperTest {
             score = 3,
             time = DateTime.now(),
             title = "title",
-            url = "url",
-            serverSortedOrder = 0
+            url = "url"
         )
 
         val commentsCallback = mockk<(Int) -> Unit>()

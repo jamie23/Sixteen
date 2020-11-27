@@ -137,9 +137,10 @@ class CommentsListViewModel(
             networkErrorCachedResults.value = Event(Unit)
         }
 
-        val sortedList = when (getSortEnum(sortState.value ?: 0)) {
-            STANDARD -> listAllComments
-            else -> sortList(listAllComments)
+        val sortedList = if (getSortEnum(sortState.value ?: -1) == STANDARD) {
+            listAllComments
+        } else {
+            sortList(listAllComments)
         }
 
         commentsViewRepository.commentList = sortedList.mapIndexed { index, commentWithDepth ->
@@ -156,7 +157,7 @@ class CommentsListViewModel(
             if (addChildren(parentComment.value)) {
                 val children = listAllComments.subList(
                     fromIndex = parentComment.index + 1,
-                    toIndex = (parentComment.index + 1) + parentComment.value.comment.commentCount
+                    toIndex = parentComment.index + 1 + parentComment.value.comment.commentCount
                 )
                 sortedFullList.addAll(children)
             }

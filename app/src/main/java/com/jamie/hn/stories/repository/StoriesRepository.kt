@@ -33,8 +33,8 @@ class StoriesRepository(
             }
         }
 
-        val newCopy = webStorage.topStories().mapIndexed { index, story ->
-            mapper.toStoryDomainModel(story, false, index)
+        val newCopy = webStorage.topStories().map { story ->
+            mapper.toStoryDomainModel(story, false)
         }
         localStorage.storyList = newCopy
         return TopStoryResults(newCopy)
@@ -57,10 +57,7 @@ class StoriesRepository(
             }
 
             return StoryResults(
-                story = Story(
-                    time = DateTime(),
-                    serverSortedOrder = -999
-                ),
+                story = Story(time = DateTime()),
                 networkFailure = true
             )
         }
@@ -81,7 +78,7 @@ class StoriesRepository(
         val index = newList.indexOfFirst { it.id == newCopy.id }
 
         val domainMappedCopy =
-            mapper.toStoryDomainModel(newCopy, true, newList[index].serverSortedOrder)
+            mapper.toStoryDomainModel(newCopy, true)
 
         newList[index] = domainMappedCopy
 
