@@ -33,7 +33,7 @@ class ApiToDomainMapperTest : BaseTest() {
             url = "url"
         )
 
-        val story = apiToDomainMapper.toStoryDomainModel(apiStory, true, 30)
+        val story = apiToDomainMapper.toStoryDomainModel(apiStory, true)
 
         assertEquals(true, story.retrievedComments)
     }
@@ -52,7 +52,7 @@ class ApiToDomainMapperTest : BaseTest() {
             url = "url"
         )
 
-        val story = apiToDomainMapper.toStoryDomainModel(apiStory, false, 30)
+        val story = apiToDomainMapper.toStoryDomainModel(apiStory, false)
 
         assertEquals(false, story.retrievedComments)
     }
@@ -71,7 +71,7 @@ class ApiToDomainMapperTest : BaseTest() {
             url = "url"
         )
 
-        val story = apiToDomainMapper.toStoryDomainModel(apiStory, serverSortedOrder = 30)
+        val story = apiToDomainMapper.toStoryDomainModel(apiStory)
 
         assertEquals("jamie", story.author)
         assertEquals(emptyList<Comment>(), story.comments)
@@ -103,7 +103,7 @@ class ApiToDomainMapperTest : BaseTest() {
             time = time
         )
 
-        val comments = apiToDomainMapper.toStoryDomainModel(apiStory, serverSortedOrder = 30).comments
+        val comments = apiToDomainMapper.toStoryDomainModel(apiStory).comments
 
         assertEquals(1, comments.size)
         assertEquals("Jamie", comments[0].author)
@@ -133,7 +133,7 @@ class ApiToDomainMapperTest : BaseTest() {
             time = time
         )
 
-        val comments = apiToDomainMapper.toStoryDomainModel(apiStory, serverSortedOrder = 30).comments
+        val comments = apiToDomainMapper.toStoryDomainModel(apiStory).comments
 
         assertEquals(1, comments.size)
         assertEquals("Jamie", comments[0].author)
@@ -148,24 +148,5 @@ class ApiToDomainMapperTest : BaseTest() {
         assertEquals(emptyList<Comment>(), resultNestedCommentList[0].comments)
         assertEquals("text", resultNestedCommentList[0].text)
         assertEquals(DateTime.parse(time), resultNestedCommentList[0].time)
-    }
-
-    @Test
-    fun `when toStoryDomainModel is called with serverSortedOrder populated then the serverSortedOrder on the story matches`() {
-        val apiStory = ApiStory(
-            author = "jamie",
-            comments = null,
-            commentsUrl = "url",
-            domain = "domain",
-            id = 1,
-            score = 2,
-            time = time,
-            title = "title",
-            url = "url"
-        )
-
-        val story = apiToDomainMapper.toStoryDomainModel(apiStory, false, 30)
-
-        assertEquals(30, story.serverSortedOrder)
     }
 }

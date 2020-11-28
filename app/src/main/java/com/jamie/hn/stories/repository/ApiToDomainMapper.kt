@@ -10,8 +10,7 @@ class ApiToDomainMapper {
 
     fun toStoryDomainModel(
         apiStory: ApiStory,
-        retrievedComments: Boolean = false,
-        serverSortedOrder: Int
+        retrievedComments: Boolean = false
     ): Story {
         return Story(
             apiStory.author,
@@ -24,8 +23,7 @@ class ApiToDomainMapper {
             DateTime.parse(apiStory.time),
             apiStory.title,
             apiStory.url,
-            retrievedComments,
-            serverSortedOrder
+            retrievedComments
         )
     }
 

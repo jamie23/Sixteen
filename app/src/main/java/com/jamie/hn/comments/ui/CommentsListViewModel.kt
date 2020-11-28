@@ -9,6 +9,9 @@ import com.jamie.hn.comments.domain.model.CommentWithDepth
 import com.jamie.hn.comments.ui.CommentsListViewModel.ShareChoice.ARTICLE_COMMENTS
 import com.jamie.hn.comments.ui.CommentsListViewModel.ShareChoice.ARTICLE
 import com.jamie.hn.comments.ui.CommentsListViewModel.ShareChoice.COMMENTS
+import com.jamie.hn.comments.ui.CommentsListViewModel.SortChoice.NEWEST
+import com.jamie.hn.comments.ui.CommentsListViewModel.SortChoice.STANDARD
+import com.jamie.hn.comments.ui.CommentsListViewModel.SortChoice.OLDEST
 import com.jamie.hn.comments.ui.repository.CommentsViewRepository
 import com.jamie.hn.comments.ui.repository.model.CommentCurrentState
 import com.jamie.hn.comments.ui.repository.model.CurrentState
@@ -49,6 +52,9 @@ class CommentsListViewModel(
     private val shareUrl = MutableLiveData<Event<String>>()
     fun shareUrl(): LiveData<Event<String>> = shareUrl
 
+    private val sortState = MutableLiveData(0)
+    fun sortState(): LiveData<Int> = sortState
+
     private lateinit var commentsViewRepository: CommentsViewRepository
     private lateinit var story: Story
 
@@ -56,7 +62,7 @@ class CommentsListViewModel(
         refreshList(false)
     }
 
-    private fun automaticallyRefreshed() {
+    fun automaticallyRefreshed() {
         refreshList(true)
     }
 
@@ -131,10 +137,64 @@ class CommentsListViewModel(
             networkErrorCachedResults.value = Event(Unit)
         }
 
-        commentsViewRepository.commentList = listAllComments.mapIndexed { index, commentWithDepth ->
+        val sortState = getSortEnum(sortState.value ?: -1)
+
+        val sortedList = if (sortState == STANDARD) {
+            listAllComments
+        } else {
+            sortList(listAllComments, sortState)
+        }
+
+        commentsViewRepository.commentList = sortedList.mapIndexed { index, commentWithDepth ->
             CommentCurrentState(comment = commentWithDepth.copy(id = index), state = FULL)
         }
     }
+
+    private fun sortList(listAllComments: List<CommentWithDepth>, sortState: SortChoice): List<CommentWithDepth> {
+        val sortedListTopLevelComments = getTopLevelSortedComments(listAllComments, sortState)
+        val sortedFullList = mutableListOf<CommentWithDepth>()
+
+        sortedListTopLevelComments.forEach { parentComment ->
+            sortedFullList.add(parentComment.value)
+            if (addChildren(parentComment.value)) {
+                val children = listAllComments.subList(
+                    fromIndex = parentComment.index + 1,
+                    toIndex = parentComment.index + 1 + parentComment.value.comment.commentCount
+                )
+                sortedFullList.addAll(children)
+            }
+        }
+
+        return sortedFullList
+    }
+
+    // Returns a list containing each top level parent and its index sorted by users choice
+    // The list comes sorted so the index holds the state of the sorted list from the server
+    private fun getTopLevelSortedComments(listAllComments: List<CommentWithDepth>, sortState: SortChoice) =
+        listAllComments
+            .withIndex()
+            .filter { it.value.depth == 0 }
+            .sortedWith(
+                when (sortState) {
+                    NEWEST -> sortByOldestTime().reversed()
+                    OLDEST -> sortByOldestTime()
+                    else -> throw IllegalArgumentException("Erroneous sort option chosen")
+                }
+            )
+
+    private fun getSortEnum(order: Int) =
+        when (order) {
+            0 -> STANDARD
+            1 -> NEWEST
+            2 -> OLDEST
+            else -> throw IllegalArgumentException("Erroneous sort option chosen")
+        }
+
+    private fun sortByOldestTime() =
+        compareBy<IndexedValue<CommentWithDepth>> { it.value.comment.time }
+
+    private fun addChildren(comment: CommentWithDepth) =
+        comment.comment.commentCount > 0
 
     private fun addHeader(listAllComments: List<ViewItem>): List<ViewItem> {
         val headerItem = commentDataMapper.toStoryHeaderViewItem(
@@ -221,6 +281,14 @@ class CommentsListViewModel(
             2 -> ARTICLE_COMMENTS
             else -> throw IllegalArgumentException("Erroneous share option chosen")
         }
+
+    fun updateSortState(which: Int) {
+        sortState.value = which
+    }
+
+    enum class SortChoice {
+        STANDARD, NEWEST, OLDEST
+    }
 
     enum class ShareChoice {
         ARTICLE, COMMENTS, ARTICLE_COMMENTS

@@ -49,14 +49,14 @@ class StoryListViewModel(
 
         viewModelScope.launch {
             val results = storiesUseCase.getStories(useCachedVersion)
+            val sortedList = if (getSortEnum(sortState.value ?: -1) == STANDARD) {
+                results.stories
+            } else {
+                sortList(results.stories)
+            }
+
             storyListViewState.value = StoryListViewState(
-                stories = results.stories
-                    .sortedWith(
-                        when (getSortEnum(sortState.value ?: -1)) {
-                            STANDARD -> sortByServerOrder()
-                            NEWEST -> sortByOldestTime().reversed()
-                            OLDEST -> sortByOldestTime()
-                        })
+                stories = sortedList
                     .map {
                         storyDataMapper.toStoryViewItem(
                             it,
@@ -73,6 +73,14 @@ class StoryListViewModel(
             }
         }
     }
+
+    private fun sortList(listStories: List<Story>) = listStories.sortedWith(
+        when (getSortEnum(sortState.value ?: -1)) {
+            NEWEST -> sortByOldestTime().reversed()
+            OLDEST -> sortByOldestTime()
+            else -> throw IllegalArgumentException("Erroneous sort option chosen")
+        }
+    )
 
     private fun commentsCallback(id: Int) {
         viewModelScope.launch {
@@ -100,7 +108,6 @@ class StoryListViewModel(
         }
 
     private fun sortByOldestTime() = compareBy<Story> { it.time }
-    private fun sortByServerOrder() = compareBy<Story> { it.serverSortedOrder }
 
     data class StoryListViewState(
         val stories: List<StoryViewItem>,

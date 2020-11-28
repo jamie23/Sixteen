@@ -56,7 +56,7 @@ class StoriesRepositoryTest {
         @Test
         fun `when network is unavailable then return local storage list and network failure as true`() {
             var topStories = TopStoryResults(emptyList())
-            val storedList = listOf(Story(time = DateTime.now(), serverSortedOrder = 0))
+            val storedList = listOf(Story(time = DateTime.now()))
 
             every { networkUtils.isNetworkAvailable() } returns false
             every { localStorage.storyList } returns storedList
@@ -73,7 +73,7 @@ class StoriesRepositoryTest {
         @Test
         fun `when useCachedVersion is true and local storage is not empty then get the list of stories from local storage`() {
             var topStories = TopStoryResults(emptyList())
-            val storedList = listOf(Story(time = DateTime.now(), serverSortedOrder = 0))
+            val storedList = listOf(Story(time = DateTime.now()))
 
             every { localStorage.storyList } returns storedList
 
@@ -99,20 +99,17 @@ class StoriesRepositoryTest {
             every { localStorage.storyList } returns listOf()
             coEvery { webStorage.topStories() } returns webList
             every {
-                apiToDomainMapper.toStoryDomainModel(
-                    apiStory,
-                    serverSortedOrder = 0
-                )
-            } returns Story(time = date, serverSortedOrder = 0)
+                apiToDomainMapper.toStoryDomainModel(apiStory)
+            } returns Story(time = date)
 
             runBlocking {
                 topStories = storiesRepository.topStories(true)
             }
 
             verify(exactly = 1) { localStorage.storyList }
-            verify { localStorage.storyList = listOf(Story(time = date, serverSortedOrder = 0)) }
+            verify { localStorage.storyList = listOf(Story(time = date)) }
             assertFalse(topStories.networkFailure)
-            assertEquals(listOf(Story(time = date, serverSortedOrder = 0)), topStories.stories)
+            assertEquals(listOf(Story(time = date)), topStories.stories)
         }
 
         @Test
@@ -128,20 +125,18 @@ class StoriesRepositoryTest {
             coEvery { webStorage.topStories() } returns webList
             every {
                 apiToDomainMapper.toStoryDomainModel(
-                    apiStory,
-                    serverSortedOrder = 0
-                )
-            } returns Story(time = date, serverSortedOrder = 0)
+                    apiStory)
+            } returns Story(time = date)
 
             runBlocking {
                 topStories = storiesRepository.topStories(false)
             }
 
             verify(exactly = 0) { localStorage.storyList }
-            verify { localStorage.storyList = listOf(Story(time = date, serverSortedOrder = 0)) }
-            verify { apiToDomainMapper.toStoryDomainModel(any(), false, 0) }
+            verify { localStorage.storyList = listOf(Story(time = date)) }
+            verify { apiToDomainMapper.toStoryDomainModel(any(), false) }
             assertFalse(topStories.networkFailure)
-            assertEquals(listOf(Story(time = date, serverSortedOrder = 0)), topStories.stories)
+            assertEquals(listOf(Story(time = date)), topStories.stories)
         }
 
         @Test
@@ -158,33 +153,28 @@ class StoriesRepositoryTest {
             coEvery { webStorage.topStories() } returns webList
             every {
                 apiToDomainMapper.toStoryDomainModel(
-                    apiStory1,
-                    serverSortedOrder = 0
-                )
-            } returns Story(time = date, serverSortedOrder = 0)
+                    apiStory1)
+            } returns Story(time = date)
             every {
-                apiToDomainMapper.toStoryDomainModel(
-                    apiStory2,
-                    serverSortedOrder = 1
-                )
-            } returns Story(time = date, serverSortedOrder = 1)
+                apiToDomainMapper.toStoryDomainModel(apiStory2)
+            } returns Story(time = date)
 
             runBlocking {
                 topStories = storiesRepository.topStories(false)
             }
 
             verifyOrder {
-                apiToDomainMapper.toStoryDomainModel(apiStory1, false, 0)
-                apiToDomainMapper.toStoryDomainModel(apiStory2, false, 1)
+                apiToDomainMapper.toStoryDomainModel(apiStory1, false)
+                apiToDomainMapper.toStoryDomainModel(apiStory2, false)
                 localStorage.storyList = listOf(
-                    Story(time = date, serverSortedOrder = 0),
-                    Story(time = date, serverSortedOrder = 1)
+                    Story(time = date),
+                    Story(time = date)
                 )
             }
             assertEquals(
                 listOf(
-                    Story(time = date, serverSortedOrder = 0),
-                    Story(time = date, serverSortedOrder = 1)
+                    Story(time = date),
+                    Story(time = date)
                 ), topStories.stories
             )
         }
@@ -195,7 +185,7 @@ class StoriesRepositoryTest {
 
         @Test
         fun `when useCachedVersion is true and local storage is not null and requireComments is false then get story from local storage`() {
-            val storedStory = Story(id = 1, time = DateTime.now(), serverSortedOrder = 0)
+            val storedStory = Story(id = 1, time = DateTime.now())
             val storedList = listOf(storedStory)
             lateinit var story: StoryResults
 
@@ -218,21 +208,19 @@ class StoriesRepositoryTest {
             val storedStory = Story(
                 id = 1,
                 time = DateTime.now(),
-                retrievedComments = false,
-                serverSortedOrder = 0
+                retrievedComments = false
             )
             val newStoredStory = Story(
                 id = 1,
                 time = DateTime.now(),
-                retrievedComments = true,
-                serverSortedOrder = 0
+                retrievedComments = true
             )
             val storedList = listOf(storedStory)
             val apiStory = ApiStory(id = 1, time = DateTime.now().toString())
             lateinit var story: StoryResults
 
             every { localStorage.storyList } returns storedList
-            every { apiToDomainMapper.toStoryDomainModel(any(), true, 0) } returns newStoredStory
+            every { apiToDomainMapper.toStoryDomainModel(any(), true) } returns newStoredStory
             coEvery { webStorage.story(1) } returns apiStory
 
             runBlocking {
@@ -247,7 +235,7 @@ class StoriesRepositoryTest {
                 localStorage.storyList
                 webStorage.story(1)
                 localStorage.storyList
-                apiToDomainMapper.toStoryDomainModel(apiStory, true, 0)
+                apiToDomainMapper.toStoryDomainModel(apiStory, true)
                 localStorage.storyList = listOf(newStoredStory)
             }
             assertEquals(newStoredStory, story.story)
@@ -259,8 +247,7 @@ class StoriesRepositoryTest {
             val storedStory = Story(
                 id = 1,
                 time = DateTime.now(),
-                retrievedComments = true,
-                serverSortedOrder = 0
+                retrievedComments = true
             )
             val storedList = listOf(storedStory)
 
@@ -275,7 +262,7 @@ class StoriesRepositoryTest {
             }
 
             verify(exactly = 0) { localStorage.storyList = any() }
-            verify(exactly = 0) { apiToDomainMapper.toStoryDomainModel(any(), any(), any()) }
+            verify(exactly = 0) { apiToDomainMapper.toStoryDomainModel(any(), any()) }
             assertEquals(storedStory, story.story)
         }
 
@@ -283,10 +270,10 @@ class StoriesRepositoryTest {
         fun `when useCachedVersion is false then get the story from web storage, update the local storage and return web copy`() {
             lateinit var story: StoryResults
             val apiStory = ApiStory(id = 1, time = DateTime.now().toString())
-            val storedStory = Story(id = 1, time = DateTime.now(), serverSortedOrder = 0)
+            val storedStory = Story(id = 1, time = DateTime.now())
             val storedList = listOf(storedStory)
 
-            every { apiToDomainMapper.toStoryDomainModel(any(), true, 0) } returns storedStory
+            every { apiToDomainMapper.toStoryDomainModel(any(), true) } returns storedStory
             coEvery { webStorage.story(1) } returns apiStory
             every { localStorage.storyList } returns storedList
 
@@ -301,7 +288,7 @@ class StoriesRepositoryTest {
             coVerifyOrder {
                 webStorage.story(1)
                 localStorage.storyList
-                apiToDomainMapper.toStoryDomainModel(apiStory, true, 0)
+                apiToDomainMapper.toStoryDomainModel(apiStory, true)
                 localStorage.storyList = listOf(storedStory)
             }
             assertEquals(storedStory, story.story)
@@ -313,8 +300,7 @@ class StoriesRepositoryTest {
             val storedStory = Story(
                 id = 1,
                 time = DateTime.now(),
-                retrievedComments = false,
-                serverSortedOrder = 0
+                retrievedComments = false
             )
             val storedList = listOf(storedStory)
 
@@ -340,8 +326,7 @@ class StoriesRepositoryTest {
             val storedStory = Story(
                 id = 1,
                 time = DateTime.now(),
-                retrievedComments = true,
-                serverSortedOrder = 0
+                retrievedComments = true
             )
             val storedList = listOf(storedStory)
 
@@ -367,8 +352,7 @@ class StoriesRepositoryTest {
             val storedStory = Story(
                 id = 1,
                 time = DateTime.now(),
-                retrievedComments = false,
-                serverSortedOrder = 0
+                retrievedComments = false
             )
             val storedList = listOf(storedStory)
 

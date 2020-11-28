@@ -40,9 +40,9 @@ class StoryListViewModelTest : BaseTest() {
 
     private lateinit var storyListViewModel: StoryListViewModel
 
-    private val story = generateStory(0, "23/08/2020 09:00:00", 0)
-    private val olderStory = generateStory(1, "23/08/2020 08:00:00", 2)
-    private val newerStory = generateStory(2, "23/08/2020 10:00:00", 1)
+    private val story = generateStory(0, "23/08/2020 09:00:00")
+    private val olderStory = generateStory(1, "23/08/2020 08:00:00")
+    private val newerStory = generateStory(2, "23/08/2020 10:00:00")
     private val storyViewItem = generateStoryViewItem(0)
     private val olderStoryViewItem = generateStoryViewItem(1)
     private val newerStoryViewItem = generateStoryViewItem(2)
@@ -240,11 +240,11 @@ class StoryListViewModelTest : BaseTest() {
                         )
                     )
                     storyDataMapper.toStoryViewItem(story, any(), any())
-                    storyDataMapper.toStoryViewItem(newerStory, any(), any())
                     storyDataMapper.toStoryViewItem(olderStory, any(), any())
+                    storyDataMapper.toStoryViewItem(newerStory, any(), any())
                     observer.onChanged(
                         StoryListViewState(
-                            stories = listOf(storyViewItem, newerStoryViewItem, olderStoryViewItem),
+                            stories = listOf(storyViewItem, olderStoryViewItem, newerStoryViewItem),
                             refreshing = false,
                             showNoCachedStoryNetworkError = false
                         )
@@ -381,17 +381,19 @@ class StoryListViewModelTest : BaseTest() {
         storyListViewModel.sortState().observeForever(observer)
         storyListViewModel.updateSortState(2)
 
-        verify { observer.onChanged(2) }
+        verify {
+            observer.onChanged(0)
+            observer.onChanged(2)
+        }
     }
 
-    private fun generateStory(id: Int, time: String, serverSortOrder: Int) = Story(
+    private fun generateStory(id: Int, time: String) = Story(
         id = id,
         time = DateTime.parse(
             time,
             DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss")
         ),
-        url = "url",
-        serverSortedOrder = serverSortOrder
+        url = "url"
     )
 
     private fun generateStoryViewItem(id: Int) =

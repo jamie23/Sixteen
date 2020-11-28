@@ -106,7 +106,7 @@ class StoryListFragment : Fragment(R.layout.story_list_fragment) {
         MaterialAlertDialogBuilder(context)
             .setTitle(resources.getString(R.string.stories_app_bar_sort))
             .setNeutralButton(resources.getString(R.string.cancel)) { _, _ -> }
-            .setPositiveButton(resources.getString(R.string.submit)) { _, _ ->
+            .setPositiveButton(resources.getString(R.string.confirm)) { _, _ ->
                 // We sort at the point of VM retrieving the stories from the repository
                 viewModel.updateSortState(sortSelected)
                 viewModel.userManuallyRefreshed()

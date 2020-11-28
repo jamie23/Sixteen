@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/sortStories"
-        android:contentDescription="@string/content_description_sort"
+        android:contentDescription="@string/stories_content_description_sort"
         android:icon="@drawable/ic_sort_24"
         android:title="@string/stories_app_bar_sort"
         app:showAsAction="ifRoom" />
