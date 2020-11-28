@@ -21,15 +21,15 @@ class CommentsResourceProviderTest : BaseTest() {
     fun setup() {
         MockKAnnotations.init(this)
 
-        every { resources.getString(any()) } returns "children"
+        every { resources.getString(any()) } returns "hidden"
         commentsResourceProvider = CommentsResourceProvider(resources)
     }
 
     @Test
-    fun `when children is called then return children string from resources`() {
-        val returnedString = commentsResourceProvider.children()
+    fun `when hidden is called then return hidden resource string from resources`() {
+        val returnedString = commentsResourceProvider.hidden()
 
-        assertEquals("children", returnedString)
+        assertEquals("hidden", returnedString)
         verify { resources.getString(any()) }
     }
 }

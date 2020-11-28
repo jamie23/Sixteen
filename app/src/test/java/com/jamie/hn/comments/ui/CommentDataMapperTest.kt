@@ -46,7 +46,7 @@ class CommentDataMapperTest : BaseTest() {
         commentDataMapper = spyk(CommentDataMapper(commentsResourceProvider, coreDataMapper, resourceProvider))
 
         every { coreDataMapper.time(any()) } returns "1d"
-        every { commentsResourceProvider.children() } returns "children"
+        every { commentsResourceProvider.hidden() } returns "hidden"
         every { commentDataMapper.processText(any(), any()) } returns mockk()
         every { resourceProvider.comments(any()) } returns "1 comment"
         every { resourceProvider.score(any()) } returns "point"
@@ -184,7 +184,7 @@ class CommentDataMapperTest : BaseTest() {
             val commentViewItem =
                 commentDataMapper.toCommentViewItem(commentWithDepth, collapseCallback, urlClickedCallback)
 
-            assertEquals(commentViewItem.authorAndHiddenChildren, "author [0 children]")
+            assertEquals(commentViewItem.authorAndHiddenChildren, "author [1 hidden]")
         }
     }
 

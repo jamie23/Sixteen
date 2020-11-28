@@ -59,7 +59,7 @@ class CommentDataMapper(
             .removeAppendedNewLines()
 
     private fun authorAndHiddenChildren(comment: Comment) =
-        "${comment.author} [${comment.commentCount} ${commentsResourceProvider.children()}]"
+        "${comment.author} [${comment.commentCount + 1} ${commentsResourceProvider.hidden()}]"
 
     private fun comments(numComments: Int) = resourceProvider.comments(numComments)
     private fun scoreText(score: Int) = resourceProvider.score(score)
