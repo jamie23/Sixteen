@@ -28,6 +28,7 @@ import io.mockk.runs
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
+import io.mockk.verifyOrder
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.junit.Assert.assertEquals
@@ -130,7 +131,7 @@ class CommentsListViewModelTest : BaseTest() {
 
             commentsListViewModel.init()
 
-            callback.invoke(useCaseResponse(), false, false)
+            callback.invoke(useCaseResponseWithoutChildren(), false, false)
 
             assertEquals(2, commentsToMapper.size)
 
@@ -164,7 +165,7 @@ class CommentsListViewModelTest : BaseTest() {
             commentsListViewModel.commentsViewState().observeForever(observer)
             commentsListViewModel.init()
 
-            callback.invoke(useCaseResponse(), false, false)
+            callback.invoke(useCaseResponseWithoutChildren(), false, false)
             verify {
                 observer.onChanged(
                     ListViewState(
@@ -241,7 +242,7 @@ class CommentsListViewModelTest : BaseTest() {
 
             commentsListViewModel.init()
 
-            callback.invoke(useCaseResponse(), true, false)
+            callback.invoke(useCaseResponseWithoutChildren(), true, false)
 
             verify(exactly = 1) { observerErrorCachedResults.onChanged(any()) }
             verify(exactly = 0) { observerErrorNoCacheResults.onChanged(any()) }
@@ -287,7 +288,7 @@ class CommentsListViewModelTest : BaseTest() {
 
             commentsListViewModel.init()
 
-            callback.invoke(useCaseResponse(), false, false)
+            callback.invoke(useCaseResponseWithoutChildren(), false, false)
 
             verify(exactly = 0) { observerErrorCachedResults.onChanged(any()) }
             verify(exactly = 0) { observerErrorNoCacheResults.onChanged(any()) }
@@ -335,7 +336,7 @@ class CommentsListViewModelTest : BaseTest() {
             commentsListViewModel.navigateToArticle().observeForever(observer)
             commentsListViewModel.init()
 
-            callback.invoke(useCaseResponse(), false, false)
+            callback.invoke(useCaseResponseWithoutChildren(), false, false)
 
             articleViewerCallback.invoke()
 
@@ -384,7 +385,7 @@ class CommentsListViewModelTest : BaseTest() {
 
             commentsListViewModel.init()
 
-            commentsUseCaseCallback.invoke(useCaseResponse(), false, false)
+            commentsUseCaseCallback.invoke(useCaseResponseWithoutChildren(), false, false)
             longClickListenerCallback.invoke(0)
 
             assertEquals(COLLAPSED, commentsPassedToMapper[2].state)
@@ -414,7 +415,7 @@ class CommentsListViewModelTest : BaseTest() {
 
             commentsListViewModel.init()
 
-            commentsUseCaseCallback.invoke(useCaseResponse(), false, false)
+            commentsUseCaseCallback.invoke(useCaseResponseWithoutChildren(), false, false)
             longClickListenerCallback.invoke(0)
 
             assertEquals(COLLAPSED, commentsPassedToMapper[2].state)
@@ -453,9 +454,13 @@ class CommentsListViewModelTest : BaseTest() {
 
             assertEquals(FULL, commentsPassedToMapper[0].state)
             assertEquals(FULL, commentsPassedToMapper[1].state)
+            assertEquals(FULL, commentsPassedToMapper[2].state)
+            assertEquals(FULL, commentsPassedToMapper[3].state)
 
-            longClickListenerCallback.invoke(1)
+            longClickListenerCallback.invoke(3)
 
+            assertEquals(FULL, commentsPassedToMapper[0].state)
+            assertEquals(FULL, commentsPassedToMapper[1].state)
             assertEquals(FULL, commentsPassedToMapper[2].state)
             assertEquals(COLLAPSED, commentsPassedToMapper[3].state)
         }
@@ -484,28 +489,20 @@ class CommentsListViewModelTest : BaseTest() {
 
             commentsListViewModel.init()
 
-            val list = useCaseResponseWithChildren()
-            list.add(
-                // Dennis here is not a child of the clicked comment
-                CommentWithDepth(
-                    comment = Comment(author = "Dennis", commentCount = 0, time = DateTime.now()),
-                    depth = 0
-                )
-            )
-
-            commentsUseCaseCallback.invoke(list, false, false)
+            commentsUseCaseCallback.invoke(useCaseResponseWithChildren(), false, false)
 
             assertEquals(FULL, commentsPassedToMapper[0].state)
             assertEquals(FULL, commentsPassedToMapper[1].state)
             assertEquals(FULL, commentsPassedToMapper[2].state)
+            assertEquals(FULL, commentsPassedToMapper[3].state)
 
             longClickListenerCallback.invoke(0)
 
-            assertEquals(5, commentsPassedToMapper.size)
-            assertEquals(COLLAPSED, commentsPassedToMapper[3].state)
-            assertEquals(0, commentsPassedToMapper[3].comment.id)
-            assertEquals(FULL, commentsPassedToMapper[4].state)
-            assertEquals(2, commentsPassedToMapper[4].comment.id)
+            assertEquals(7, commentsPassedToMapper.size)
+            assertEquals(COLLAPSED, commentsPassedToMapper[4].state)
+            assertEquals(0, commentsPassedToMapper[4].comment.id)
+            assertEquals(FULL, commentsPassedToMapper[5].state)
+            assertEquals(2, commentsPassedToMapper[5].comment.id)
         }
 
         @Test
@@ -532,92 +529,164 @@ class CommentsListViewModelTest : BaseTest() {
 
             commentsListViewModel.init()
 
-            val list = useCaseResponseWithChildren()
-            list.add(
-                // Dennis here is a child of the clicked comment
-                CommentWithDepth(
-                    comment = Comment(author = "Dennis", commentCount = 0, time = DateTime.now()),
-                    depth = 1
-                )
-            )
-
-            commentsUseCaseCallback.invoke(list, false, false)
+            commentsUseCaseCallback.invoke(useCaseResponseWithChildren(), false, false)
 
             assertEquals(FULL, commentsPassedToMapper[0].state)
             assertEquals(FULL, commentsPassedToMapper[1].state)
             assertEquals(FULL, commentsPassedToMapper[2].state)
+            assertEquals(FULL, commentsPassedToMapper[3].state)
 
-            longClickListenerCallback.invoke(0)
+            longClickListenerCallback.invoke(2)
 
-            assertEquals(4, commentsPassedToMapper.size)
-            assertEquals(COLLAPSED, commentsPassedToMapper[3].state)
-            assertEquals(0, commentsPassedToMapper[3].comment.id)
+            assertEquals(7, commentsPassedToMapper.size)
+            assertEquals(COLLAPSED, commentsPassedToMapper[6].state)
+            assertEquals(2, commentsPassedToMapper[2].comment.id)
         }
     }
 
-    @Test
-    fun `when urlClicked callback is called from an item then post the url`() {
-        val observer = spyk<Observer<String>>()
-        val commentsUseCaseCallback = slot<(List<CommentWithDepth>, Boolean, Boolean) -> Unit>()
-        val urlClickedCallback = slot<(String) -> Unit>()
+    @Nested
+    inner class Refresh {
 
-        commentsListViewModel.urlClicked().observeForever(observer)
+        @Test
+        fun `when userManuallyRefreshed is called then retrieve the comments from the use case with use cache as false`() {
+            coEvery { commentsUseCase.retrieveComments(any(), any(), any(), any()) } just Runs
 
-        coEvery {
-            commentsUseCase.retrieveComments(
-                any(),
-                any(),
-                capture(commentsUseCaseCallback),
-                any()
-            )
-        } just Runs
-        coEvery {
-            commentDataMapper.toCommentViewItem(
-                any(),
-                any(),
-                capture(urlClickedCallback)
-            )
-        } returns mockk()
+            commentsListViewModel.userManuallyRefreshed()
 
-        commentsListViewModel.init()
+            coVerify {
+                commentsUseCase.retrieveComments(
+                    storyId = 1,
+                    useCache = false,
+                    onResult = any(),
+                    requireComments = true
+                )
+            }
+        }
 
-        commentsUseCaseCallback.invoke(useCaseResponse(), false, false)
-        urlClickedCallback.invoke("url")
+        @Test
+        fun `when automaticallyRefreshed is called then retrieve the comments from the use case with use cache as true`() {
+            coEvery { commentsUseCase.retrieveComments(any(), any(), any(), any()) } just Runs
 
-        verify {
-            observer.onChanged("url")
+            commentsListViewModel.automaticallyRefreshed()
+
+            coVerify {
+                commentsUseCase.retrieveComments(
+                    storyId = 1,
+                    useCache = true,
+                    onResult = any(),
+                    requireComments = true
+                )
+            }
         }
     }
 
-    @Test
-    fun `when userManuallyRefreshed is called then retrieve the comments from the use case with use cache as false`() {
-        coEvery { commentsUseCase.retrieveComments(any(), any(), any(), any()) } just Runs
+    @Nested
+    inner class Sort {
 
-        commentsListViewModel.userManuallyRefreshed()
+        @Test
+        fun `when sorting is set to 0 then sort by the servers ordering`() {
+            val callback = slot<(List<CommentWithDepth>, Boolean, Boolean) -> Unit>()
+            val commentsPassedToMapper = mutableListOf<CommentCurrentState>()
 
-        coVerify {
-            commentsUseCase.retrieveComments(
-                storyId = 1,
-                useCache = false,
-                onResult = any(),
-                requireComments = true
-            )
+            coEvery {
+                commentsUseCase.retrieveComments(
+                    any(),
+                    any(),
+                    capture(callback),
+                    any()
+                )
+            } just Runs
+            coEvery {
+                commentDataMapper.toCommentViewItem(
+                    capture(commentsPassedToMapper),
+                    any(),
+                    any()
+                )
+            } returns mockk()
+
+            commentsListViewModel.init()
+            commentsListViewModel.updateSortState(0)
+            commentsListViewModel.automaticallyRefreshed()
+
+            callback.invoke(useCaseResponseWithManyChildren(), false, false)
+
+            assertEquals(commentsPassedToMapper[0].comment.comment.author, "Jamie")
+            assertEquals(commentsPassedToMapper[1].comment.comment.author, "Alex")
+            assertEquals(commentsPassedToMapper[2].comment.comment.author, "John")
+            assertEquals(commentsPassedToMapper[3].comment.comment.author, "Alice")
+            assertEquals(commentsPassedToMapper[4].comment.comment.author, "Audrey")
+            assertEquals(commentsPassedToMapper[5].comment.comment.author, "David")
         }
-    }
 
-    @Test
-    fun `when openArticle is called then post the url to the correct live data`() {
-        val observer = spyk<Observer<Event<String>>>()
-        val urlEmitted = slot<Event<String>>()
+        @Test
+        fun `when sorting is set to 1 then sort by the newest parent comments`() {
+            val callback = slot<(List<CommentWithDepth>, Boolean, Boolean) -> Unit>()
+            val commentsPassedToMapper = mutableListOf<CommentCurrentState>()
 
-        every { observer.onChanged(capture(urlEmitted)) } just runs
-        coEvery { commentsUseCase.retrieveComments(any(), any(), any(), any()) } just Runs
+            coEvery {
+                commentsUseCase.retrieveComments(
+                    any(),
+                    any(),
+                    capture(callback),
+                    any()
+                )
+            } just Runs
+            coEvery {
+                commentDataMapper.toCommentViewItem(
+                    capture(commentsPassedToMapper),
+                    any(),
+                    any()
+                )
+            } returns mockk()
 
-        commentsListViewModel.init()
-        commentsListViewModel.navigateToArticle().observeForever(observer)
-        commentsListViewModel.openArticle()
+            commentsListViewModel.init()
+            commentsListViewModel.updateSortState(1)
+            commentsListViewModel.automaticallyRefreshed()
 
-        assertEquals("url", urlEmitted.captured.getContentIfNotHandled())
+            callback.invoke(useCaseResponseWithManyChildren(), false, false)
+
+            assertEquals(commentsPassedToMapper[0].comment.comment.author, "John")
+            assertEquals(commentsPassedToMapper[1].comment.comment.author, "Alice")
+            assertEquals(commentsPassedToMapper[2].comment.comment.author, "Jamie")
+            assertEquals(commentsPassedToMapper[3].comment.comment.author, "Alex")
+            assertEquals(commentsPassedToMapper[4].comment.comment.author, "Audrey")
+            assertEquals(commentsPassedToMapper[5].comment.comment.author, "David")
+        }
+
+        @Test
+        fun `when sorting is set to 2 then sort by the oldest parent comments`() {
+            val callback = slot<(List<CommentWithDepth>, Boolean, Boolean) -> Unit>()
+            val commentsPassedToMapper = mutableListOf<CommentCurrentState>()
+
+            coEvery {
+                commentsUseCase.retrieveComments(
+                    any(),
+                    any(),
+                    capture(callback),
+                    any()
+                )
+            } just Runs
+            coEvery {
+                commentDataMapper.toCommentViewItem(
+                    capture(commentsPassedToMapper),
+                    any(),
+                    any()
+                )
+            } returns mockk()
+
+            commentsListViewModel.init()
+            commentsListViewModel.updateSortState(2)
+            commentsListViewModel.automaticallyRefreshed()
+
+            callback.invoke(useCaseResponseWithManyChildren(), false, false)
+
+            assertEquals(commentsPassedToMapper[0].comment.comment.author, "Audrey")
+            assertEquals(commentsPassedToMapper[1].comment.comment.author, "David")
+            assertEquals(commentsPassedToMapper[2].comment.comment.author, "Jamie")
+            assertEquals(commentsPassedToMapper[3].comment.comment.author, "Alex")
+            assertEquals(commentsPassedToMapper[4].comment.comment.author, "John")
+            assertEquals(commentsPassedToMapper[5].comment.comment.author, "Alice")
+        }
     }
 
     @Nested
@@ -679,25 +748,128 @@ class CommentsListViewModelTest : BaseTest() {
         }
     }
 
-    private fun useCaseResponse() = mutableListOf(
-        CommentWithDepth(
-            comment = Comment(author = "Jamie", commentCount = 0, time = DateTime.now()),
+    @Test
+    fun `when urlClicked callback is called from an item then post the url`() {
+        val observer = spyk<Observer<String>>()
+        val commentsUseCaseCallback = slot<(List<CommentWithDepth>, Boolean, Boolean) -> Unit>()
+        val urlClickedCallback = slot<(String) -> Unit>()
+
+        commentsListViewModel.urlClicked().observeForever(observer)
+
+        coEvery {
+            commentsUseCase.retrieveComments(
+                any(),
+                any(),
+                capture(commentsUseCaseCallback),
+                any()
+            )
+        } just Runs
+        coEvery {
+            commentDataMapper.toCommentViewItem(
+                any(),
+                any(),
+                capture(urlClickedCallback)
+            )
+        } returns mockk()
+
+        commentsListViewModel.init()
+
+        commentsUseCaseCallback.invoke(useCaseResponseWithoutChildren(), false, false)
+        urlClickedCallback.invoke("url")
+
+        verify {
+            observer.onChanged("url")
+        }
+    }
+
+    @Test
+    fun `when openArticle is called then post the url to the correct live data`() {
+        val observer = spyk<Observer<Event<String>>>()
+        val urlEmitted = slot<Event<String>>()
+
+        every { observer.onChanged(capture(urlEmitted)) } just runs
+        coEvery { commentsUseCase.retrieveComments(any(), any(), any(), any()) } just Runs
+
+        commentsListViewModel.init()
+        commentsListViewModel.navigateToArticle().observeForever(observer)
+        commentsListViewModel.openArticle()
+
+        assertEquals("url", urlEmitted.captured.getContentIfNotHandled())
+    }
+
+    @Test
+    fun `when sortState is updated then post new sorted state`() {
+        val observer = spyk<Observer<Int>>()
+
+        commentsListViewModel.sortState().observeForever(observer)
+        commentsListViewModel.updateSortState(2)
+
+        verifyOrder {
+            observer.onChanged(0)
+            observer.onChanged(2)
+        }
+    }
+
+    private fun useCaseResponseWithoutChildren() = mutableListOf(
+        generateComment(
+            author = "Jamie",
+            commentCount = 0,
+            time = "23/08/2020 09:00:00",
             depth = 0
         ),
-        CommentWithDepth(
-            comment = Comment(author = "Alex", commentCount = 0, time = DateTime.now()),
-            depth = 0
-        )
+        generateComment(author = "Alex", commentCount = 0, time = "23/08/2020 10:00:00", depth = 0)
     )
 
     private fun useCaseResponseWithChildren() = mutableListOf(
-        CommentWithDepth(
-            comment = Comment(author = "Jamie", commentCount = 1, time = DateTime.now()),
+        generateComment(
+            author = "Jamie",
+            commentCount = 1,
+            time = "23/08/2020 09:00:00",
             depth = 0
         ),
-        CommentWithDepth(
-            comment = Comment(author = "Alex", commentCount = 0, time = DateTime.now()),
+        generateComment(author = "Alex", commentCount = 0, time = "23/08/2020 10:00:00", depth = 1),
+        generateComment(author = "John", commentCount = 1, time = "23/08/2020 11:00:00", depth = 0),
+        generateComment(author = "Alice", commentCount = 0, time = "23/08/2020 12:00:00", depth = 1)
+    )
+
+    private fun useCaseResponseWithManyChildren() = mutableListOf(
+        generateComment(
+            author = "Jamie",
+            commentCount = 1,
+            time = "23/08/2020 09:00:00",
+            depth = 0
+        ),
+        generateComment(author = "Alex", commentCount = 0, time = "23/08/2020 10:00:00", depth = 1),
+        generateComment(author = "John", commentCount = 1, time = "23/08/2020 11:00:00", depth = 0),
+        generateComment(
+            author = "Alice",
+            commentCount = 0,
+            time = "23/08/2020 12:00:00",
+            depth = 1
+        ),
+        generateComment(author = "Audrey", commentCount = 1, time = "23/08/2020 07:00:00", depth = 0),
+        generateComment(
+            author = "David",
+            commentCount = 0,
+            time = "23/08/2020 08:00:00",
             depth = 1
         )
     )
+
+    private fun generateComment(
+        author: String,
+        commentCount: Int,
+        time: String,
+        depth: Int
+    ): CommentWithDepth {
+        return CommentWithDepth(
+            comment = Comment(
+                author = author, commentCount = commentCount, time = DateTime.parse(
+                    time,
+                    DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss")
+                )
+            ),
+            depth = depth
+        )
+    }
 }

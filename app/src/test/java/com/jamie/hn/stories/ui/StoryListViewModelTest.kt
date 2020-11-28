@@ -381,7 +381,10 @@ class StoryListViewModelTest : BaseTest() {
         storyListViewModel.sortState().observeForever(observer)
         storyListViewModel.updateSortState(2)
 
-        verify { observer.onChanged(2) }
+        verify {
+            observer.onChanged(0)
+            observer.onChanged(2)
+        }
     }
 
     private fun generateStory(id: Int, time: String) = Story(

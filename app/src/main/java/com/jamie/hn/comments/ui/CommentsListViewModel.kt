@@ -137,10 +137,12 @@ class CommentsListViewModel(
             networkErrorCachedResults.value = Event(Unit)
         }
 
-        val sortedList = if (getSortEnum(sortState.value ?: -1) == STANDARD) {
+        val sortState = getSortEnum(sortState.value ?: -1)
+
+        val sortedList = if (sortState == STANDARD) {
             listAllComments
         } else {
-            sortList(listAllComments)
+            sortList(listAllComments, sortState)
         }
 
         commentsViewRepository.commentList = sortedList.mapIndexed { index, commentWithDepth ->
@@ -148,8 +150,8 @@ class CommentsListViewModel(
         }
     }
 
-    private fun sortList(listAllComments: List<CommentWithDepth>): List<CommentWithDepth> {
-        val sortedListTopLevelComments = getTopLevelSortedComments(listAllComments)
+    private fun sortList(listAllComments: List<CommentWithDepth>, sortState: SortChoice): List<CommentWithDepth> {
+        val sortedListTopLevelComments = getTopLevelSortedComments(listAllComments, sortState)
         val sortedFullList = mutableListOf<CommentWithDepth>()
 
         sortedListTopLevelComments.forEach { parentComment ->
@@ -168,12 +170,12 @@ class CommentsListViewModel(
 
     // Returns a list containing each top level parent and its index sorted by users choice
     // The list comes sorted so the index holds the state of the sorted list from the server
-    private fun getTopLevelSortedComments(listAllComments: List<CommentWithDepth>) =
+    private fun getTopLevelSortedComments(listAllComments: List<CommentWithDepth>, sortState: SortChoice) =
         listAllComments
             .withIndex()
             .filter { it.value.depth == 0 }
             .sortedWith(
-                when (getSortEnum(sortState.value ?: -1)) {
+                when (sortState) {
                     NEWEST -> sortByOldestTime().reversed()
                     OLDEST -> sortByOldestTime()
                     else -> throw IllegalArgumentException("Erroneous sort option chosen")
