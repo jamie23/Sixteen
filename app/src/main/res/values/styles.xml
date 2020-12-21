@@ -8,7 +8,6 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-
     <style name="Toolbar" parent="Widget.MaterialComponents.Toolbar.Primary">
         <item name="titleTextAppearance">@style/ToolbarText</item>
         <item name="subtitleTextAppearance">@style/ToolbarSubText</item>

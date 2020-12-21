@@ -1,11 +1,18 @@
 package com.jamie.hn.stories.repository
 
+import com.jamie.hn.core.StoriesType
+import com.jamie.hn.core.StoriesType.TOP
+import com.jamie.hn.core.StoriesType.ASK
+import com.jamie.hn.core.StoriesType.JOBS
+import com.jamie.hn.core.StoriesType.NEW
+import com.jamie.hn.core.StoriesType.SHOW
 import com.jamie.hn.core.net.NetworkUtils
 import com.jamie.hn.stories.repository.local.LocalStorage
 import com.jamie.hn.core.net.hex.Hex
 import com.jamie.hn.stories.domain.model.Story
-import com.jamie.hn.stories.repository.model.StoryResults
-import com.jamie.hn.stories.repository.model.TopStoryResults
+import com.jamie.hn.stories.repository.model.StoryResult
+import com.jamie.hn.stories.repository.model.StoriesResult
+import com.jamie.hn.stories.repository.web.getWebPath
 import org.joda.time.DateTime
 
 class StoriesRepository(
@@ -15,58 +22,64 @@ class StoriesRepository(
     private val networkUtils: NetworkUtils
 ) : Repository {
 
-    override suspend fun topStories(useCachedVersion: Boolean): TopStoryResults {
+    override suspend fun stories(
+        useCachedVersion: Boolean,
+        storiesType: StoriesType
+    ): StoriesResult {
         if (!networkUtils.isNetworkAvailable()) {
-            return TopStoryResults(
-                localStorage.storyList,
+            return StoriesResult(
+                getLocalStoriesListByType(storiesType),
                 true
             )
         }
 
         if (useCachedVersion) {
-            val localCopy = localStorage.storyList
+            val localCopy = getLocalStoriesListByType(storiesType)
             if (localCopy.isNotEmpty()) {
-                return TopStoryResults(
+                return StoriesResult(
                     localCopy,
                     false
                 )
             }
         }
 
-        val newCopy = webStorage.topStories().map { story ->
+        val newCopy = webStorage.stories(getWebPath(storiesType)).map { story ->
             mapper.toStoryDomainModel(story, false)
         }
-        localStorage.storyList = newCopy
-        return TopStoryResults(newCopy)
+
+        updateLocalStoriesListByType(storiesType, newCopy)
+        return StoriesResult(newCopy)
     }
 
     override suspend fun story(
         id: Int,
         useCachedVersion: Boolean,
-        requireComments: Boolean
-    ): StoryResults {
+        requireComments: Boolean,
+        storiesType: StoriesType
+    ): StoryResult {
+        val localStoriesList = getLocalStoriesListByType(storiesType)
 
         if (!networkUtils.isNetworkAvailable()) {
-            val localCopy = localStorage.storyList.first { it.id == id }
+            val localCopy = localStoriesList.first { it.id == id }
 
             if (!requireComments || requireComments && localCopy.retrievedComments) {
-                return StoryResults(
+                return StoryResult(
                     story = localCopy,
                     networkFailure = true
                 )
             }
 
-            return StoryResults(
+            return StoryResult(
                 story = Story(time = DateTime()),
                 networkFailure = true
             )
         }
 
         if (useCachedVersion) {
-            val localCopy = localStorage.storyList.first { it.id == id }
+            val localCopy = localStoriesList.first { it.id == id }
 
             if (!requireComments || localCopy.retrievedComments) {
-                return StoryResults(
+                return StoryResult(
                     story = localCopy,
                     networkFailure = false
                 )
@@ -74,7 +87,7 @@ class StoriesRepository(
         }
 
         val newCopy = webStorage.story(id)
-        val newList = localStorage.storyList.toMutableList()
+        val newList = localStoriesList.toMutableList()
         val index = newList.indexOfFirst { it.id == newCopy.id }
 
         val domainMappedCopy =
@@ -82,7 +95,25 @@ class StoriesRepository(
 
         newList[index] = domainMappedCopy
 
-        localStorage.storyList = newList
-        return StoryResults(domainMappedCopy)
+        updateLocalStoriesListByType(storiesType, newList)
+        return StoryResult(domainMappedCopy)
     }
+
+    private fun getLocalStoriesListByType(storiesType: StoriesType): List<Story> =
+        when (storiesType) {
+            TOP -> localStorage.topStoryList
+            ASK -> localStorage.askStoryList
+            JOBS -> localStorage.jobsStoryList
+            NEW -> localStorage.newStoryList
+            SHOW -> localStorage.showStoryList
+        }
+
+    private fun updateLocalStoriesListByType(storiesType: StoriesType, list: List<Story>) =
+        when (storiesType) {
+            TOP -> localStorage.topStoryList = list
+            ASK -> localStorage.askStoryList = list
+            JOBS -> localStorage.jobsStoryList = list
+            NEW -> localStorage.newStoryList = list
+            SHOW -> localStorage.showStoryList = list
+        }
 }

@@ -6,6 +6,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jamie.hn.stories.domain.StoriesUseCase
 import com.jamie.hn.core.Event
+import com.jamie.hn.core.StoriesType
+import com.jamie.hn.core.ui.Ask
+import com.jamie.hn.core.ui.Jobs
+import com.jamie.hn.core.ui.New
+import com.jamie.hn.core.ui.Screen
+import com.jamie.hn.core.ui.Show
+import com.jamie.hn.core.ui.Top
 import com.jamie.hn.stories.domain.model.Story
 import com.jamie.hn.stories.ui.StoryListViewModel.SortChoice.OLDEST
 import com.jamie.hn.stories.ui.StoryListViewModel.SortChoice.NEWEST
@@ -14,14 +21,15 @@ import kotlinx.coroutines.launch
 
 class StoryListViewModel(
     private val storyDataMapper: StoryDataMapper,
-    private val storiesUseCase: StoriesUseCase
+    private val storiesUseCase: StoriesUseCase,
+    private val storyResourceProvider: StoryResourceProvider
 ) : ViewModel() {
 
     private val storyListViewState = MutableLiveData<StoryListViewState>()
     fun storyListViewState(): LiveData<StoryListViewState> = storyListViewState
 
-    private val navigateToComments = MutableLiveData<Event<Int>>()
-    fun navigateToComments(): LiveData<Event<Int>> = navigateToComments
+    private val navigateToComments = MutableLiveData<Event<StoryTypeStoryId>>()
+    fun navigateToComments(): LiveData<Event<StoryTypeStoryId>> = navigateToComments
 
     private val navigateToArticle = MutableLiveData<Event<String>>()
     fun navigateToArticle(): LiveData<Event<String>> = navigateToArticle
@@ -32,6 +40,11 @@ class StoryListViewModel(
     private val sortState = MutableLiveData(0)
     fun sortState(): LiveData<Int> = sortState
 
+    private val toolbarTitle = MutableLiveData<String>()
+    fun toolbarTitle(): LiveData<String> = toolbarTitle
+
+    lateinit var currentScreen: Screen
+
     fun userManuallyRefreshed() {
         refreshList(false)
     }
@@ -39,6 +52,22 @@ class StoryListViewModel(
     fun automaticallyRefreshed() {
         refreshList(true)
     }
+
+    fun initialise(currentScreen: Screen) {
+        toolbarTitle.value = getTitle(currentScreen)
+        this.currentScreen = currentScreen
+        automaticallyRefreshed()
+    }
+
+    private fun getTitle(currentScreen: Screen) =
+        when (currentScreen) {
+            Top -> storyResourceProvider.topTitle()
+            Ask -> storyResourceProvider.askTitle()
+            Jobs -> storyResourceProvider.jobsTitle()
+            New -> storyResourceProvider.newTitle()
+            Show -> storyResourceProvider.showTitle()
+            else -> throw IllegalArgumentException("Unsupported title")
+        }
 
     private fun refreshList(useCachedVersion: Boolean) {
         storyListViewState.value = StoryListViewState(
@@ -48,7 +77,8 @@ class StoryListViewModel(
         )
 
         viewModelScope.launch {
-            val results = storiesUseCase.getStories(useCachedVersion)
+            val results =
+                storiesUseCase.getStories(useCachedVersion, getStoryTypeFromScreen(currentScreen))
             val sortedList = if (getSortEnum(sortState.value ?: -1) == STANDARD) {
                 results.stories
             } else {
@@ -83,15 +113,22 @@ class StoryListViewModel(
     )
 
     private fun commentsCallback(id: Int) {
+        val storiesType = getStoryTypeFromScreen(currentScreen)
+
         viewModelScope.launch {
-            navigateToComments.value = Event(storiesUseCase.getStory(id, true).story.id)
+            navigateToComments.value = Event(
+                StoryTypeStoryId(
+                    storiesUseCase.getStory(id, true, storiesType).story.id,
+                    storiesType
+                )
+            )
         }
     }
 
     private fun articleViewerCallback(id: Int) {
         viewModelScope.launch {
             navigateToArticle.value =
-                Event(storiesUseCase.getStory(id, true).story.url)
+                Event(storiesUseCase.getStory(id, true, getStoryTypeFromScreen(currentScreen)).story.url)
         }
     }
 
@@ -109,10 +146,25 @@ class StoryListViewModel(
 
     private fun sortByOldestTime() = compareBy<Story> { it.time }
 
+    private fun getStoryTypeFromScreen(screen: Screen) =
+        when (screen) {
+            Top -> StoriesType.TOP
+            Ask -> StoriesType.ASK
+            Jobs -> StoriesType.JOBS
+            New -> StoriesType.NEW
+            Show -> StoriesType.SHOW
+            else -> throw IllegalArgumentException("Unsupported type of screen for fetching stories")
+        }
+
     data class StoryListViewState(
         val stories: List<StoryViewItem>,
         val refreshing: Boolean,
         val showNoCachedStoryNetworkError: Boolean
+    )
+
+    data class StoryTypeStoryId(
+        val storyId: Int,
+        val storyType: StoriesType
     )
 
     enum class SortChoice {

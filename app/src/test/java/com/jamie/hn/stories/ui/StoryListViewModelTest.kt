@@ -6,8 +6,8 @@ import com.jamie.hn.core.BaseTest
 import com.jamie.hn.core.Event
 import com.jamie.hn.core.InstantExecutorExtension
 import com.jamie.hn.stories.domain.model.Story
-import com.jamie.hn.stories.repository.model.StoryResults
-import com.jamie.hn.stories.repository.model.TopStoryResults
+import com.jamie.hn.stories.repository.model.StoryResult
+import com.jamie.hn.stories.repository.model.StoriesResult
 import com.jamie.hn.stories.ui.StoryListViewModel.StoryListViewState
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
@@ -47,14 +47,14 @@ class StoryListViewModelTest : BaseTest() {
     private val olderStoryViewItem = generateStoryViewItem(1)
     private val newerStoryViewItem = generateStoryViewItem(2)
 
-    private val storyResults = StoryResults(story)
+    private val storyResults = StoryResult(story)
     private val stories = listOf(story)
 
     @BeforeEach
     fun setup() {
         MockKAnnotations.init(this)
 
-        coEvery { storiesUseCase.getStories(any()) } returns TopStoryResults(stories)
+        coEvery { storiesUseCase.getStories(any()) } returns StoriesResult(stories)
         coEvery { storiesUseCase.getStory(1, true) } returns storyResults
         every { storyDataMapper.toStoryViewItem(story, any(), any()) } returns storyViewItem
         every {
@@ -124,7 +124,7 @@ class StoryListViewModelTest : BaseTest() {
                 val observerStories = spyk<Observer<StoryListViewState>>()
                 val observerNetworkError = spyk<Observer<Event<Unit>>>()
 
-                coEvery { storiesUseCase.getStories(any()) } returns TopStoryResults(stories, true)
+                coEvery { storiesUseCase.getStories(any()) } returns StoriesResult(stories, true)
 
                 storyListViewModel.storyListViewState().observeForever(observerStories)
                 storyListViewModel.cachedStoriesNetworkError().observeForever(observerNetworkError)
@@ -148,7 +148,7 @@ class StoryListViewModelTest : BaseTest() {
                 val observerStories = spyk<Observer<StoryListViewState>>()
                 val observerNetworkError = spyk<Observer<Event<Unit>>>()
 
-                coEvery { storiesUseCase.getStories(any()) } returns TopStoryResults(
+                coEvery { storiesUseCase.getStories(any()) } returns StoriesResult(
                     emptyList(),
                     true
                 )
@@ -219,7 +219,7 @@ class StoryListViewModelTest : BaseTest() {
             @Test
             fun `when sorting is set to 0 then sort by the servers ordering`() {
                 val observer = spyk<Observer<StoryListViewState>>()
-                coEvery { storiesUseCase.getStories(any()) } returns TopStoryResults(
+                coEvery { storiesUseCase.getStories(any()) } returns StoriesResult(
                     listOf(
                         story,
                         olderStory,
@@ -255,7 +255,7 @@ class StoryListViewModelTest : BaseTest() {
             @Test
             fun `when sorting is set to 1 then sort by newest stories`() {
                 val observer = spyk<Observer<StoryListViewState>>()
-                coEvery { storiesUseCase.getStories(any()) } returns TopStoryResults(
+                coEvery { storiesUseCase.getStories(any()) } returns StoriesResult(
                     listOf(
                         story,
                         olderStory,
@@ -291,7 +291,7 @@ class StoryListViewModelTest : BaseTest() {
             @Test
             fun `when sorting is set to 2 then sort by the oldest stories`() {
                 val observer = spyk<Observer<StoryListViewState>>()
-                coEvery { storiesUseCase.getStories(any()) } returns TopStoryResults(
+                coEvery { storiesUseCase.getStories(any()) } returns StoriesResult(
                     listOf(
                         story,
                         olderStory,

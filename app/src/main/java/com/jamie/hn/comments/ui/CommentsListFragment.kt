@@ -17,22 +17,37 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.jamie.hn.R
+import com.jamie.hn.core.StoriesType
 import com.jamie.hn.core.extensions.visibleOrGone
+import com.jamie.hn.core.ui.Article
+import com.jamie.hn.core.ui.Ask
+import com.jamie.hn.core.ui.Comments
+import com.jamie.hn.core.ui.Jobs
+import com.jamie.hn.core.ui.New
+import com.jamie.hn.core.ui.SharedNavigationViewModel
+import com.jamie.hn.core.ui.Show
+import com.jamie.hn.core.ui.Top
 import com.jamie.hn.databinding.CommentListFragmentBinding
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
 class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
-    private val storyId: Int
-        get() = arguments?.get("storyId") as Int
-
-    private var binding: CommentListFragmentBinding? = null
-    private lateinit var commentsListAdapter: CommentsListAdapter
-    private var currentSortState: Int = 0
 
     private val viewModel: CommentsListViewModel by viewModel {
         parametersOf(storyId)
     }
+    private val sharedNavigationViewModel by sharedViewModel<SharedNavigationViewModel>()
+
+    private val storyId: Int
+        get() = arguments?.get("storyId") as Int
+
+    private val storyType: StoriesType
+        get() = arguments?.get("storyType") as StoriesType
+
+    private var binding: CommentListFragmentBinding? = null
+    private lateinit var commentsListAdapter: CommentsListAdapter
+    private var currentSortState: Int = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -43,12 +58,11 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
         return binding?.root
     }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        binding = null
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        sharedNavigationViewModel.currentScreen = Comments(storyId, storyType)
+        viewModel.storyType = storyType
         commentsListAdapter = CommentsListAdapter()
 
         binding?.let {
@@ -86,6 +100,11 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
         initialiseLiveDataObservers(view)
     }
 
+    override fun onDestroyView() {
+        binding = null
+        super.onDestroyView()
+    }
+
     private fun initialiseLiveDataObservers(view: View) {
         viewModel.commentsViewState().observe(viewLifecycleOwner, Observer { item ->
             binding?.let {
@@ -117,8 +136,7 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
 
         viewModel.navigateToArticle().observe(viewLifecycleOwner, Observer {
             it.getContentIfNotHandled()?.let { url ->
-                val action = CommentsListFragmentDirections.actionCommentsListToArticleViewer(url)
-                view.findNavController().navigate(action)
+                sharedNavigationViewModel.navigate(Article(url))
             }
         })
 
@@ -141,6 +159,24 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
 
         viewModel.sortState().observe(viewLifecycleOwner, Observer<Int> {
             currentSortState = it
+        })
+
+        sharedNavigationViewModel.navigateNextScreen().observe(viewLifecycleOwner, Observer {
+            it.getContentIfNotHandled()?.let { nextScreen ->
+                val action =
+                    when (nextScreen) {
+                        is Article ->
+                            CommentsListFragmentDirections.actionCommentsListToArticleViewer(
+                                nextScreen.url
+                            )
+                        is Top, Ask, Jobs, New, Show ->
+                            CommentsListFragmentDirections.actionCommentsListToStoriesList(
+                                nextScreen
+                            )
+                        else -> throw IllegalArgumentException("Unsupported screen chosen")
+                    }
+                view.findNavController().navigate(action)
+            }
         })
     }
 

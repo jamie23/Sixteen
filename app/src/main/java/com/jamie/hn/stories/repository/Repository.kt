@@ -1,9 +1,15 @@
 package com.jamie.hn.stories.repository
 
-import com.jamie.hn.stories.repository.model.StoryResults
-import com.jamie.hn.stories.repository.model.TopStoryResults
+import com.jamie.hn.core.StoriesType
+import com.jamie.hn.stories.repository.model.StoryResult
+import com.jamie.hn.stories.repository.model.StoriesResult
 
 interface Repository {
-    suspend fun topStories(useCachedVersion: Boolean): TopStoryResults
-    suspend fun story(id: Int, useCachedVersion: Boolean, requireComments: Boolean): StoryResults
+    suspend fun stories(useCachedVersion: Boolean, storiesType: StoriesType): StoriesResult
+    suspend fun story(
+        id: Int,
+        useCachedVersion: Boolean,
+        requireComments: Boolean,
+        storiesType: StoriesType
+    ): StoryResult
 }

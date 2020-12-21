@@ -14,6 +14,7 @@ import com.jamie.hn.core.extensions.visibleOrGone
 import com.jamie.hn.databinding.ArticleViewerFragmentBinding
 
 class ArticleViewerFragment : Fragment(R.layout.article_viewer_fragment) {
+
     private val url: String
         get() = arguments?.get("url") as String
 

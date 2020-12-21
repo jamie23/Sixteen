@@ -5,7 +5,7 @@ import com.jamie.hn.comments.domain.model.CommentWithDepth
 import com.jamie.hn.core.BaseTest
 import com.jamie.hn.stories.domain.model.Story
 import com.jamie.hn.stories.repository.StoriesRepository
-import com.jamie.hn.stories.repository.model.StoryResults
+import com.jamie.hn.stories.repository.model.StoryResult
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -29,7 +29,7 @@ class CommentsUseCaseTest : BaseTest() {
     private lateinit var repository: StoriesRepository
 
     @MockK
-    private lateinit var storyResults: StoryResults
+    private lateinit var storyResult: StoryResult
 
     @MockK
     private lateinit var story: Story
@@ -44,9 +44,9 @@ class CommentsUseCaseTest : BaseTest() {
     fun setup() {
         MockKAnnotations.init(this)
 
-        coEvery { repository.story(any(), any(), any()) } returns storyResults
-        every { storyResults.story } returns story
-        every { storyResults.networkFailure } returns false
+        coEvery { repository.story(any(), any(), any()) } returns storyResult
+        every { storyResult.story } returns story
+        every { storyResult.networkFailure } returns false
 
         commentsUseCase = CommentsUseCase(repository)
         scope = CoroutineScope(Unconfined)
@@ -96,7 +96,7 @@ class CommentsUseCaseTest : BaseTest() {
             val returnedComments = slot<List<CommentWithDepth>>()
 
             every { onResult.invoke(any(), any(), any()) } returns Unit
-            coEvery { repository.story(any(), any(), any()) } returns StoryResults(story(singleComment()))
+            coEvery { repository.story(any(), any(), any()) } returns StoryResult(story(singleComment()))
 
             runBlocking {
                 commentsUseCase.retrieveComments(
@@ -119,7 +119,7 @@ class CommentsUseCaseTest : BaseTest() {
             val returnedComments = slot<List<CommentWithDepth>>()
 
             every { onResult.invoke(any(), any(), any()) } returns Unit
-            coEvery { repository.story(any(), any(), any()) } returns StoryResults(story(
+            coEvery { repository.story(any(), any(), any()) } returns StoryResult(story(
                 singleCommentNestedComment()
             ))
 

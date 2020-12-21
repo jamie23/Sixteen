@@ -13,7 +13,7 @@ import com.jamie.hn.core.Event
 import com.jamie.hn.core.InstantExecutorExtension
 import com.jamie.hn.stories.domain.StoriesUseCase
 import com.jamie.hn.stories.domain.model.Story
-import com.jamie.hn.stories.repository.model.StoryResults
+import com.jamie.hn.stories.repository.model.StoryResult
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
 import io.mockk.coEvery
@@ -66,7 +66,7 @@ class CommentsListViewModelTest : BaseTest() {
         title = "title",
         url = "url"
     )
-    private val storyResults = StoryResults(story)
+    private val storyResults = StoryResult(story)
 
     @BeforeEach
     fun setup() {

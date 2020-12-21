@@ -73,11 +73,11 @@ complexity:
     active: false
     ignoredLabels: ""
   LargeClass:
-    active: true
+    active: trueww
     threshold: 600
   LongMethod:
     active: true
-    threshold: 60
+    threshold: 100
   LongParameterList:
     active: true
     threshold: 6
