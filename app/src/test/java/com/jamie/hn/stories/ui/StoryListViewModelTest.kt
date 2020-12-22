@@ -42,7 +42,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 
-
 @ExtendWith(InstantExecutorExtension::class)
 class StoryListViewModelTest : BaseTest() {
 
@@ -179,7 +178,6 @@ class StoryListViewModelTest : BaseTest() {
             coVerify(exactly = 0) { storiesUseCase.getStories(true, TOP) }
         }
     }
-
 
     @Nested
     inner class RefreshList {
@@ -474,7 +472,6 @@ class StoryListViewModelTest : BaseTest() {
             }
         }
     }
-
 
     @Test
     fun `when comments callback is called then we get the story using cache version and post the id  and the correct storyType to correct live data`() {

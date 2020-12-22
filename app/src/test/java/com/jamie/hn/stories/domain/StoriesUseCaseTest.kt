@@ -27,7 +27,7 @@ class StoriesUseCaseTest {
     @Test
     fun `when getStories is called then call the repository passing in the cache variable and storiesType`() {
         runBlocking {
-            storiesUseCase.getStories(true, TOP )
+            storiesUseCase.getStories(true, TOP)
         }
 
         coVerify { storiesRepository.stories(true, TOP) }
