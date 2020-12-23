@@ -16,6 +16,9 @@
             <argument
                 android:name="storyId"
                 app:argType="integer" />
+            <argument
+                android:name="storyType"
+                app:argType="com.jamie.hn.core.StoriesType" />
         </action>
         <action
             android:id="@+id/action_storiesList_to_articleViewer"
@@ -26,13 +29,20 @@
                 app:argType="string"
                 app:nullable="true" />
         </action>
+        <action
+            android:id="@+id/action_storiesList_to_storiesList"
+            app:destination="@id/storyListFragment">
+            <argument
+                android:name="nextScreen"
+                app:argType="com.jamie.hn.core.ui.Screen" />
+        </action>
     </fragment>
 
     <fragment
         android:id="@+id/commentsListFragment"
         android:name="com.jamie.hn.comments.ui.CommentsListFragment"
         android:label="@string/comments_title"
-        tools:layout="@layout/comment_list_fragment" >
+        tools:layout="@layout/comment_list_fragment">
 
         <action
             android:id="@+id/action_commentsList_to_articleViewer"
@@ -42,6 +52,13 @@
                 android:defaultValue="@null"
                 app:argType="string"
                 app:nullable="true" />
+        </action>
+        <action
+            android:id="@+id/action_commentsList_to_storiesList"
+            app:destination="@id/storyListFragment">
+            <argument
+                android:name="nextScreen"
+                app:argType="com.jamie.hn.core.ui.Screen" />
         </action>
     </fragment>
 

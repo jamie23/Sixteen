@@ -29,6 +29,12 @@
     <string name="stories_oldest">Oldest</string>
     <string name="stories_newest">Newest</string>
 
+    <string name="stories_title_top">Top</string>
+    <string name="stories_title_ask">Ask</string>
+    <string name="stories_title_jobs">Jobs</string>
+    <string name="stories_title_new">New</string>
+    <string name="stories_title_show">Show</string>
+
     <!-- Stories Menu -->
     <string name="stories_app_bar_sort">Sort stories</string>
     <string name="stories_content_description_sort">Sort stories</string>

@@ -24,26 +24,27 @@
             android:title="@string/drawer_show_hn" />
     </group>
 
-    <group android:id="@+id/group_extra_stories">
-        <item
-            android:id="@+id/drawerSavedStories"
-            android:icon="@drawable/ic_saved_stories_24"
-            android:title="@string/drawer_saved_stories" />
-        <item
-            android:id="@+id/drawerFollowedUsers"
-            android:icon="@drawable/ic_followed_users"
-            android:title="@string/drawer_followed_users" />
-    </group>
+    <!-- New functionality to add: -->
+<!--    <group android:id="@+id/group_extra_stories">-->
+<!--        <item-->
+<!--            android:id="@+id/drawerSavedStories"-->
+<!--            android:icon="@drawable/ic_saved_stories_24"-->
+<!--            android:title="@string/drawer_saved_stories" />-->
+<!--        <item-->
+<!--            android:id="@+id/drawerFollowedUsers"-->
+<!--            android:icon="@drawable/ic_followed_users"-->
+<!--            android:title="@string/drawer_followed_users" />-->
+<!--    </group>-->
 
-    <group android:id="@+id/group_search">
-        <item
-            android:id="@+id/drawerSearchUsers"
-            android:icon="@drawable/ic_search_users_24"
-            android:title="@string/drawer_search_users" />
-        <item
-            android:id="@+id/drawerSearchStories"
-            android:icon="@drawable/ic_search_stories_24"
-            android:title="@string/drawer_search_stories" />
-    </group>
+<!--    <group android:id="@+id/group_search">-->
+<!--        <item-->
+<!--            android:id="@+id/drawerSearchUsers"-->
+<!--            android:icon="@drawable/ic_search_users_24"-->
+<!--            android:title="@string/drawer_search_users" />-->
+<!--        <item-->
+<!--            android:id="@+id/drawerSearchStories"-->
+<!--            android:icon="@drawable/ic_search_stories_24"-->
+<!--            android:title="@string/drawer_search_stories" />-->
+<!--    </group>-->
 
 </menu>

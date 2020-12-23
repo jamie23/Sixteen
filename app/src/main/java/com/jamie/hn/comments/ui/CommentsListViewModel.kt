@@ -19,6 +19,7 @@ import com.jamie.hn.comments.ui.repository.model.CurrentState.COLLAPSED
 import com.jamie.hn.comments.ui.repository.model.CurrentState.FULL
 import com.jamie.hn.comments.ui.repository.model.CurrentState.HIDDEN
 import com.jamie.hn.core.Event
+import com.jamie.hn.core.StoriesType
 import com.jamie.hn.stories.domain.StoriesUseCase
 import com.jamie.hn.stories.domain.model.Story
 import kotlinx.coroutines.launch
@@ -57,6 +58,7 @@ class CommentsListViewModel(
 
     private lateinit var commentsViewRepository: CommentsViewRepository
     private lateinit var story: Story
+    lateinit var storyType: StoriesType
 
     fun userManuallyRefreshed() {
         refreshList(false)
@@ -73,7 +75,7 @@ class CommentsListViewModel(
             )
 
         viewModelScope.launch {
-            story = storiesUseCase.getStory(storyId, true).story
+            story = storiesUseCase.getStory(storyId, true, storyType).story
             updateTitleWithArticleTitle()
         }
 
@@ -95,7 +97,8 @@ class CommentsListViewModel(
                 storyId = storyId,
                 useCache = useCachedVersion,
                 onResult = ::populateUiCommentRepository,
-                requireComments = true
+                requireComments = true,
+                storyType = storyType
             )
         }
     }

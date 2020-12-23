@@ -13,16 +13,30 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.jamie.hn.R
 import com.jamie.hn.core.extensions.visibleOrGone
+import com.jamie.hn.core.ui.Article
+import com.jamie.hn.core.ui.Ask
+import com.jamie.hn.core.ui.Comments
+import com.jamie.hn.core.ui.Jobs
+import com.jamie.hn.core.ui.New
+import com.jamie.hn.core.ui.Screen
+import com.jamie.hn.core.ui.SharedNavigationViewModel
+import com.jamie.hn.core.ui.Show
+import com.jamie.hn.core.ui.Top
 import com.jamie.hn.databinding.StoryListFragmentBinding
+import org.koin.androidx.viewmodel.ext.android.sharedViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class StoryListFragment : Fragment(R.layout.story_list_fragment) {
+
     private val viewModel: StoryListViewModel by viewModel()
+    private val sharedNavigationViewModel by sharedViewModel<SharedNavigationViewModel>()
 
     private var binding: StoryListFragmentBinding? = null
 
     private lateinit var storyListAdapter: StoryListAdapter
     private var currentSortState: Int = 0
+    private val currentScreen: Screen
+        get() = (arguments?.get("nextScreen") ?: Top) as Screen
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -36,6 +50,7 @@ class StoryListFragment : Fragment(R.layout.story_list_fragment) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        sharedNavigationViewModel.currentScreen = currentScreen
         storyListAdapter = StoryListAdapter()
 
         binding?.let {
@@ -57,8 +72,6 @@ class StoryListFragment : Fragment(R.layout.story_list_fragment) {
             }
         }
 
-        viewModel.automaticallyRefreshed()
-
         viewModel.storyListViewState().observe(viewLifecycleOwner, Observer {
             binding?.progressBar?.visibleOrGone(it.refreshing)
             binding?.storySwipeLayout?.isRefreshing = it.refreshing
@@ -68,17 +81,19 @@ class StoryListFragment : Fragment(R.layout.story_list_fragment) {
         })
 
         viewModel.navigateToComments().observe(viewLifecycleOwner, Observer {
-            it.getContentIfNotHandled()?.let { storyId ->
-                val action =
-                    StoryListFragmentDirections.actionStoriesListToCommentsList(storyId)
-                view.findNavController().navigate(action)
+            it.getContentIfNotHandled()?.let { storyTypeStoryId ->
+                sharedNavigationViewModel.navigate(
+                    Comments(
+                        storyTypeStoryId.storyId,
+                        storyTypeStoryId.storyType
+                    )
+                )
             }
         })
 
         viewModel.navigateToArticle().observe(viewLifecycleOwner, Observer {
             it.getContentIfNotHandled()?.let { url ->
-                val action = StoryListFragmentDirections.actionStoriesListToArticleViewer(url)
-                view.findNavController().navigate(action)
+                sharedNavigationViewModel.navigate(Article(url))
             }
         })
 
@@ -89,9 +104,33 @@ class StoryListFragment : Fragment(R.layout.story_list_fragment) {
             }
         })
 
-        viewModel.sortState().observe(viewLifecycleOwner, Observer<Int> {
+        viewModel.sortState().observe(viewLifecycleOwner, Observer {
             currentSortState = it
         })
+
+        viewModel.toolbarTitle().observe(viewLifecycleOwner, Observer {
+            binding?.topAppBar?.title = it
+        })
+
+        sharedNavigationViewModel.navigateNextScreen().observe(viewLifecycleOwner, Observer {
+            it.getContentIfNotHandled()?.let { nextScreen ->
+                val action =
+                    when (nextScreen) {
+                        is Comments ->
+                            StoryListFragmentDirections.actionStoriesListToCommentsList(
+                                nextScreen.storyId, nextScreen.storyType
+                            )
+                        is Article ->
+                            StoryListFragmentDirections.actionStoriesListToArticleViewer(nextScreen.url)
+                        is Top, Ask, Jobs, New, Show ->
+                            StoryListFragmentDirections.actionStoriesListToStoriesList(nextScreen)
+                    }
+
+                view.findNavController().navigate(action)
+            }
+        })
+
+        viewModel.initialise(currentScreen)
     }
 
     private fun showSortStories() {
