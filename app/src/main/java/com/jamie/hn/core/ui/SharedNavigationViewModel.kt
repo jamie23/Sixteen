@@ -8,8 +8,12 @@ import com.jamie.hn.core.Event
 class SharedNavigationViewModel : ViewModel() {
 
     var currentScreen: Screen = Top
+
     private val navigateNextScreen = MutableLiveData<Event<Screen>>()
     fun navigateNextScreen(): LiveData<Event<Screen>> = navigateNextScreen
+
+    private val showDrawer = MutableLiveData<Event<Unit>>()
+    fun showDrawer(): LiveData<Event<Unit>> = showDrawer
 
     fun navigate(nextScreen: Screen) {
         if (currentScreen == nextScreen) {
@@ -19,5 +23,9 @@ class SharedNavigationViewModel : ViewModel() {
         }
 
         navigateNextScreen.value = Event(nextScreen)
+    }
+
+    fun navigationIconSelected() {
+        showDrawer.value = Event(Unit)
     }
 }

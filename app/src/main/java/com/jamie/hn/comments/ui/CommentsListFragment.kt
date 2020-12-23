@@ -161,6 +161,10 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
             currentSortState = it
         })
 
+        binding?.topAppBar?.setNavigationOnClickListener {
+            sharedNavigationViewModel.navigationIconSelected()
+        }
+
         sharedNavigationViewModel.navigateNextScreen().observe(viewLifecycleOwner, Observer {
             it.getContentIfNotHandled()?.let { nextScreen ->
                 val action =

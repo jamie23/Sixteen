@@ -72,6 +72,10 @@ class StoryListFragment : Fragment(R.layout.story_list_fragment) {
             }
         }
 
+        binding?.topAppBar?.setNavigationOnClickListener {
+            sharedNavigationViewModel.navigationIconSelected()
+        }
+
         viewModel.storyListViewState().observe(viewLifecycleOwner, Observer {
             binding?.progressBar?.visibleOrGone(it.refreshing)
             binding?.storySwipeLayout?.isRefreshing = it.refreshing
