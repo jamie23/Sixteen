@@ -51,4 +51,17 @@ class SharedNavigationViewModelTest : BaseTest() {
             assertEquals(Ask, nextScreen.captured.getContentIfNotHandled())
         }
     }
+
+    @Nested
+    inner class NavigationIconSelected {
+
+        @Test
+        fun `when navigationIconSelected is called then post value to showDrawer`() {
+            val observer = spyk<Observer<Event<Unit>>>()
+            sharedNavigationViewModel.showDrawer().observeForever(observer)
+
+            sharedNavigationViewModel.navigationIconSelected()
+            verify { observer.onChanged(any()) }
+        }
+    }
 }

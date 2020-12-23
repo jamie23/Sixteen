@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
 import androidx.core.view.GravityCompat.START
+import androidx.lifecycle.Observer
 import com.jamie.hn.core.ui.Ask
 import com.jamie.hn.core.ui.Jobs
 import com.jamie.hn.core.ui.New
@@ -25,6 +26,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupNavigationDrawer()
+        initialiseLiveDataObservers()
     }
 
     private fun setupNavigationDrawer() {
@@ -34,6 +36,12 @@ class MainActivity : AppCompatActivity() {
             binding.drawerLayout.closeDrawer(START)
             true
         }
+    }
+
+    private fun initialiseLiveDataObservers() {
+        sharedNavigationViewModel.showDrawer().observe(this, Observer {
+            binding.drawerLayout.openDrawer(START)
+        })
     }
 
     private fun getScreenFromMenuItem(menuItem: MenuItem) =
