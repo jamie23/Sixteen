@@ -1,8 +1,10 @@
 package com.jamie.hn.comments.ui
 
 import android.content.Context
+import android.graphics.Color
 import android.text.method.LinkMovementMethod
 import android.text.util.Linkify
+import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -22,6 +24,7 @@ import com.jamie.hn.core.ui.convertDpToPixels
 import com.jamie.hn.databinding.CommentItemCollapsedBinding
 import com.jamie.hn.databinding.CommentItemFullBinding
 import com.jamie.hn.databinding.StoryItemCompleteBinding
+
 
 class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     class FullCommentViewHolder(val viewBinding: CommentItemFullBinding) :
@@ -218,9 +221,11 @@ class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
         for (i in 1..depth) {
             val margin = View(context)
+            val typedValue = TypedValue()
+            context.theme.resolveAttribute(R.attr.item_divider, typedValue, true)
 
             margin.id = View.generateViewId()
-            margin.background = context.getDrawable(R.color.divider)
+            margin.setBackgroundColor(typedValue.data)
             margin.layoutParams = ConstraintLayout.LayoutParams(2, 0)
 
             layout.addView(margin)

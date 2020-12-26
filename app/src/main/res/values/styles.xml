@@ -3,9 +3,12 @@
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorPrimary">@color/black_coral</item>
+        <item name="colorPrimaryDark">@color/black_coral</item>
+        <item name="colorAccent">@color/s_gray</item>
+        <item name="username">@color/orange</item>
+        <item name="secondary_text">@color/s_gray</item>
+        <item name="item_divider">@color/platinum</item>
     </style>
 
     <style name="Toolbar" parent="Widget.MaterialComponents.Toolbar.Primary">
@@ -17,7 +20,7 @@
     </style>
 
     <style name="ToolbarText">
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">18sp</item>
     </style>
 
     <style name="ToolbarSubText">

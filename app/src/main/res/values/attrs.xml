@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="username" format="color" />
+    <attr name="secondary_text" format="color" />
+    <attr name="item_divider" format="color" />
+</resources>

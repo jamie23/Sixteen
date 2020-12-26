@@ -16,7 +16,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/commentsButton"
         app:layout_constraintStart_toStartOf="parent"
-        android:textColor="@color/text"
+        android:textColor="?attr/secondary_text"
         android:text="Article"
         tools:text="Article" />
 
@@ -31,7 +31,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/articleButton"
-        android:textColor="@color/text"
+        android:textColor="?attr/secondary_text"
         android:text="Comments"
         tools:text="Comments" />
 
