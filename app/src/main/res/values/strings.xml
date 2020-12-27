@@ -85,4 +85,7 @@
     <string name="drawer_search_users">User Lookup</string>
     <string name="drawer_search_stories">Search Stories</string>
 
+    <!-- Storage -->
+    <string name="saved_theme">theme</string>
+
 </resources>

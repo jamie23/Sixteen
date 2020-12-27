@@ -1,14 +1,29 @@
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/black_coral</item>
-        <item name="colorPrimaryDark">@color/black_coral</item>
+    <style name="LightAppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/blue_grey_coral</item>
+        <item name="colorPrimaryDark">@color/blue_grey_coral</item>
         <item name="colorAccent">@color/s_gray</item>
         <item name="username">@color/orange</item>
         <item name="secondary_text">@color/s_gray</item>
         <item name="item_divider">@color/platinum</item>
+        <item name="color_background">@color/platinum</item>
+        <item name="drawer_color_background">@color/white</item>
+        <item name="list_item_color">@color/white</item>
+        <item name="story_item_text_color">@color/black</item>
+    </style>
+
+    <style name="DarkAppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/blue_grey_coral</item>
+        <item name="colorPrimaryDark">@color/blue_grey_coral</item>
+        <item name="colorAccent">@color/s_gray</item>
+        <item name="username">@color/teal</item>
+        <item name="secondary_text">@color/s_gray</item>
+        <item name="color_background">@color/dark_coral</item>
+        <item name="drawer_color_background">@color/blue_grey_coral</item>
+        <item name="item_divider">@color/dark_platinum</item>
+        <item name="list_item_color">@color/blue_grey_coral</item>
+        <item name="story_item_text_color">@color/white</item>
     </style>
 
     <style name="Toolbar" parent="Widget.MaterialComponents.Toolbar.Primary">

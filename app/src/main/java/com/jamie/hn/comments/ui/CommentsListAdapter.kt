@@ -1,7 +1,6 @@
 package com.jamie.hn.comments.ui
 
 import android.content.Context
-import android.graphics.Color
 import android.text.method.LinkMovementMethod
 import android.text.util.Linkify
 import android.util.TypedValue
@@ -24,7 +23,6 @@ import com.jamie.hn.core.ui.convertDpToPixels
 import com.jamie.hn.databinding.CommentItemCollapsedBinding
 import com.jamie.hn.databinding.CommentItemFullBinding
 import com.jamie.hn.databinding.StoryItemCompleteBinding
-
 
 class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     class FullCommentViewHolder(val viewBinding: CommentItemFullBinding) :

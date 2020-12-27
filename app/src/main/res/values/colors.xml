@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="black_coral">#4f5c72</color>
+    <color name="dark_coral">#1A1F27</color>
+    <color name="blue_grey_coral">#2C3340</color>
     <color name="s_gray">#ff9E9E9E</color>
     <color name="orange">#FF6600</color>
+    <color name="teal">#1FCDCD</color>
     <color name="platinum">#E2E2E2</color>
+    <color name="dark_platinum">#676767</color>
+    <color name="white">#FFFFFF</color>
+    <color name="black">#000000</color>
 </resources>

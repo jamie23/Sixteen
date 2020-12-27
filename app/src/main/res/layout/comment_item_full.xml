@@ -5,7 +5,8 @@
     android:id="@+id/commentItem"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?selectableItemBackground">
+    android:background="?attr/list_item_color"
+    android:foreground="?selectableItemBackground">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/contentTop"

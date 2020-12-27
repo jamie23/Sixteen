@@ -1,10 +1,14 @@
-package com.jamie.hn
+package com.jamie.hn.hostactivity.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO
+import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
 import androidx.core.view.GravityCompat.START
 import androidx.lifecycle.Observer
+import com.jamie.hn.R
 import com.jamie.hn.core.ui.Ask
 import com.jamie.hn.core.ui.Jobs
 import com.jamie.hn.core.ui.New
@@ -19,14 +23,34 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
     private val sharedNavigationViewModel by viewModel<SharedNavigationViewModel>()
+    private val viewModel: MainActivityViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        getPreferences(MODE_PRIVATE)
         setupNavigationDrawer()
         initialiseLiveDataObservers()
+        initialiseTheme()
+    }
+
+    private fun initialiseTheme() {
+        val preferences = this.getSharedPreferences("Theme", MODE_PRIVATE)
+        val isLight = preferences.getBoolean(getString(R.string.saved_theme), true)
+        val nightMode: Int
+        val theme: Int
+
+        if (isLight) {
+            theme = R.style.LightAppTheme
+            nightMode = MODE_NIGHT_NO
+        } else {
+            theme = R.style.DarkAppTheme
+            nightMode = MODE_NIGHT_YES
+        }
+        AppCompatDelegate.setDefaultNightMode(nightMode)
+        setTheme(theme)
     }
 
     private fun setupNavigationDrawer() {
@@ -36,11 +60,26 @@ class MainActivity : AppCompatActivity() {
             binding.drawerLayout.closeDrawer(START)
             true
         }
+
+        binding.lightThemeButton.setOnClickListener {
+            viewModel.lightThemeSet()
+        }
+
+        binding.darkThemeButton.setOnClickListener {
+            viewModel.darkThemeSet()
+        }
     }
 
     private fun initialiseLiveDataObservers() {
         sharedNavigationViewModel.showDrawer().observe(this, Observer {
             binding.drawerLayout.openDrawer(START)
+        })
+
+        viewModel.themeIconsUpdate().observe(this, Observer {
+            binding.drawerLayout.closeDrawer(START)
+            binding.lightThemeButton.setImageResource(it.lightThemeIcon)
+            binding.darkThemeButton.setImageResource(it.darkThemeIcon)
+            AppCompatDelegate.setDefaultNightMode(it.newTheme)
         })
     }
 
