@@ -1,23 +1,46 @@
 <resources>
 
-    <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+    <style name="LightAppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/blue_grey_coral</item>
+        <item name="colorPrimaryDark">@color/blue_grey_coral</item>
+        <item name="colorAccent">@color/s_gray</item>
+        <item name="username">@color/orange</item>
+        <item name="secondary_text">@color/s_gray</item>
+        <item name="item_divider">@color/platinum</item>
+        <item name="color_background">@color/platinum</item>
+        <item name="list_item_color">@color/white</item>
+        <item name="story_item_text_color">@color/black</item>
+    </style>
+
+    <style name="DarkAppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/s_gray</item>
+        <item name="colorPrimaryDark">@color/blue_grey_coral</item>
+        <item name="colorAccent">@color/s_gray</item>
+        <item name="username">@color/teal</item>
+        <item name="secondary_text">@color/s_gray</item>
+        <item name="color_background">@color/dark_coral</item>
+        <item name="item_divider">@color/dark_platinum</item>
+        <item name="list_item_color">@color/blue_grey_coral</item>
+        <item name="story_item_text_color">@color/white</item>
+    </style>
+
+    <style name="ThemeOverlay" parent="ThemeOverlay.MaterialComponents.Toolbar.Primary">
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="colorOnPrimary">@color/white</item>
     </style>
 
     <style name="Toolbar" parent="Widget.MaterialComponents.Toolbar.Primary">
+        <item name="android:background">@color/dark_coral</item>
+        <item name="materialThemeOverlay">@style/ThemeOverlay</item>
         <item name="titleTextAppearance">@style/ToolbarText</item>
-        <item name="subtitleTextAppearance">@style/ToolbarSubText</item>
         <item name="layout_scrollFlags">scroll|enterAlways|snap</item>
         <item name="title">@string/top_app_bar_title</item>
         <item name="navigationIcon">@drawable/ic_menu_24</item>
     </style>
 
+
     <style name="ToolbarText">
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">18sp</item>
     </style>
 
     <style name="ToolbarSubText">

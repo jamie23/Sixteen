@@ -5,7 +5,8 @@
     android:id="@+id/commentItemCollapsed"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="?selectableItemBackground">
+    android:background="?attr/list_item_color"
+    android:foreground="?selectableItemBackground">
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/contentTop"
@@ -39,7 +40,7 @@
         android:id="@+id/divider"
         android:layout_width="wrap_content"
         android:layout_height="1dp"
-        android:background="@color/divider"
+        android:background="?attr/item_divider"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -49,7 +50,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginBottom="2dp"
-        android:textColor="@color/text"
+        android:textColor="?attr/secondary_text"
         android:textSize="12sp"
         app:layout_constraintBottom_toTopOf="@id/contentBottom"
         app:layout_constraintStart_toEndOf="@id/contentStart"
@@ -60,7 +61,7 @@
         android:id="@+id/time"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textColor="@color/text"
+        android:textColor="?attr/secondary_text"
         android:textSize="12sp"
         app:layout_constraintBottom_toTopOf="@id/contentBottom"
         app:layout_constraintEnd_toStartOf="@id/contentEnd"
