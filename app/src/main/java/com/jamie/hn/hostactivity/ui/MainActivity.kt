@@ -30,10 +30,9 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        getPreferences(MODE_PRIVATE)
         setupNavigationDrawer()
-        initialiseLiveDataObservers()
         initialiseTheme()
+        initialiseLiveDataObservers()
     }
 
     private fun initialiseTheme() {
@@ -45,9 +44,13 @@ class MainActivity : AppCompatActivity() {
         if (isLight) {
             theme = R.style.LightAppTheme
             nightMode = MODE_NIGHT_NO
+            binding.lightThemeButton.setImageResource(R.drawable.ic_sun_filled_24)
+            binding.darkThemeButton.setImageResource(R.drawable.ic_moon_outline_24)
         } else {
             theme = R.style.DarkAppTheme
             nightMode = MODE_NIGHT_YES
+            binding.lightThemeButton.setImageResource(R.drawable.ic_sun_outline_24)
+            binding.darkThemeButton.setImageResource(R.drawable.ic_moon_filled_24)
         }
         AppCompatDelegate.setDefaultNightMode(nightMode)
         setTheme(theme)

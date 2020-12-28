@@ -6,5 +6,4 @@
     <attr name="list_item_color" format="color" />
     <attr name="story_item_text_color" format="color" />
     <attr name="color_background" format="color" />
-    <attr name="drawer_color_background" format="color" />
 </resources>
