@@ -22,13 +22,13 @@ import com.jamie.hn.stories.repository.model.StoriesResult
 import com.jamie.hn.stories.ui.StoryListViewModel.StoryListViewState
 import com.jamie.hn.stories.ui.StoryListViewModel.StoryTypeStoryId
 import io.mockk.MockKAnnotations
+import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.impl.annotations.RelaxedMockK
 import io.mockk.just
-import io.mockk.runs
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
@@ -486,7 +486,7 @@ class StoryListViewModelTest : BaseTest() {
                 any()
             )
         } returns storyViewItem
-        every { observer.onChanged(capture(storyTypeStoryId)) } just runs
+        every { observer.onChanged(capture(storyTypeStoryId)) } just Runs
 
         storyListViewModel.navigateToComments().observeForever(observer)
         storyListViewModel.automaticallyRefreshed()
@@ -512,7 +512,7 @@ class StoryListViewModelTest : BaseTest() {
                 capture(articleViewerCallback)
             )
         } returns storyViewItem
-        every { observer.onChanged(capture(urlEmitted)) } just runs
+        every { observer.onChanged(capture(urlEmitted)) } just Runs
 
         storyListViewModel.navigateToArticle().observeForever(observer)
         storyListViewModel.automaticallyRefreshed()

@@ -29,7 +29,6 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.invoke
 import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
@@ -374,7 +373,7 @@ class CommentsListViewModelTest : BaseTest() {
                     capture(articleViewerCallback)
                 )
             } returns storyHeaderItem
-            every { observer.onChanged(capture(urlEmitted)) } just runs
+            every { observer.onChanged(capture(urlEmitted)) } just Runs
 
             commentsListViewModel.navigateToArticle().observeForever(observer)
             commentsListViewModel.init()
@@ -784,7 +783,7 @@ class CommentsListViewModelTest : BaseTest() {
                     any()
                 )
             } just Runs
-            every { observer.onChanged(capture(shareText)) } just runs
+            every { observer.onChanged(capture(shareText)) } just Runs
 
             commentsListViewModel.shareUrl().observeForever(observer)
             commentsListViewModel.init()
@@ -810,7 +809,7 @@ class CommentsListViewModelTest : BaseTest() {
                     any()
                 )
             } just Runs
-            every { observer.onChanged(capture(shareText)) } just runs
+            every { observer.onChanged(capture(shareText)) } just Runs
 
             commentsListViewModel.shareUrl().observeForever(observer)
             commentsListViewModel.init()
@@ -836,7 +835,7 @@ class CommentsListViewModelTest : BaseTest() {
                     any()
                 )
             } just Runs
-            every { observer.onChanged(capture(shareText)) } just runs
+            every { observer.onChanged(capture(shareText)) } just Runs
 
             commentsListViewModel.shareUrl().observeForever(observer)
             commentsListViewModel.init()
@@ -891,7 +890,7 @@ class CommentsListViewModelTest : BaseTest() {
         val observer = spyk<Observer<Event<String>>>()
         val urlEmitted = slot<Event<String>>()
 
-        every { observer.onChanged(capture(urlEmitted)) } just runs
+        every { observer.onChanged(capture(urlEmitted)) } just Runs
         coEvery { commentsUseCase.retrieveComments(any(), any(), any(), any(), any()) } just Runs
 
         commentsListViewModel.init()
