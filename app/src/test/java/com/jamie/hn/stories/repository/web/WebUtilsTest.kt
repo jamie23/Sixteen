@@ -1,11 +1,11 @@
 package com.jamie.hn.stories.repository.web
 
 import com.jamie.hn.core.BaseTest
-import com.jamie.hn.core.StoriesType.ASK
-import com.jamie.hn.core.StoriesType.JOBS
-import com.jamie.hn.core.StoriesType.NEW
-import com.jamie.hn.core.StoriesType.SHOW
-import com.jamie.hn.core.StoriesType.TOP
+import com.jamie.hn.core.StoriesListType.ASK
+import com.jamie.hn.core.StoriesListType.JOBS
+import com.jamie.hn.core.StoriesListType.NEW
+import com.jamie.hn.core.StoriesListType.SHOW
+import com.jamie.hn.core.StoriesListType.TOP
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

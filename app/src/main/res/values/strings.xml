@@ -11,7 +11,6 @@
     <string name="hours">h</string>
     <string name="minutes">m</string>
 
-    <string name="icon_description">Icon for website</string>
     <plurals name="comments_plural">
         <item quantity="one">%d comment</item>
         <item quantity="other">%d comments</item>
@@ -21,6 +20,9 @@
         <item quantity="one">point</item>
         <item quantity="other">points</item>
     </plurals>
+
+    <string name="story_article">Article</string>
+    <string name="story_comments">Comments</string>
 
     <string name="stories_network_cached_error">Error retrieving stories due to connection, showing cached stories</string>
     <string name="stories_none_cached_network_error">Error retrieving stories, please check internet connection</string>
@@ -54,7 +56,6 @@
 
     <!-- Comments Menu -->
     <string name="comments_app_bar_article">Article</string>
-    <string name="comments_app_bar_comments">Comments</string>
     <string name="content_description_article">Open article</string>
     <string name="comments_app_bar_share">Share</string>
     <string name="content_description_share">Share</string>

@@ -1,14 +1,14 @@
 package com.jamie.hn.stories.repository.web
 
-import com.jamie.hn.core.StoriesType
-import com.jamie.hn.core.StoriesType.SHOW
-import com.jamie.hn.core.StoriesType.NEW
-import com.jamie.hn.core.StoriesType.JOBS
-import com.jamie.hn.core.StoriesType.ASK
-import com.jamie.hn.core.StoriesType.TOP
+import com.jamie.hn.core.StoriesListType
+import com.jamie.hn.core.StoriesListType.SHOW
+import com.jamie.hn.core.StoriesListType.NEW
+import com.jamie.hn.core.StoriesListType.JOBS
+import com.jamie.hn.core.StoriesListType.ASK
+import com.jamie.hn.core.StoriesListType.TOP
 
-fun getWebPath(storiesType: StoriesType) =
-    when (storiesType) {
+fun getWebPath(storiesListType: StoriesListType) =
+    when (storiesListType) {
         TOP -> "top"
         ASK -> "ask"
         JOBS -> "jobs"

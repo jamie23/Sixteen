@@ -39,6 +39,7 @@ class CommentDataMapper(
 
     fun toStoryHeaderViewItem(
         story: Story,
+        urlClickedCallback: (String) -> Unit,
         storyViewerCallback: () -> Unit
     ) = HeaderViewItem(
         id = story.id,
@@ -50,6 +51,9 @@ class CommentDataMapper(
         scoreText = scoreText(story.score),
         title = story.title,
         url = story.domain,
+        text = processText(story.text, urlClickedCallback),
+        showAskText = story.isAskStory,
+        showNavigateToArticle = !story.isAskStory,
         storyViewerCallback = storyViewerCallback
     )
 

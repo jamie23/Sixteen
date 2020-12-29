@@ -4,11 +4,11 @@ import androidx.lifecycle.Observer
 import com.jamie.hn.core.BaseTest
 import com.jamie.hn.core.Event
 import com.jamie.hn.core.InstantExecutorExtension
-import com.jamie.hn.core.StoriesType.ASK
-import com.jamie.hn.core.StoriesType.JOBS
-import com.jamie.hn.core.StoriesType.NEW
-import com.jamie.hn.core.StoriesType.SHOW
-import com.jamie.hn.core.StoriesType.TOP
+import com.jamie.hn.core.StoriesListType.ASK
+import com.jamie.hn.core.StoriesListType.JOBS
+import com.jamie.hn.core.StoriesListType.NEW
+import com.jamie.hn.core.StoriesListType.SHOW
+import com.jamie.hn.core.StoriesListType.TOP
 import com.jamie.hn.core.ui.Article
 import com.jamie.hn.core.ui.Ask
 import com.jamie.hn.core.ui.Jobs
@@ -20,7 +20,7 @@ import com.jamie.hn.stories.domain.model.Story
 import com.jamie.hn.stories.repository.model.StoryResult
 import com.jamie.hn.stories.repository.model.StoriesResult
 import com.jamie.hn.stories.ui.StoryListViewModel.StoryListViewState
-import com.jamie.hn.stories.ui.StoryListViewModel.StoryTypeStoryId
+import com.jamie.hn.stories.ui.StoryListViewModel.StoryData
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
 import io.mockk.coEvery
@@ -224,7 +224,7 @@ class StoryListViewModelTest : BaseTest() {
             }
 
             @Test
-            fun `when refresh is called and currentScreen is Top then the usecase should be called with storiesType TOP`() {
+            fun `when refresh is called and currentScreen is Top then the usecase should be called with storiesListType TOP`() {
                 storyListViewModel.currentScreen = Top
                 storyListViewModel.userManuallyRefreshed()
 
@@ -232,7 +232,7 @@ class StoryListViewModelTest : BaseTest() {
             }
 
             @Test
-            fun `when refresh is called and currentScreen is Ask then the usecase should be called with storiesType ASK`() {
+            fun `when refresh is called and currentScreen is Ask then the usecase should be called with storiesListType ASK`() {
                 storyListViewModel.currentScreen = Ask
                 storyListViewModel.userManuallyRefreshed()
 
@@ -240,7 +240,7 @@ class StoryListViewModelTest : BaseTest() {
             }
 
             @Test
-            fun `when refresh is called and currentScreen is Jobs then the usecase should be called with storiesType JOBS`() {
+            fun `when refresh is called and currentScreen is Jobs then the usecase should be called with storiesListType JOBS`() {
                 storyListViewModel.currentScreen = Jobs
                 storyListViewModel.userManuallyRefreshed()
 
@@ -248,7 +248,7 @@ class StoryListViewModelTest : BaseTest() {
             }
 
             @Test
-            fun `when refresh is called and currentScreen is New then the usecase should be called with storiesType NEW`() {
+            fun `when refresh is called and currentScreen is New then the usecase should be called with storiesListType NEW`() {
                 storyListViewModel.currentScreen = New
                 storyListViewModel.userManuallyRefreshed()
 
@@ -256,7 +256,7 @@ class StoryListViewModelTest : BaseTest() {
             }
 
             @Test
-            fun `when refresh is called and currentScreen is Show then the usecase should be called with storiesType SHOW`() {
+            fun `when refresh is called and currentScreen is Show then the usecase should be called with storiesListType SHOW`() {
                 storyListViewModel.currentScreen = Show
                 storyListViewModel.userManuallyRefreshed()
 
@@ -474,10 +474,10 @@ class StoryListViewModelTest : BaseTest() {
     }
 
     @Test
-    fun `when comments callback is called then we get the story using cache version and post the id  and the correct storyType to correct live data`() {
-        val observer = spyk<Observer<Event<StoryTypeStoryId>>>()
+    fun `when comments callback is called then we get the story using cache version and post the id and the correct storiesListType to correct live data`() {
+        val observer = spyk<Observer<Event<StoryData>>>()
         val commentsCallback = slot<(id: Int) -> Unit>()
-        val storyTypeStoryId = slot<Event<StoryTypeStoryId>>()
+        val storyTypeStoryId = slot<Event<StoryData>>()
 
         every {
             storyDataMapper.toStoryViewItem(
@@ -496,7 +496,7 @@ class StoryListViewModelTest : BaseTest() {
         val resultStoryTypeStoryId = storyTypeStoryId.captured.getContentIfNotHandled()!!
         coVerify { storiesUseCase.getStory(1, true, TOP) }
         assertEquals(0, resultStoryTypeStoryId.storyId)
-        assertEquals(TOP, resultStoryTypeStoryId.storyType)
+        assertEquals(TOP, resultStoryTypeStoryId.storiesListType)
     }
 
     @Test

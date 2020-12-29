@@ -152,7 +152,10 @@ class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             time.text = item.time
             title.text = item.title
             url.text = item.url
+            askText.text = item.text
+            askText.visibleOrGone(item.showAskText)
             actionBar.commentsButton.visibleOrGone(false)
+            actionBar.articleButton.visibleOrGone(item.showNavigateToArticle)
             actionBar.articleButton.setOnClickListener {
                 item.storyViewerCallback()
             }

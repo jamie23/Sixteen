@@ -1,7 +1,7 @@
 package com.jamie.hn.stories.domain
 
-import com.jamie.hn.core.StoriesType.ASK
-import com.jamie.hn.core.StoriesType.TOP
+import com.jamie.hn.core.StoriesListType.ASK
+import com.jamie.hn.core.StoriesListType.TOP
 import com.jamie.hn.stories.repository.StoriesRepository
 import io.mockk.MockKAnnotations
 import io.mockk.coVerify
@@ -25,7 +25,7 @@ class StoriesUseCaseTest {
     }
 
     @Test
-    fun `when getStories is called then call the repository passing in the cache variable and storiesType`() {
+    fun `when getStories is called then call the repository passing in the cache variable and storiesListType`() {
         runBlocking {
             storiesUseCase.getStories(true, TOP)
         }
@@ -34,7 +34,7 @@ class StoriesUseCaseTest {
     }
 
     @Test
-    fun `when getStory is called then call the repository passing in the cache variable, correct id, require comments as false and storiesType`() {
+    fun `when getStory is called then call the repository passing in the cache variable, correct id, require comments as false and storiesListType`() {
         runBlocking {
             storiesUseCase.getStory(1, true, ASK)
         }
@@ -44,7 +44,7 @@ class StoriesUseCaseTest {
                 id = 1,
                 useCachedVersion = true,
                 requireComments = false,
-                storiesType = ASK
+                storiesListType = ASK
             )
         }
     }

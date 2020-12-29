@@ -14,5 +14,9 @@ data class Story(
     val time: DateTime,
     val title: String = "",
     val url: String = "",
+    val text: String = "",
     val retrievedComments: Boolean = false
-)
+) {
+    val isAskStory: Boolean
+        get() = title.startsWith("Ask HN:")
+}

@@ -1,12 +1,13 @@
 package com.jamie.hn.stories.repository
 
-import com.jamie.hn.core.StoriesType.ASK
-import com.jamie.hn.core.StoriesType.JOBS
-import com.jamie.hn.core.StoriesType.NEW
-import com.jamie.hn.core.StoriesType.SHOW
-import com.jamie.hn.core.StoriesType.TOP
+import com.jamie.hn.core.StoriesListType.ASK
+import com.jamie.hn.core.StoriesListType.JOBS
+import com.jamie.hn.core.StoriesListType.NEW
+import com.jamie.hn.core.StoriesListType.SHOW
+import com.jamie.hn.core.StoriesListType.TOP
 import com.jamie.hn.core.net.NetworkUtils
 import com.jamie.hn.core.net.hex.Hex
+import com.jamie.hn.core.net.official.OfficialClient
 import com.jamie.hn.stories.domain.model.Story
 import com.jamie.hn.stories.repository.local.LocalStorage
 import com.jamie.hn.stories.repository.model.ApiStory
@@ -43,6 +44,9 @@ class StoriesRepositoryTest {
     @RelaxedMockK
     private lateinit var localStorage: LocalStorage
 
+    @MockK
+    private lateinit var officialClient: OfficialClient
+
     private lateinit var storiesRepository: StoriesRepository
 
     @BeforeEach
@@ -52,7 +56,7 @@ class StoriesRepositoryTest {
         every { networkUtils.isNetworkAvailable() } returns true
 
         storiesRepository =
-            StoriesRepository(webStorage, localStorage, apiToDomainMapper, networkUtils)
+            StoriesRepository(webStorage, officialClient, localStorage, apiToDomainMapper, networkUtils)
     }
 
     @Nested
@@ -223,7 +227,7 @@ class StoriesRepositoryTest {
                     id = 1,
                     useCachedVersion = true,
                     requireComments = false,
-                    storiesType = TOP
+                    storiesListType = TOP
                 )
             }
 
@@ -260,7 +264,7 @@ class StoriesRepositoryTest {
                     id = 1,
                     useCachedVersion = true,
                     requireComments = true,
-                    storiesType = ASK
+                    storiesListType = ASK
                 )
             }
 
@@ -294,7 +298,7 @@ class StoriesRepositoryTest {
                     id = 1,
                     useCachedVersion = true,
                     requireComments = true,
-                    storiesType = JOBS
+                    storiesListType = JOBS
                 )
             }
 
@@ -323,7 +327,7 @@ class StoriesRepositoryTest {
                     id = 1,
                     useCachedVersion = false,
                     requireComments = false,
-                    storiesType = NEW
+                    storiesListType = NEW
                 )
             }
 
@@ -358,7 +362,7 @@ class StoriesRepositoryTest {
                     id = 1,
                     useCachedVersion = false,
                     requireComments = false,
-                    storiesType = SHOW
+                    storiesListType = SHOW
                 )
             }
 
@@ -389,7 +393,7 @@ class StoriesRepositoryTest {
                     id = 1,
                     useCachedVersion = false,
                     requireComments = true,
-                    storiesType = TOP
+                    storiesListType = TOP
                 )
             }
 
@@ -420,7 +424,7 @@ class StoriesRepositoryTest {
                     id = 1,
                     useCachedVersion = false,
                     requireComments = true,
-                    storiesType = TOP
+                    storiesListType = TOP
                 )
             }
 

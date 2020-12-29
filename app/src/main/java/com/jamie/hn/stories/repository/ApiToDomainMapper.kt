@@ -10,7 +10,8 @@ class ApiToDomainMapper {
 
     fun toStoryDomainModel(
         apiStory: ApiStory,
-        retrievedComments: Boolean = false
+        retrievedComments: Boolean = false,
+        text: String = ""
     ): Story {
         return Story(
             apiStory.author,
@@ -23,6 +24,7 @@ class ApiToDomainMapper {
             DateTime.parse(apiStory.time),
             apiStory.title,
             apiStory.url,
+            text,
             retrievedComments
         )
     }

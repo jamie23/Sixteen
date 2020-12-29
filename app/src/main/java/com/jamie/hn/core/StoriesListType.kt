@@ -1,5 +1,5 @@
 package com.jamie.hn.core
 
-enum class StoriesType {
+enum class StoriesListType {
     TOP, ASK, JOBS, NEW, SHOW
 }

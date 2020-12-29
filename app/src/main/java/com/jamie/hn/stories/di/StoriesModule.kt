@@ -15,7 +15,7 @@ val storiesModule =
         single { ApiToDomainMapper() }
         single { LocalStorage() }
         viewModel { StoryListViewModel(get(), get(), get()) }
-        single { StoriesRepository(get(), get(), get(), get()) }
+        single { StoriesRepository(get(), get(), get(), get(), get()) }
         single { StoryDataMapper(get(), get()) }
         single { StoryResourceProvider(get()) }
         single { StoriesUseCase(get()) }

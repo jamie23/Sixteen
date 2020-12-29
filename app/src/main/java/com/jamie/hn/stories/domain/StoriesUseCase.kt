@@ -1,20 +1,21 @@
 package com.jamie.hn.stories.domain
 
-import com.jamie.hn.core.StoriesType
+import com.jamie.hn.core.StoriesListType
 import com.jamie.hn.stories.repository.StoriesRepository
 
 class StoriesUseCase(
     private val storiesRepository: StoriesRepository
 ) {
 
-    suspend fun getStories(useCachedVersion: Boolean, storiesType: StoriesType) =
-        storiesRepository.stories(useCachedVersion, storiesType)
+    suspend fun getStories(useCachedVersion: Boolean, storiesListType: StoriesListType) =
+        storiesRepository.stories(useCachedVersion, storiesListType)
 
-    suspend fun getStory(id: Int, useCachedVersion: Boolean, storyType: StoriesType) =
+    suspend fun getStory(id: Int, useCachedVersion: Boolean, storiesListType: StoriesListType, requireText: Boolean) =
         storiesRepository.story(
             id = id,
             useCachedVersion = useCachedVersion,
             requireComments = false,
-            storiesType = storyType
+            storiesListType = storiesListType,
+            requireText = requireText
         )
 }
