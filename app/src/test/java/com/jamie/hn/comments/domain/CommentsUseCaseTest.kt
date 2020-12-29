@@ -48,7 +48,7 @@ class CommentsUseCaseTest : BaseTest() {
     fun setup() {
         MockKAnnotations.init(this)
 
-        coEvery { repository.story(any(), any(), any(), any()) } returns storyResult
+        coEvery { repository.story(any(), any(), any(), any(), any()) } returns storyResult
         every { storyResult.story } returns story
         every { storyResult.networkFailure } returns false
 
@@ -76,7 +76,8 @@ class CommentsUseCaseTest : BaseTest() {
                 id = 1,
                 useCachedVersion = true,
                 requireComments = true,
-                storiesListType = TOP
+                storiesListType = TOP,
+                requireText = false
             )
         }
         verify { onResult.invoke(any(), eq(false), eq(true)) }
@@ -102,7 +103,8 @@ class CommentsUseCaseTest : BaseTest() {
                 id = 1,
                 useCachedVersion = false,
                 requireComments = true,
-                storiesListType = ASK
+                storiesListType = ASK,
+                requireText = false
             )
         }
         verify { onResult.invoke(any(), eq(false), eq(false)) }
@@ -116,7 +118,7 @@ class CommentsUseCaseTest : BaseTest() {
             val returnedComments = slot<List<CommentWithDepth>>()
 
             every { onResult.invoke(any(), any(), any()) } returns Unit
-            coEvery { repository.story(any(), any(), any(), any()) } returns StoryResult(
+            coEvery { repository.story(any(), any(), any(), any(), any()) } returns StoryResult(
                 story(
                     singleComment()
                 )
@@ -132,7 +134,7 @@ class CommentsUseCaseTest : BaseTest() {
                 )
             }
 
-            coVerify { repository.story(any(), any(), any(), eq(JOBS)) }
+            coVerify { repository.story(any(), any(), any(), eq(JOBS), eq(false)) }
             verify { onResult.invoke(capture(returnedComments), any(), any()) }
 
             assertEquals(1, returnedComments.captured.size)
@@ -145,7 +147,7 @@ class CommentsUseCaseTest : BaseTest() {
             val returnedComments = slot<List<CommentWithDepth>>()
 
             every { onResult.invoke(any(), any(), any()) } returns Unit
-            coEvery { repository.story(any(), any(), any(), any()) } returns StoryResult(story(
+            coEvery { repository.story(any(), any(), any(), any(), eq(false)) } returns StoryResult(story(
                 singleCommentNestedComment()
             ))
 
@@ -159,7 +161,7 @@ class CommentsUseCaseTest : BaseTest() {
                 )
             }
 
-            coVerify { repository.story(any(), any(), any(), eq(SHOW)) }
+            coVerify { repository.story(any(), any(), any(), eq(SHOW), eq(false)) }
             verify { onResult.invoke(capture(returnedComments), any(), any()) }
 
             // We remove the nested child comments but keep the commentCount
