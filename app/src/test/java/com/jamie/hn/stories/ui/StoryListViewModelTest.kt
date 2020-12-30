@@ -9,6 +9,7 @@ import com.jamie.hn.core.StoriesListType.JOBS
 import com.jamie.hn.core.StoriesListType.NEW
 import com.jamie.hn.core.StoriesListType.SHOW
 import com.jamie.hn.core.StoriesListType.TOP
+import com.jamie.hn.core.StoryType
 import com.jamie.hn.core.ui.Article
 import com.jamie.hn.core.ui.Ask
 import com.jamie.hn.core.ui.Jobs
@@ -77,7 +78,7 @@ class StoryListViewModelTest : BaseTest() {
         every { storyResourceProvider.showTitle() } returns "Show stories"
 
         coEvery { storiesUseCase.getStories(any(), any()) } returns StoriesResult(stories)
-//        coEvery { storiesUseCase.getStory(1, true, any()) } returns storyResults
+        coEvery { storiesUseCase.getStory(1, true, any(), any()) } returns storyResults
         every { storyDataMapper.toStoryViewItem(story, any(), any()) } returns storyViewItem
         every {
             storyDataMapper.toStoryViewItem(
@@ -472,76 +473,134 @@ class StoryListViewModelTest : BaseTest() {
             }
         }
     }
-//
-//    @Test
-//    fun `when comments callback is called then we get the story using cache version and post the id and the correct storiesListType to correct live data`() {
-//        val observer = spyk<Observer<Event<StoryData>>>()
-//        val commentsCallback = slot<(id: Int) -> Unit>()
-//        val storyTypeStoryId = slot<Event<StoryData>>()
-//
-//        every {
-//            storyDataMapper.toStoryViewItem(
-//                any(),
-//                capture(commentsCallback),
-//                any()
-//            )
-//        } returns storyViewItem
-//        every { observer.onChanged(capture(storyTypeStoryId)) } just Runs
-//
-//        storyListViewModel.navigateToComments().observeForever(observer)
-//        storyListViewModel.automaticallyRefreshed()
-//
-//        commentsCallback.captured.invoke(1)
-//
-//        val resultStoryTypeStoryId = storyTypeStoryId.captured.getContentIfNotHandled()!!
-//        coVerify { storiesUseCase.getStory(1, true, TOP) }
-//        assertEquals(0, resultStoryTypeStoryId.storyId)
-//        assertEquals(TOP, resultStoryTypeStoryId.storiesListType)
-//    }
-//
-//    @Test
-//    fun `when article viewer callback is called then we get the story using cache and post the url to the correct live data`() {
-//        val observer = spyk<Observer<Event<String>>>()
-//        val articleViewerCallback = slot<(id: Int) -> Unit>()
-//        val urlEmitted = slot<Event<String>>()
-//
-//        every {
-//            storyDataMapper.toStoryViewItem(
-//                any(),
-//                any(),
-//                capture(articleViewerCallback)
-//            )
-//        } returns storyViewItem
-//        every { observer.onChanged(capture(urlEmitted)) } just Runs
-//
-//        storyListViewModel.navigateToArticle().observeForever(observer)
-//        storyListViewModel.automaticallyRefreshed()
-//
-//        articleViewerCallback.captured.invoke(1)
-//
-//        coVerify { storiesUseCase.getStory(1, true, TOP) }
-//        assertEquals("url", urlEmitted.captured.getContentIfNotHandled())
-//    }
-//
-//    @Test
-//    fun `when sortState is updated then post new sorted state`() {
-//        val observer = spyk<Observer<Int>>()
-//
-//        storyListViewModel.sortState().observeForever(observer)
-//        storyListViewModel.updateSortState(2)
-//
-//        verify {
-//            observer.onChanged(0)
-//            observer.onChanged(2)
-//        }
-//    }
 
-    private fun generateStory(id: Int, time: String) = Story(
+    @Nested
+    inner class CommentsCallback {
+
+        @Test
+        fun `when comments callback is called then we get the story using cache version and post the id and the correct storiesListType to correct live data`() {
+            val observer = spyk<Observer<Event<StoryData>>>()
+            val commentsCallback = slot<(id: Int) -> Unit>()
+            val storyData = slot<Event<StoryData>>()
+
+            every {
+                storyDataMapper.toStoryViewItem(
+                    any(),
+                    capture(commentsCallback),
+                    any()
+                )
+            } returns storyViewItem
+            every { observer.onChanged(capture(storyData)) } just Runs
+            coEvery { storiesUseCase.getStory(1, true, any(), any()) } returns storyResults
+
+            storyListViewModel.navigateToComments().observeForever(observer)
+            storyListViewModel.automaticallyRefreshed()
+
+            commentsCallback.captured.invoke(1)
+
+            val resultStoryData = storyData.captured.getContentIfNotHandled()!!
+            coVerify { storiesUseCase.getStory(1, true, TOP, false) }
+            assertEquals(0, resultStoryData.storyId)
+            assertEquals(TOP, resultStoryData.storiesListType)
+        }
+
+        @Test
+        fun `when comments callback is called and story type is not Ask then post the StoryData with storyType set to STANDARD`() {
+            val observer = spyk<Observer<Event<StoryData>>>()
+            val commentsCallback = slot<(id: Int) -> Unit>()
+            val storyData = slot<Event<StoryData>>()
+            val storyResults = StoryResult(generateStory(0, "23/08/2020 09:00:00", title = "Non Ask story"))
+
+            every {
+                storyDataMapper.toStoryViewItem(
+                    any(),
+                    capture(commentsCallback),
+                    any()
+                )
+            } returns storyViewItem
+            every { observer.onChanged(capture(storyData)) } just Runs
+            coEvery { storiesUseCase.getStory(1, true, any(), any()) } returns storyResults
+
+            storyListViewModel.navigateToComments().observeForever(observer)
+            storyListViewModel.automaticallyRefreshed()
+
+            commentsCallback.captured.invoke(1)
+
+            val resultStoryData = storyData.captured.getContentIfNotHandled()!!
+            assertEquals(StoryType.STANDARD, resultStoryData.storyType)
+        }
+
+        @Test
+        fun `when comments callback is called and story type is Ask then post the StoryData with storyType set to ASK`() {
+            val observer = spyk<Observer<Event<StoryData>>>()
+            val commentsCallback = slot<(id: Int) -> Unit>()
+            val storyData = slot<Event<StoryData>>()
+            val storyResults = StoryResult(generateStory(0, "23/08/2020 09:00:00", title = "Ask HN: Hello"))
+
+            every {
+                storyDataMapper.toStoryViewItem(
+                    any(),
+                    capture(commentsCallback),
+                    any()
+                )
+            } returns storyViewItem
+            every { observer.onChanged(capture(storyData)) } just Runs
+            coEvery { storiesUseCase.getStory(1, true, any(), any()) } returns storyResults
+
+            storyListViewModel.navigateToComments().observeForever(observer)
+            storyListViewModel.automaticallyRefreshed()
+
+            commentsCallback.captured.invoke(1)
+
+            val resultStoryData = storyData.captured.getContentIfNotHandled()!!
+            assertEquals(StoryType.ASK, resultStoryData.storyType)
+        }
+    }
+
+    @Test
+    fun `when article viewer callback is called then we get the story using cache and post the url to the correct live data`() {
+        val observer = spyk<Observer<Event<String>>>()
+        val articleViewerCallback = slot<(id: Int) -> Unit>()
+        val urlEmitted = slot<Event<String>>()
+
+        every {
+            storyDataMapper.toStoryViewItem(
+                any(),
+                any(),
+                capture(articleViewerCallback)
+            )
+        } returns storyViewItem
+        every { observer.onChanged(capture(urlEmitted)) } just Runs
+
+        storyListViewModel.navigateToArticle().observeForever(observer)
+        storyListViewModel.automaticallyRefreshed()
+
+        articleViewerCallback.captured.invoke(1)
+
+        coVerify { storiesUseCase.getStory(1, true, TOP, false) }
+        assertEquals("url", urlEmitted.captured.getContentIfNotHandled())
+    }
+
+    @Test
+    fun `when sortState is updated then post new sorted state`() {
+        val observer = spyk<Observer<Int>>()
+
+        storyListViewModel.sortState().observeForever(observer)
+        storyListViewModel.updateSortState(2)
+
+        verify {
+            observer.onChanged(0)
+            observer.onChanged(2)
+        }
+    }
+
+    private fun generateStory(id: Int, time: String, title: String = "") = Story(
         id = id,
         time = DateTime.parse(
             time,
             DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss")
         ),
+        title = title,
         url = "url"
     )
 

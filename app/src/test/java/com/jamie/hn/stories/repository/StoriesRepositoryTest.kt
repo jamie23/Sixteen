@@ -651,6 +651,5 @@ class StoriesRepositoryTest {
                 assertEquals(storedStory, story.story)
             }
         }
-
     }
 }
