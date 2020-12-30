@@ -63,10 +63,12 @@ class CommentsListViewModel(
     private lateinit var storyType: StoryType
 
     fun userManuallyRefreshed() {
+        showLoadingUI()
         refreshList(false)
     }
 
     fun automaticallyRefreshed() {
+        showLoadingUI()
         refreshList(true)
     }
 
@@ -75,6 +77,8 @@ class CommentsListViewModel(
         this.storyType = storyType
 
         commentsViewRepository = CommentsViewRepository(::viewStateUpdate)
+
+        showLoadingUI()
 
         viewModelScope.launch {
             story = storiesUseCase.getStory(
@@ -85,7 +89,7 @@ class CommentsListViewModel(
             ).story
 
             updateTitleWithArticleTitle()
-            automaticallyRefreshed()
+            refreshList(true)
         }
     }
 
@@ -94,11 +98,6 @@ class CommentsListViewModel(
     }
 
     private fun refreshList(useCachedVersion: Boolean) {
-        listViewState.value = ListViewState(
-            comments = emptyList(),
-            refreshing = true
-        )
-
         viewModelScope.launch {
             commentsUseCase.retrieveComments(
                 storyId = storyId,
@@ -108,6 +107,13 @@ class CommentsListViewModel(
                 storiesListType = storyListType
             )
         }
+    }
+
+    private fun showLoadingUI() {
+        listViewState.value = ListViewState(
+            comments = emptyList(),
+            refreshing = true
+        )
     }
 
     private fun viewStateUpdate(commentList: List<CommentCurrentState>) {

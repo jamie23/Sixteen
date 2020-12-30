@@ -149,4 +149,23 @@ class ApiToDomainMapperTest : BaseTest() {
         assertEquals("text", resultNestedCommentList[0].text)
         assertEquals(DateTime.parse(time), resultNestedCommentList[0].time)
     }
+
+    @Test
+    fun `when toStoryDomainModel is called with text then text is set on the story`() {
+        val apiStory = ApiStory(
+            author = "jamie",
+            comments = null,
+            commentsUrl = "url",
+            domain = "domain",
+            id = 1,
+            score = 2,
+            time = time,
+            title = "title",
+            url = "url"
+        )
+
+        val story = apiToDomainMapper.toStoryDomainModel(apiStory, false, "Text")
+
+        assertEquals("Text", story.text)
+    }
 }

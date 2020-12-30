@@ -34,9 +34,9 @@ class StoriesUseCaseTest {
     }
 
     @Test
-    fun `when getStory is called then call the repository passing in the cache variable, correct id, require comments as false and storiesListType`() {
+    fun `when getStory is called then call the repository passing in the cache variable, correct id, require comments as false, storiesListType and requireText`() {
         runBlocking {
-            storiesUseCase.getStory(1, true, ASK)
+            storiesUseCase.getStory(1, true, ASK, false)
         }
 
         coVerify {
@@ -44,7 +44,8 @@ class StoriesUseCaseTest {
                 id = 1,
                 useCachedVersion = true,
                 requireComments = false,
-                storiesListType = ASK
+                storiesListType = ASK,
+                requireText = false
             )
         }
     }
