@@ -41,9 +41,6 @@
     <string name="stories_app_bar_sort">Sort stories</string>
     <string name="stories_content_description_sort">Sort stories</string>
 
-    <!-- Common app bar -->
-    <string name="top_app_bar_title">Title</string>
-
     <!-- Comments -->
     <string name="comments_title">Comments</string>
     <string name="comments_hidden">hidden</string>

@@ -34,7 +34,6 @@
         <item name="materialThemeOverlay">@style/ThemeOverlay</item>
         <item name="titleTextAppearance">@style/ToolbarText</item>
         <item name="layout_scrollFlags">scroll|enterAlways|snap</item>
-        <item name="title">@string/top_app_bar_title</item>
         <item name="navigationIcon">@drawable/ic_menu_24</item>
     </style>
 
