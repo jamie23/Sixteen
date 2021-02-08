@@ -19,14 +19,10 @@ The main aim was to build out a Hacker News client that I enjoyed using, relying
 - View Binding
 - Koin
 - Retrofit
-
-Testing:
  - JUnit5
  - MockK
 
 ## Features
-Features:
-
 - Top/Ask/Jobs/New Stories/Show HN
 - Light/dark themes
 - Collapsable comments
