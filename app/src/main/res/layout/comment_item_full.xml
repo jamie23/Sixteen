@@ -51,10 +51,20 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="2dp"
         android:textColor="?attr/username"
-        android:textSize="12sp"
+        android:textSize="13sp"
         app:layout_constraintStart_toEndOf="@id/contentStart"
         app:layout_constraintTop_toTopOf="@id/contentTop"
         tools:text="Jamie" />
+
+    <TextView
+        android:id="@+id/original_poster"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="4dp"
+        android:textSize="11sp"
+        app:layout_constraintStart_toEndOf="@id/author"
+        app:layout_constraintBottom_toBottomOf="@id/author"
+        android:text="@string/comments_op" />
 
     <TextView
         android:id="@+id/time"

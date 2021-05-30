@@ -133,6 +133,7 @@ class CommentsListViewModel(
         val viewStateComments = comments.map {
             commentDataMapper.toCommentViewItem(
                 it,
+                story.author,
                 ::longClickCommentListener,
                 ::urlClicked
             )
@@ -273,7 +274,8 @@ class CommentsListViewModel(
         id: Int
     ) {
         if (commentWithState.comment.id != newStateList.lastIndex) {
-            val idOfNextSibling = newStateList.subList(id + 1, newStateList.size)
+            val idOfNextSibling = newStateList
+                .subList(id + 1, newStateList.size)
                 .firstOrNull { it.comment.depth <= depth }?.comment?.id ?: newStateList.size
 
             for (i in id + 1 until idOfNextSibling) {

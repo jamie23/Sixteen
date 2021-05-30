@@ -45,6 +45,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.mockito.ArgumentMatchers.anyString
 
 @ExtendWith(InstantExecutorExtension::class)
 class CommentsListViewModelTest : BaseTest() {
@@ -187,6 +188,7 @@ class CommentsListViewModelTest : BaseTest() {
             coEvery {
                 commentDataMapper.toCommentViewItem(
                     capture(commentsToMapper),
+                    anyString(),
                     any(),
                     any()
                 )
@@ -233,7 +235,7 @@ class CommentsListViewModelTest : BaseTest() {
                 )
             } just Runs
             coEvery {
-                commentDataMapper.toCommentViewItem(any(), any(), any())
+                commentDataMapper.toCommentViewItem(any(), anyString(), any(), any())
             } returns mockedCommentViewItem
 
             commentsListViewModel.commentsViewState().observeForever(observer)
@@ -276,6 +278,7 @@ class CommentsListViewModelTest : BaseTest() {
             } just Runs
             coEvery {
                 commentDataMapper.toCommentViewItem(
+                    any(),
                     any(),
                     any(),
                     any()
@@ -324,7 +327,7 @@ class CommentsListViewModelTest : BaseTest() {
                 )
             } just Runs
             coEvery {
-                commentDataMapper.toCommentViewItem(any(), any(), any())
+                commentDataMapper.toCommentViewItem(any(), any(), any(), any())
             } returns mockedCommentViewItem
 
             commentsListViewModel.init(storiesListType, storyType)
@@ -371,7 +374,7 @@ class CommentsListViewModelTest : BaseTest() {
                 )
             } just Runs
             coEvery {
-                commentDataMapper.toCommentViewItem(any(), any(), any())
+                commentDataMapper.toCommentViewItem(any(), any(), any(), any())
             } returns mockedCommentViewItem
 
             commentsListViewModel.init(storiesListType, storyType)
@@ -412,7 +415,7 @@ class CommentsListViewModelTest : BaseTest() {
                 )
             } just Runs
             coEvery {
-                commentDataMapper.toCommentViewItem(any(), any(), any())
+                commentDataMapper.toCommentViewItem(any(), any(), any(), any())
             } returns mockedCommentViewItem
             every {
                 commentDataMapper.toStoryHeaderViewItem(

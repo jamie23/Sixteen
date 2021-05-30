@@ -95,6 +95,7 @@ class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
         holder.viewBinding.run {
             author.text = item.author
+            originalPoster.visibleOrGone(item.isOP)
             time.text = item.time
             divider.visibleOrInvisible(item.showTopDivider)
             text.text = item.text

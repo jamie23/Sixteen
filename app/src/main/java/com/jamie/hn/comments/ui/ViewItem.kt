@@ -7,8 +7,6 @@ interface ViewItem {
     val state: CurrentState
     val author: String
     val time: String
-
-    // Ensuring implementing classes must implement equals so that DiffUtil callback can be
     // implemented properly. Check here for more info:
     // https://stackoverflow.com/questions/55895359/lint-error-suspicious-equality-check-equals-is-not-implemented-in-object-dif
     override fun equals(other: Any?): Boolean
@@ -41,5 +39,6 @@ data class CommentViewItem(
     val depth: Int,
     val authorAndHiddenChildren: String,
     val showTopDivider: Boolean,
+    val isOP: Boolean,
     val clickCommentListener: (position: Int) -> Unit
 ) : ViewItem

@@ -43,6 +43,7 @@
 
     <!-- Comments -->
     <string name="comments_title">Comments</string>
+    <string name="comments_op">op</string>
     <string name="comments_hidden">hidden</string>
     <string name="comments_network_error">Error retrieving comments due to connection, showing cached comments</string>
     <string name="comments_none_cached_network_error">Error retrieving comments, please check internet connection</string>

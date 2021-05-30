@@ -97,7 +97,6 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
         }
 
         viewModel.init(storyListType, storyType)
-
         initialiseLiveDataObservers(view)
     }
 
@@ -114,7 +113,7 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
                 it.commentsList.visibleOrGone(!item.refreshing)
                 it.commentListError.visibleOrGone(false)
             }
-            commentsListAdapter?.data(item.comments)
+            commentsListAdapter.data(item.comments)
         })
 
         viewModel.networkErrorCachedResults().observe(viewLifecycleOwner, Observer {
