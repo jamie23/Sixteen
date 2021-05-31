@@ -23,6 +23,8 @@ import com.jamie.hn.core.StoriesListType
 import com.jamie.hn.core.StoryType
 import com.jamie.hn.stories.domain.StoriesUseCase
 import com.jamie.hn.stories.domain.model.Story
+import com.jamie.hn.stories.repository.StoriesRepository.RequireText.NOT_REQUIRED
+import com.jamie.hn.stories.repository.StoriesRepository.RequireText.REQUIRED
 import kotlinx.coroutines.launch
 
 class CommentsListViewModel(
@@ -80,12 +82,18 @@ class CommentsListViewModel(
 
         showLoadingUI()
 
+        val requireText = if (storyType == StoryType.ASK) {
+            REQUIRED
+        } else {
+            NOT_REQUIRED
+        }
+
         viewModelScope.launch {
             story = storiesUseCase.getStory(
                 id = storyId,
                 useCachedVersion = false,
                 storiesListType = this@CommentsListViewModel.storyListType,
-                requireText = storyType == StoryType.ASK
+                requireText = requireText
             ).story
 
             updateTitleWithArticleTitle()

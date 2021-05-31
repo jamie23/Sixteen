@@ -18,6 +18,7 @@ import com.jamie.hn.core.ui.Show
 import com.jamie.hn.core.ui.Top
 import com.jamie.hn.stories.domain.StoriesUseCase
 import com.jamie.hn.stories.domain.model.Story
+import com.jamie.hn.stories.repository.StoriesRepository.RequireText.NOT_REQUIRED
 import com.jamie.hn.stories.repository.model.StoryResult
 import com.jamie.hn.stories.repository.model.StoriesResult
 import com.jamie.hn.stories.ui.StoryListViewModel.StoryListViewState
@@ -499,7 +500,7 @@ class StoryListViewModelTest : BaseTest() {
             commentsCallback.captured.invoke(1)
 
             val resultStoryData = storyData.captured.getContentIfNotHandled()!!
-            coVerify { storiesUseCase.getStory(1, true, TOP, false) }
+            coVerify { storiesUseCase.getStory(1, true, TOP, NOT_REQUIRED) }
             assertEquals(0, resultStoryData.storyId)
             assertEquals(TOP, resultStoryData.storiesListType)
         }
@@ -577,7 +578,7 @@ class StoryListViewModelTest : BaseTest() {
 
         articleViewerCallback.captured.invoke(1)
 
-        coVerify { storiesUseCase.getStory(1, true, TOP, false) }
+        coVerify { storiesUseCase.getStory(1, true, TOP, NOT_REQUIRED) }
         assertEquals("url", urlEmitted.captured.getContentIfNotHandled())
     }
 

@@ -21,6 +21,8 @@ import com.jamie.hn.core.StoryType
 import com.jamie.hn.core.StoryType.STANDARD
 import com.jamie.hn.stories.domain.StoriesUseCase
 import com.jamie.hn.stories.domain.model.Story
+import com.jamie.hn.stories.repository.StoriesRepository.RequireText.NOT_REQUIRED
+import com.jamie.hn.stories.repository.StoriesRepository.RequireText.REQUIRED
 import com.jamie.hn.stories.repository.model.StoryResult
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
@@ -130,7 +132,7 @@ class CommentsListViewModelTest : BaseTest() {
                     id = 1,
                     useCachedVersion = false,
                     storiesListType = TOP,
-                    requireText = false
+                    requireText = NOT_REQUIRED
                 )
                 commentsUseCase.retrieveComments(
                     storyId = 1,
@@ -162,7 +164,7 @@ class CommentsListViewModelTest : BaseTest() {
                     id = 1,
                     useCachedVersion = false,
                     storiesListType = TOP,
-                    requireText = true
+                    requireText = REQUIRED
                 )
             }
         }
@@ -428,7 +430,7 @@ class CommentsListViewModelTest : BaseTest() {
 
             articleViewerCallback.invoke()
 
-            coVerify { storiesUseCase.getStory(1, false, TOP, false) }
+            coVerify { storiesUseCase.getStory(1, false, TOP, NOT_REQUIRED) }
             assertEquals("url", urlEmitted.captured.getContentIfNotHandled())
         }
 

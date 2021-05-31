@@ -125,7 +125,6 @@ class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             divider.visibleOrInvisible(item.showTopDivider)
             commentItemCollapsed.setOnClickListener {
                 item.clickCommentListener.invoke(item.id)
-                true
             }
             commentItemCollapsed.setOnLongClickListener {
                 item.clickCommentListener.invoke(item.id)

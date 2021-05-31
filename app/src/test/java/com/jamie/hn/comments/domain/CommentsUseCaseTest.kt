@@ -9,6 +9,7 @@ import com.jamie.hn.core.StoriesListType.SHOW
 import com.jamie.hn.core.StoriesListType.TOP
 import com.jamie.hn.stories.domain.model.Story
 import com.jamie.hn.stories.repository.StoriesRepository
+import com.jamie.hn.stories.repository.StoriesRepository.RequireText.NOT_REQUIRED
 import com.jamie.hn.stories.repository.model.StoryResult
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
@@ -77,7 +78,7 @@ class CommentsUseCaseTest : BaseTest() {
                 useCachedVersion = true,
                 requireComments = true,
                 storiesListType = TOP,
-                requireText = false
+                requireText = NOT_REQUIRED
             )
         }
         verify { onResult.invoke(any(), eq(false), eq(true)) }
@@ -104,7 +105,7 @@ class CommentsUseCaseTest : BaseTest() {
                 useCachedVersion = false,
                 requireComments = true,
                 storiesListType = ASK,
-                requireText = false
+                requireText = NOT_REQUIRED
             )
         }
         verify { onResult.invoke(any(), eq(false), eq(false)) }
@@ -134,7 +135,7 @@ class CommentsUseCaseTest : BaseTest() {
                 )
             }
 
-            coVerify { repository.story(any(), any(), any(), eq(JOBS), eq(false)) }
+            coVerify { repository.story(any(), any(), any(), eq(JOBS), eq(NOT_REQUIRED)) }
             verify { onResult.invoke(capture(returnedComments), any(), any()) }
 
             assertEquals(1, returnedComments.captured.size)
@@ -147,7 +148,7 @@ class CommentsUseCaseTest : BaseTest() {
             val returnedComments = slot<List<CommentWithDepth>>()
 
             every { onResult.invoke(any(), any(), any()) } returns Unit
-            coEvery { repository.story(any(), any(), any(), any(), eq(false)) } returns StoryResult(story(
+            coEvery { repository.story(any(), any(), any(), any(), eq(NOT_REQUIRED)) } returns StoryResult(story(
                 singleCommentNestedComment()
             ))
 
@@ -161,7 +162,7 @@ class CommentsUseCaseTest : BaseTest() {
                 )
             }
 
-            coVerify { repository.story(any(), any(), any(), eq(SHOW), eq(false)) }
+            coVerify { repository.story(any(), any(), any(), eq(SHOW), eq(NOT_REQUIRED)) }
             verify { onResult.invoke(capture(returnedComments), any(), any()) }
 
             // We remove the nested child comments but keep the commentCount

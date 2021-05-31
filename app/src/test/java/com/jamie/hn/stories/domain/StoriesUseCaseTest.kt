@@ -3,6 +3,7 @@ package com.jamie.hn.stories.domain
 import com.jamie.hn.core.StoriesListType.ASK
 import com.jamie.hn.core.StoriesListType.TOP
 import com.jamie.hn.stories.repository.StoriesRepository
+import com.jamie.hn.stories.repository.StoriesRepository.RequireText.NOT_REQUIRED
 import io.mockk.MockKAnnotations
 import io.mockk.coVerify
 import io.mockk.impl.annotations.RelaxedMockK
@@ -36,7 +37,7 @@ class StoriesUseCaseTest {
     @Test
     fun `when getStory is called then call the repository passing in the cache variable, correct id, require comments as false, storiesListType and requireText`() {
         runBlocking {
-            storiesUseCase.getStory(1, true, ASK, false)
+            storiesUseCase.getStory(1, true, ASK, NOT_REQUIRED)
         }
 
         coVerify {
@@ -45,7 +46,7 @@ class StoriesUseCaseTest {
                 useCachedVersion = true,
                 requireComments = false,
                 storiesListType = ASK,
-                requireText = false
+                requireText = NOT_REQUIRED
             )
         }
     }

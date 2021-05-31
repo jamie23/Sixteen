@@ -15,6 +15,7 @@ import com.jamie.hn.core.ui.Screen
 import com.jamie.hn.core.ui.Show
 import com.jamie.hn.core.ui.Top
 import com.jamie.hn.stories.domain.model.Story
+import com.jamie.hn.stories.repository.StoriesRepository.RequireText.NOT_REQUIRED
 import com.jamie.hn.stories.ui.StoryListViewModel.SortChoice.OLDEST
 import com.jamie.hn.stories.ui.StoryListViewModel.SortChoice.NEWEST
 import com.jamie.hn.stories.ui.StoryListViewModel.SortChoice.STANDARD
@@ -121,14 +122,14 @@ class StoryListViewModel(
                 id = id,
                 useCachedVersion = true,
                 storiesListType = storiesListType,
-                requireText = false
+                requireText = NOT_REQUIRED
             ).story
 
             navigateToComments.value = Event(
                 StoryData(
                     storyId = story.id,
                     storiesListType = storiesListType,
-                    storyType = getStoryType(story.title)
+                    storyType = story.storyType
                 )
             )
         }
@@ -142,18 +143,10 @@ class StoryListViewModel(
                         id = id,
                         useCachedVersion = true,
                         storiesListType = getStoryTypeFromScreen(currentScreen),
-                        requireText = false
+                        requireText = NOT_REQUIRED
                     ).story.url
                 )
         }
-    }
-
-    private fun getStoryType(title: String): StoryType {
-        if (title.startsWith("Ask HN:")) {
-            return StoryType.ASK
-        }
-
-        return StoryType.STANDARD
     }
 
     fun updateSortState(which: Int) {

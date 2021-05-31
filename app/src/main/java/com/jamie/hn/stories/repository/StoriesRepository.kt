@@ -11,6 +11,8 @@ import com.jamie.hn.stories.repository.local.LocalStorage
 import com.jamie.hn.core.net.hex.Hex
 import com.jamie.hn.core.net.official.OfficialClient
 import com.jamie.hn.stories.domain.model.Story
+import com.jamie.hn.stories.repository.StoriesRepository.RequireText.NOT_REQUIRED
+import com.jamie.hn.stories.repository.StoriesRepository.RequireText.REQUIRED
 import com.jamie.hn.stories.repository.model.StoryResult
 import com.jamie.hn.stories.repository.model.StoriesResult
 import com.jamie.hn.stories.repository.web.getWebPath
@@ -58,7 +60,7 @@ class StoriesRepository(
         useCachedVersion: Boolean,
         requireComments: Boolean,
         storiesListType: StoriesListType,
-        requireText: Boolean
+        requireText: RequireText
     ): StoryResult {
         val localStoriesList = getLocalStoriesListByType(storiesListType)
 
@@ -94,7 +96,7 @@ class StoriesRepository(
         }
 
         var text = ""
-        if (requireText) {
+        if (requireText == REQUIRED) {
             text = officialClient.getStory(id).text
         }
 
@@ -114,8 +116,8 @@ class StoriesRepository(
     private fun commentsRequiredAndRetrieved(requireComments: Boolean, localCopy: Story) =
         !requireComments || localCopy.retrievedComments
 
-    private fun textRequiredAndRetrieved(requireText: Boolean, localCopy: Story) =
-        !requireText || localCopy.text != ""
+    private fun textRequiredAndRetrieved(requireText: RequireText, localCopy: Story) =
+        requireText == NOT_REQUIRED || localCopy.text != ""
 
     private fun getLocalStoriesListByType(storiesListType: StoriesListType): List<Story> =
         when (storiesListType) {
@@ -134,4 +136,8 @@ class StoriesRepository(
             NEW -> localStorage.newStoryList = list
             SHOW -> localStorage.showStoryList = list
         }
+
+    enum class RequireText {
+        REQUIRED, NOT_REQUIRED
+    }
 }

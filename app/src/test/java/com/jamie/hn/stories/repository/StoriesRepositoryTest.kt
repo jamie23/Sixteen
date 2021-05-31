@@ -9,6 +9,8 @@ import com.jamie.hn.core.net.NetworkUtils
 import com.jamie.hn.core.net.hex.Hex
 import com.jamie.hn.core.net.official.OfficialClient
 import com.jamie.hn.stories.domain.model.Story
+import com.jamie.hn.stories.repository.StoriesRepository.RequireText.NOT_REQUIRED
+import com.jamie.hn.stories.repository.StoriesRepository.RequireText.REQUIRED
 import com.jamie.hn.stories.repository.local.LocalStorage
 import com.jamie.hn.stories.repository.model.ApiAskText
 import com.jamie.hn.stories.repository.model.ApiStory
@@ -247,7 +249,7 @@ class StoriesRepositoryTest {
                             useCachedVersion = false,
                             requireComments = false,
                             storiesListType = SHOW,
-                            requireText = false
+                            requireText = NOT_REQUIRED
                         )
                     }
 
@@ -279,7 +281,7 @@ class StoriesRepositoryTest {
                             useCachedVersion = false,
                             requireComments = true,
                             storiesListType = TOP,
-                            requireText = false
+                            requireText = NOT_REQUIRED
                         )
                     }
 
@@ -311,7 +313,7 @@ class StoriesRepositoryTest {
                             useCachedVersion = false,
                             requireComments = true,
                             storiesListType = TOP,
-                            requireText = false
+                            requireText = NOT_REQUIRED
                         )
                     }
 
@@ -344,7 +346,7 @@ class StoriesRepositoryTest {
                             useCachedVersion = false,
                             requireComments = true,
                             storiesListType = SHOW,
-                            requireText = false
+                            requireText = NOT_REQUIRED
                         )
                     }
 
@@ -378,7 +380,7 @@ class StoriesRepositoryTest {
                             useCachedVersion = false,
                             requireComments = true,
                             storiesListType = TOP,
-                            requireText = true
+                            requireText = REQUIRED
                         )
                     }
 
@@ -412,7 +414,7 @@ class StoriesRepositoryTest {
                             useCachedVersion = false,
                             requireComments = true,
                             storiesListType = TOP,
-                            requireText = true
+                            requireText = REQUIRED
                         )
                     }
 
@@ -440,7 +442,7 @@ class StoriesRepositoryTest {
                         useCachedVersion = true,
                         requireComments = false,
                         storiesListType = TOP,
-                        requireText = false
+                        requireText = NOT_REQUIRED
                     )
                 }
 
@@ -478,7 +480,7 @@ class StoriesRepositoryTest {
                         useCachedVersion = true,
                         requireComments = true,
                         storiesListType = ASK,
-                        requireText = false
+                        requireText = NOT_REQUIRED
                     )
                 }
 
@@ -513,7 +515,7 @@ class StoriesRepositoryTest {
                         useCachedVersion = true,
                         requireComments = true,
                         storiesListType = JOBS,
-                        requireText = false
+                        requireText = NOT_REQUIRED
                     )
                 }
 
@@ -561,7 +563,7 @@ class StoriesRepositoryTest {
                         useCachedVersion = true,
                         requireComments = true,
                         storiesListType = ASK,
-                        requireText = true
+                        requireText = REQUIRED
                     )
                 }
 
@@ -598,7 +600,7 @@ class StoriesRepositoryTest {
                         useCachedVersion = true,
                         requireComments = true,
                         storiesListType = JOBS,
-                        requireText = true
+                        requireText = REQUIRED
                     )
                 }
 
@@ -634,7 +636,7 @@ class StoriesRepositoryTest {
                         useCachedVersion = false,
                         requireComments = false,
                         storiesListType = NEW,
-                        requireText = false
+                        requireText = NOT_REQUIRED
                     )
                 }
 

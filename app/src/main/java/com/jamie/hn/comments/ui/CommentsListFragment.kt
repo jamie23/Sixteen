@@ -22,7 +22,6 @@ import com.jamie.hn.core.StoryType
 import com.jamie.hn.core.extensions.visibleOrGone
 import com.jamie.hn.core.ui.Article
 import com.jamie.hn.core.ui.Ask
-import com.jamie.hn.core.ui.Comments
 import com.jamie.hn.core.ui.Jobs
 import com.jamie.hn.core.ui.New
 import com.jamie.hn.core.ui.SharedNavigationViewModel
@@ -65,7 +64,6 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        sharedNavigationViewModel.currentScreen = Comments(storyId, storyListType, storyType)
         commentsListAdapter = CommentsListAdapter()
 
         binding?.let {
@@ -114,7 +112,7 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
                 it.progressBar.visibleOrGone(item.refreshing)
                 it.commentSwipeLayout.isRefreshing = item.refreshing
                 it.commentsList.visibleOrGone(!item.refreshing)
-                it.commentListError?.visibleOrGone(false)
+                it.commentListError.visibleOrGone(false)
             }
             commentsListAdapter?.data(item.comments)
         })
