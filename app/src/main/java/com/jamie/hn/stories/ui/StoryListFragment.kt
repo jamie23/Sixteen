@@ -85,11 +85,12 @@ class StoryListFragment : Fragment(R.layout.story_list_fragment) {
         })
 
         viewModel.navigateToComments().observe(viewLifecycleOwner, Observer {
-            it.getContentIfNotHandled()?.let { storyTypeStoryId ->
+            it.getContentIfNotHandled()?.let { storyData ->
                 sharedNavigationViewModel.navigate(
                     Comments(
-                        storyTypeStoryId.storyId,
-                        storyTypeStoryId.storyType
+                        storyData.storyId,
+                        storyData.storiesListType,
+                        storyData.storyType
                     )
                 )
             }
@@ -122,7 +123,7 @@ class StoryListFragment : Fragment(R.layout.story_list_fragment) {
                     when (nextScreen) {
                         is Comments ->
                             StoryListFragmentDirections.actionStoriesListToCommentsList(
-                                nextScreen.storyId, nextScreen.storyType
+                                nextScreen.storyId, nextScreen.storiesListType, nextScreen.storyType
                             )
                         is Article ->
                             StoryListFragmentDirections.actionStoriesListToArticleViewer(nextScreen.url)

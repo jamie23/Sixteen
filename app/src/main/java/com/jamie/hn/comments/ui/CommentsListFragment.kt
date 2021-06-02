@@ -17,11 +17,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.jamie.hn.R
-import com.jamie.hn.core.StoriesType
+import com.jamie.hn.core.StoriesListType
+import com.jamie.hn.core.StoryType
 import com.jamie.hn.core.extensions.visibleOrGone
 import com.jamie.hn.core.ui.Article
 import com.jamie.hn.core.ui.Ask
-import com.jamie.hn.core.ui.Comments
 import com.jamie.hn.core.ui.Jobs
 import com.jamie.hn.core.ui.New
 import com.jamie.hn.core.ui.SharedNavigationViewModel
@@ -42,8 +42,11 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
     private val storyId: Int
         get() = arguments?.get("storyId") as Int
 
-    private val storyType: StoriesType
-        get() = arguments?.get("storyType") as StoriesType
+    private val storyListType: StoriesListType
+        get() = arguments?.get("storiesListType") as StoriesListType
+
+    private val storyType: StoryType
+        get() = arguments?.get("storyType") as StoryType
 
     private var binding: CommentListFragmentBinding? = null
     private lateinit var commentsListAdapter: CommentsListAdapter
@@ -61,8 +64,6 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        sharedNavigationViewModel.currentScreen = Comments(storyId, storyType)
-        viewModel.storyType = storyType
         commentsListAdapter = CommentsListAdapter()
 
         binding?.let {
@@ -95,7 +96,7 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
             }
         }
 
-        viewModel.init()
+        viewModel.init(storyListType, storyType)
 
         initialiseLiveDataObservers(view)
     }
@@ -111,7 +112,7 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
                 it.progressBar.visibleOrGone(item.refreshing)
                 it.commentSwipeLayout.isRefreshing = item.refreshing
                 it.commentsList.visibleOrGone(!item.refreshing)
-                it.commentListError?.visibleOrGone(false)
+                it.commentListError.visibleOrGone(false)
             }
             commentsListAdapter?.data(item.comments)
         })

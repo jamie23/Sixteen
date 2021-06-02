@@ -4,11 +4,12 @@ import androidx.lifecycle.Observer
 import com.jamie.hn.core.BaseTest
 import com.jamie.hn.core.Event
 import com.jamie.hn.core.InstantExecutorExtension
-import com.jamie.hn.core.StoriesType.ASK
-import com.jamie.hn.core.StoriesType.JOBS
-import com.jamie.hn.core.StoriesType.NEW
-import com.jamie.hn.core.StoriesType.SHOW
-import com.jamie.hn.core.StoriesType.TOP
+import com.jamie.hn.core.StoriesListType.ASK
+import com.jamie.hn.core.StoriesListType.JOBS
+import com.jamie.hn.core.StoriesListType.NEW
+import com.jamie.hn.core.StoriesListType.SHOW
+import com.jamie.hn.core.StoriesListType.TOP
+import com.jamie.hn.core.StoryType
 import com.jamie.hn.core.ui.Article
 import com.jamie.hn.core.ui.Ask
 import com.jamie.hn.core.ui.Jobs
@@ -17,10 +18,11 @@ import com.jamie.hn.core.ui.Show
 import com.jamie.hn.core.ui.Top
 import com.jamie.hn.stories.domain.StoriesUseCase
 import com.jamie.hn.stories.domain.model.Story
+import com.jamie.hn.stories.repository.StoriesRepository.RequireText.NOT_REQUIRED
 import com.jamie.hn.stories.repository.model.StoryResult
 import com.jamie.hn.stories.repository.model.StoriesResult
 import com.jamie.hn.stories.ui.StoryListViewModel.StoryListViewState
-import com.jamie.hn.stories.ui.StoryListViewModel.StoryTypeStoryId
+import com.jamie.hn.stories.ui.StoryListViewModel.StoryData
 import io.mockk.MockKAnnotations
 import io.mockk.Runs
 import io.mockk.coEvery
@@ -77,7 +79,7 @@ class StoryListViewModelTest : BaseTest() {
         every { storyResourceProvider.showTitle() } returns "Show stories"
 
         coEvery { storiesUseCase.getStories(any(), any()) } returns StoriesResult(stories)
-        coEvery { storiesUseCase.getStory(1, true, any()) } returns storyResults
+        coEvery { storiesUseCase.getStory(1, true, any(), any()) } returns storyResults
         every { storyDataMapper.toStoryViewItem(story, any(), any()) } returns storyViewItem
         every {
             storyDataMapper.toStoryViewItem(
@@ -224,7 +226,7 @@ class StoryListViewModelTest : BaseTest() {
             }
 
             @Test
-            fun `when refresh is called and currentScreen is Top then the usecase should be called with storiesType TOP`() {
+            fun `when refresh is called and currentScreen is Top then the usecase should be called with storiesListType TOP`() {
                 storyListViewModel.currentScreen = Top
                 storyListViewModel.userManuallyRefreshed()
 
@@ -232,7 +234,7 @@ class StoryListViewModelTest : BaseTest() {
             }
 
             @Test
-            fun `when refresh is called and currentScreen is Ask then the usecase should be called with storiesType ASK`() {
+            fun `when refresh is called and currentScreen is Ask then the usecase should be called with storiesListType ASK`() {
                 storyListViewModel.currentScreen = Ask
                 storyListViewModel.userManuallyRefreshed()
 
@@ -240,7 +242,7 @@ class StoryListViewModelTest : BaseTest() {
             }
 
             @Test
-            fun `when refresh is called and currentScreen is Jobs then the usecase should be called with storiesType JOBS`() {
+            fun `when refresh is called and currentScreen is Jobs then the usecase should be called with storiesListType JOBS`() {
                 storyListViewModel.currentScreen = Jobs
                 storyListViewModel.userManuallyRefreshed()
 
@@ -248,7 +250,7 @@ class StoryListViewModelTest : BaseTest() {
             }
 
             @Test
-            fun `when refresh is called and currentScreen is New then the usecase should be called with storiesType NEW`() {
+            fun `when refresh is called and currentScreen is New then the usecase should be called with storiesListType NEW`() {
                 storyListViewModel.currentScreen = New
                 storyListViewModel.userManuallyRefreshed()
 
@@ -256,7 +258,7 @@ class StoryListViewModelTest : BaseTest() {
             }
 
             @Test
-            fun `when refresh is called and currentScreen is Show then the usecase should be called with storiesType SHOW`() {
+            fun `when refresh is called and currentScreen is Show then the usecase should be called with storiesListType SHOW`() {
                 storyListViewModel.currentScreen = Show
                 storyListViewModel.userManuallyRefreshed()
 
@@ -473,30 +475,87 @@ class StoryListViewModelTest : BaseTest() {
         }
     }
 
-    @Test
-    fun `when comments callback is called then we get the story using cache version and post the id  and the correct storyType to correct live data`() {
-        val observer = spyk<Observer<Event<StoryTypeStoryId>>>()
-        val commentsCallback = slot<(id: Int) -> Unit>()
-        val storyTypeStoryId = slot<Event<StoryTypeStoryId>>()
+    @Nested
+    inner class CommentsCallback {
 
-        every {
-            storyDataMapper.toStoryViewItem(
-                any(),
-                capture(commentsCallback),
-                any()
-            )
-        } returns storyViewItem
-        every { observer.onChanged(capture(storyTypeStoryId)) } just Runs
+        @Test
+        fun `when comments callback is called then we get the story using cache version and post the id and the correct storiesListType to correct live data`() {
+            val observer = spyk<Observer<Event<StoryData>>>()
+            val commentsCallback = slot<(id: Int) -> Unit>()
+            val storyData = slot<Event<StoryData>>()
 
-        storyListViewModel.navigateToComments().observeForever(observer)
-        storyListViewModel.automaticallyRefreshed()
+            every {
+                storyDataMapper.toStoryViewItem(
+                    any(),
+                    capture(commentsCallback),
+                    any()
+                )
+            } returns storyViewItem
+            every { observer.onChanged(capture(storyData)) } just Runs
+            coEvery { storiesUseCase.getStory(1, true, any(), any()) } returns storyResults
 
-        commentsCallback.captured.invoke(1)
+            storyListViewModel.navigateToComments().observeForever(observer)
+            storyListViewModel.automaticallyRefreshed()
 
-        val resultStoryTypeStoryId = storyTypeStoryId.captured.getContentIfNotHandled()!!
-        coVerify { storiesUseCase.getStory(1, true, TOP) }
-        assertEquals(0, resultStoryTypeStoryId.storyId)
-        assertEquals(TOP, resultStoryTypeStoryId.storyType)
+            commentsCallback.captured.invoke(1)
+
+            val resultStoryData = storyData.captured.getContentIfNotHandled()!!
+            coVerify { storiesUseCase.getStory(1, true, TOP, NOT_REQUIRED) }
+            assertEquals(0, resultStoryData.storyId)
+            assertEquals(TOP, resultStoryData.storiesListType)
+        }
+
+        @Test
+        fun `when comments callback is called and story type is not Ask then post the StoryData with storyType set to STANDARD`() {
+            val observer = spyk<Observer<Event<StoryData>>>()
+            val commentsCallback = slot<(id: Int) -> Unit>()
+            val storyData = slot<Event<StoryData>>()
+            val storyResults = StoryResult(generateStory(0, "23/08/2020 09:00:00", title = "Non Ask story"))
+
+            every {
+                storyDataMapper.toStoryViewItem(
+                    any(),
+                    capture(commentsCallback),
+                    any()
+                )
+            } returns storyViewItem
+            every { observer.onChanged(capture(storyData)) } just Runs
+            coEvery { storiesUseCase.getStory(1, true, any(), any()) } returns storyResults
+
+            storyListViewModel.navigateToComments().observeForever(observer)
+            storyListViewModel.automaticallyRefreshed()
+
+            commentsCallback.captured.invoke(1)
+
+            val resultStoryData = storyData.captured.getContentIfNotHandled()!!
+            assertEquals(StoryType.STANDARD, resultStoryData.storyType)
+        }
+
+        @Test
+        fun `when comments callback is called and story type is Ask then post the StoryData with storyType set to ASK`() {
+            val observer = spyk<Observer<Event<StoryData>>>()
+            val commentsCallback = slot<(id: Int) -> Unit>()
+            val storyData = slot<Event<StoryData>>()
+            val storyResults = StoryResult(generateStory(0, "23/08/2020 09:00:00", title = "Ask HN: Hello"))
+
+            every {
+                storyDataMapper.toStoryViewItem(
+                    any(),
+                    capture(commentsCallback),
+                    any()
+                )
+            } returns storyViewItem
+            every { observer.onChanged(capture(storyData)) } just Runs
+            coEvery { storiesUseCase.getStory(1, true, any(), any()) } returns storyResults
+
+            storyListViewModel.navigateToComments().observeForever(observer)
+            storyListViewModel.automaticallyRefreshed()
+
+            commentsCallback.captured.invoke(1)
+
+            val resultStoryData = storyData.captured.getContentIfNotHandled()!!
+            assertEquals(StoryType.ASK, resultStoryData.storyType)
+        }
     }
 
     @Test
@@ -519,7 +578,7 @@ class StoryListViewModelTest : BaseTest() {
 
         articleViewerCallback.captured.invoke(1)
 
-        coVerify { storiesUseCase.getStory(1, true, TOP) }
+        coVerify { storiesUseCase.getStory(1, true, TOP, NOT_REQUIRED) }
         assertEquals("url", urlEmitted.captured.getContentIfNotHandled())
     }
 
@@ -536,12 +595,13 @@ class StoryListViewModelTest : BaseTest() {
         }
     }
 
-    private fun generateStory(id: Int, time: String) = Story(
+    private fun generateStory(id: Int, time: String, title: String = "") = Story(
         id = id,
         time = DateTime.parse(
             time,
             DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss")
         ),
+        title = title,
         url = "url"
     )
 

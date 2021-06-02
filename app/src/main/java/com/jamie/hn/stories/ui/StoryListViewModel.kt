@@ -6,7 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jamie.hn.stories.domain.StoriesUseCase
 import com.jamie.hn.core.Event
-import com.jamie.hn.core.StoriesType
+import com.jamie.hn.core.StoriesListType
+import com.jamie.hn.core.StoryType
 import com.jamie.hn.core.ui.Ask
 import com.jamie.hn.core.ui.Jobs
 import com.jamie.hn.core.ui.New
@@ -14,6 +15,7 @@ import com.jamie.hn.core.ui.Screen
 import com.jamie.hn.core.ui.Show
 import com.jamie.hn.core.ui.Top
 import com.jamie.hn.stories.domain.model.Story
+import com.jamie.hn.stories.repository.StoriesRepository.RequireText.NOT_REQUIRED
 import com.jamie.hn.stories.ui.StoryListViewModel.SortChoice.OLDEST
 import com.jamie.hn.stories.ui.StoryListViewModel.SortChoice.NEWEST
 import com.jamie.hn.stories.ui.StoryListViewModel.SortChoice.STANDARD
@@ -28,8 +30,8 @@ class StoryListViewModel(
     private val storyListViewState = MutableLiveData<StoryListViewState>()
     fun storyListViewState(): LiveData<StoryListViewState> = storyListViewState
 
-    private val navigateToComments = MutableLiveData<Event<StoryTypeStoryId>>()
-    fun navigateToComments(): LiveData<Event<StoryTypeStoryId>> = navigateToComments
+    private val navigateToComments = MutableLiveData<Event<StoryData>>()
+    fun navigateToComments(): LiveData<Event<StoryData>> = navigateToComments
 
     private val navigateToArticle = MutableLiveData<Event<String>>()
     fun navigateToArticle(): LiveData<Event<String>> = navigateToArticle
@@ -113,13 +115,21 @@ class StoryListViewModel(
     )
 
     private fun commentsCallback(id: Int) {
-        val storiesType = getStoryTypeFromScreen(currentScreen)
+        val storiesListType = getStoryTypeFromScreen(currentScreen)
 
         viewModelScope.launch {
+            val story = storiesUseCase.getStory(
+                id = id,
+                useCachedVersion = true,
+                storiesListType = storiesListType,
+                requireText = NOT_REQUIRED
+            ).story
+
             navigateToComments.value = Event(
-                StoryTypeStoryId(
-                    storiesUseCase.getStory(id, true, storiesType).story.id,
-                    storiesType
+                StoryData(
+                    storyId = story.id,
+                    storiesListType = storiesListType,
+                    storyType = story.storyType
                 )
             )
         }
@@ -128,7 +138,14 @@ class StoryListViewModel(
     private fun articleViewerCallback(id: Int) {
         viewModelScope.launch {
             navigateToArticle.value =
-                Event(storiesUseCase.getStory(id, true, getStoryTypeFromScreen(currentScreen)).story.url)
+                Event(
+                    storiesUseCase.getStory(
+                        id = id,
+                        useCachedVersion = true,
+                        storiesListType = getStoryTypeFromScreen(currentScreen),
+                        requireText = NOT_REQUIRED
+                    ).story.url
+                )
         }
     }
 
@@ -148,11 +165,11 @@ class StoryListViewModel(
 
     private fun getStoryTypeFromScreen(screen: Screen) =
         when (screen) {
-            Top -> StoriesType.TOP
-            Ask -> StoriesType.ASK
-            Jobs -> StoriesType.JOBS
-            New -> StoriesType.NEW
-            Show -> StoriesType.SHOW
+            Top -> StoriesListType.TOP
+            Ask -> StoriesListType.ASK
+            Jobs -> StoriesListType.JOBS
+            New -> StoriesListType.NEW
+            Show -> StoriesListType.SHOW
             else -> throw IllegalArgumentException("Unsupported type of screen for fetching stories")
         }
 
@@ -162,9 +179,10 @@ class StoryListViewModel(
         val showNoCachedStoryNetworkError: Boolean
     )
 
-    data class StoryTypeStoryId(
+    data class StoryData(
         val storyId: Int,
-        val storyType: StoriesType
+        val storiesListType: StoriesListType,
+        val storyType: StoryType
     )
 
     enum class SortChoice {

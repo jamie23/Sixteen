@@ -1,15 +1,18 @@
 package com.jamie.hn.stories.repository
 
-import com.jamie.hn.core.StoriesType
-import com.jamie.hn.core.StoriesType.TOP
-import com.jamie.hn.core.StoriesType.ASK
-import com.jamie.hn.core.StoriesType.JOBS
-import com.jamie.hn.core.StoriesType.NEW
-import com.jamie.hn.core.StoriesType.SHOW
+import com.jamie.hn.core.StoriesListType
+import com.jamie.hn.core.StoriesListType.TOP
+import com.jamie.hn.core.StoriesListType.ASK
+import com.jamie.hn.core.StoriesListType.JOBS
+import com.jamie.hn.core.StoriesListType.NEW
+import com.jamie.hn.core.StoriesListType.SHOW
 import com.jamie.hn.core.net.NetworkUtils
 import com.jamie.hn.stories.repository.local.LocalStorage
 import com.jamie.hn.core.net.hex.Hex
+import com.jamie.hn.core.net.official.OfficialClient
 import com.jamie.hn.stories.domain.model.Story
+import com.jamie.hn.stories.repository.StoriesRepository.RequireText.NOT_REQUIRED
+import com.jamie.hn.stories.repository.StoriesRepository.RequireText.REQUIRED
 import com.jamie.hn.stories.repository.model.StoryResult
 import com.jamie.hn.stories.repository.model.StoriesResult
 import com.jamie.hn.stories.repository.web.getWebPath
@@ -17,6 +20,7 @@ import org.joda.time.DateTime
 
 class StoriesRepository(
     private val webStorage: Hex,
+    private val officialClient: OfficialClient,
     private val localStorage: LocalStorage,
     private val mapper: ApiToDomainMapper,
     private val networkUtils: NetworkUtils
@@ -24,17 +28,17 @@ class StoriesRepository(
 
     override suspend fun stories(
         useCachedVersion: Boolean,
-        storiesType: StoriesType
+        storiesListType: StoriesListType
     ): StoriesResult {
         if (!networkUtils.isNetworkAvailable()) {
             return StoriesResult(
-                getLocalStoriesListByType(storiesType),
+                getLocalStoriesListByType(storiesListType),
                 true
             )
         }
 
         if (useCachedVersion) {
-            val localCopy = getLocalStoriesListByType(storiesType)
+            val localCopy = getLocalStoriesListByType(storiesListType)
             if (localCopy.isNotEmpty()) {
                 return StoriesResult(
                     localCopy,
@@ -43,11 +47,11 @@ class StoriesRepository(
             }
         }
 
-        val newCopy = webStorage.stories(getWebPath(storiesType)).map { story ->
+        val newCopy = webStorage.stories(getWebPath(storiesListType)).map { story ->
             mapper.toStoryDomainModel(story, false)
         }
 
-        updateLocalStoriesListByType(storiesType, newCopy)
+        updateLocalStoriesListByType(storiesListType, newCopy)
         return StoriesResult(newCopy)
     }
 
@@ -55,14 +59,17 @@ class StoriesRepository(
         id: Int,
         useCachedVersion: Boolean,
         requireComments: Boolean,
-        storiesType: StoriesType
+        storiesListType: StoriesListType,
+        requireText: RequireText
     ): StoryResult {
-        val localStoriesList = getLocalStoriesListByType(storiesType)
+        val localStoriesList = getLocalStoriesListByType(storiesListType)
 
         if (!networkUtils.isNetworkAvailable()) {
             val localCopy = localStoriesList.first { it.id == id }
 
-            if (!requireComments || requireComments && localCopy.retrievedComments) {
+            if (commentsRequiredAndRetrieved(requireComments, localCopy) &&
+                textRequiredAndRetrieved(requireText, localCopy)
+            ) {
                 return StoryResult(
                     story = localCopy,
                     networkFailure = true
@@ -78,7 +85,9 @@ class StoriesRepository(
         if (useCachedVersion) {
             val localCopy = localStoriesList.first { it.id == id }
 
-            if (!requireComments || localCopy.retrievedComments) {
+            if (commentsRequiredAndRetrieved(requireComments, localCopy) &&
+                textRequiredAndRetrieved(requireText, localCopy)
+            ) {
                 return StoryResult(
                     story = localCopy,
                     networkFailure = false
@@ -86,21 +95,32 @@ class StoriesRepository(
             }
         }
 
+        var text = ""
+        if (requireText == REQUIRED) {
+            text = officialClient.getStory(id).text
+        }
+
         val newCopy = webStorage.story(id)
         val newList = localStoriesList.toMutableList()
         val index = newList.indexOfFirst { it.id == newCopy.id }
 
         val domainMappedCopy =
-            mapper.toStoryDomainModel(newCopy, true)
+            mapper.toStoryDomainModel(newCopy, true, text)
 
         newList[index] = domainMappedCopy
 
-        updateLocalStoriesListByType(storiesType, newList)
+        updateLocalStoriesListByType(storiesListType, newList)
         return StoryResult(domainMappedCopy)
     }
 
-    private fun getLocalStoriesListByType(storiesType: StoriesType): List<Story> =
-        when (storiesType) {
+    private fun commentsRequiredAndRetrieved(requireComments: Boolean, localCopy: Story) =
+        !requireComments || localCopy.retrievedComments
+
+    private fun textRequiredAndRetrieved(requireText: RequireText, localCopy: Story) =
+        requireText == NOT_REQUIRED || localCopy.text != ""
+
+    private fun getLocalStoriesListByType(storiesListType: StoriesListType): List<Story> =
+        when (storiesListType) {
             TOP -> localStorage.topStoryList
             ASK -> localStorage.askStoryList
             JOBS -> localStorage.jobsStoryList
@@ -108,12 +128,16 @@ class StoriesRepository(
             SHOW -> localStorage.showStoryList
         }
 
-    private fun updateLocalStoriesListByType(storiesType: StoriesType, list: List<Story>) =
-        when (storiesType) {
+    private fun updateLocalStoriesListByType(storiesListType: StoriesListType, list: List<Story>) =
+        when (storiesListType) {
             TOP -> localStorage.topStoryList = list
             ASK -> localStorage.askStoryList = list
             JOBS -> localStorage.jobsStoryList = list
             NEW -> localStorage.newStoryList = list
             SHOW -> localStorage.showStoryList = list
         }
+
+    enum class RequireText {
+        REQUIRED, NOT_REQUIRED
+    }
 }

@@ -1,18 +1,18 @@
 package com.jamie.hn.core.di
 
 import com.jamie.hn.core.net.hex.Hex
-import com.jamie.hn.core.net.official.HackerNewsService
+import com.jamie.hn.core.net.official.OfficialClient
 import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 val apiModule = module {
-    single<HackerNewsService> {
+    single<OfficialClient> {
         Retrofit.Builder()
             .baseUrl("https://hacker-news.firebaseio.com/v0/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(HackerNewsService::class.java)
+            .create(OfficialClient::class.java)
     }
 
     single<Hex> {

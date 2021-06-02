@@ -19,9 +19,12 @@ import com.jamie.hn.comments.ui.repository.model.CurrentState.COLLAPSED
 import com.jamie.hn.comments.ui.repository.model.CurrentState.FULL
 import com.jamie.hn.comments.ui.repository.model.CurrentState.HIDDEN
 import com.jamie.hn.core.Event
-import com.jamie.hn.core.StoriesType
+import com.jamie.hn.core.StoriesListType
+import com.jamie.hn.core.StoryType
 import com.jamie.hn.stories.domain.StoriesUseCase
 import com.jamie.hn.stories.domain.model.Story
+import com.jamie.hn.stories.repository.StoriesRepository.RequireText.NOT_REQUIRED
+import com.jamie.hn.stories.repository.StoriesRepository.RequireText.REQUIRED
 import kotlinx.coroutines.launch
 
 class CommentsListViewModel(
@@ -58,28 +61,44 @@ class CommentsListViewModel(
 
     private lateinit var commentsViewRepository: CommentsViewRepository
     private lateinit var story: Story
-    lateinit var storyType: StoriesType
+    private lateinit var storyListType: StoriesListType
+    private lateinit var storyType: StoryType
 
     fun userManuallyRefreshed() {
+        showLoadingUI()
         refreshList(false)
     }
 
     fun automaticallyRefreshed() {
+        showLoadingUI()
         refreshList(true)
     }
 
-    fun init() {
-        commentsViewRepository =
-            CommentsViewRepository(
-                ::viewStateUpdate
-            )
+    fun init(storyListType: StoriesListType, storyType: StoryType) {
+        this.storyListType = storyListType
+        this.storyType = storyType
 
-        viewModelScope.launch {
-            story = storiesUseCase.getStory(storyId, true, storyType).story
-            updateTitleWithArticleTitle()
+        commentsViewRepository = CommentsViewRepository(::viewStateUpdate)
+
+        showLoadingUI()
+
+        val requireText = if (storyType == StoryType.ASK) {
+            REQUIRED
+        } else {
+            NOT_REQUIRED
         }
 
-        automaticallyRefreshed()
+        viewModelScope.launch {
+            story = storiesUseCase.getStory(
+                id = storyId,
+                useCachedVersion = false,
+                storiesListType = this@CommentsListViewModel.storyListType,
+                requireText = requireText
+            ).story
+
+            updateTitleWithArticleTitle()
+            refreshList(true)
+        }
     }
 
     private fun updateTitleWithArticleTitle() {
@@ -87,20 +106,22 @@ class CommentsListViewModel(
     }
 
     private fun refreshList(useCachedVersion: Boolean) {
-        listViewState.value = ListViewState(
-            comments = emptyList(),
-            refreshing = true
-        )
-
         viewModelScope.launch {
             commentsUseCase.retrieveComments(
                 storyId = storyId,
                 useCache = useCachedVersion,
                 onResult = ::populateUiCommentRepository,
                 requireComments = true,
-                storyType = storyType
+                storiesListType = storyListType
             )
         }
+    }
+
+    private fun showLoadingUI() {
+        listViewState.value = ListViewState(
+            comments = emptyList(),
+            refreshing = true
+        )
     }
 
     private fun viewStateUpdate(commentList: List<CommentCurrentState>) {
@@ -153,7 +174,10 @@ class CommentsListViewModel(
         }
     }
 
-    private fun sortList(listAllComments: List<CommentWithDepth>, sortState: SortChoice): List<CommentWithDepth> {
+    private fun sortList(
+        listAllComments: List<CommentWithDepth>,
+        sortState: SortChoice
+    ): List<CommentWithDepth> {
         val sortedListTopLevelComments = getTopLevelSortedComments(listAllComments, sortState)
         val sortedFullList = mutableListOf<CommentWithDepth>()
 
@@ -173,7 +197,10 @@ class CommentsListViewModel(
 
     // Returns a list containing each top level parent and its index sorted by users choice
     // The list comes sorted so the index holds the state of the sorted list from the server
-    private fun getTopLevelSortedComments(listAllComments: List<CommentWithDepth>, sortState: SortChoice) =
+    private fun getTopLevelSortedComments(
+        listAllComments: List<CommentWithDepth>,
+        sortState: SortChoice
+    ) =
         listAllComments
             .withIndex()
             .filter { it.value.depth == 0 }
@@ -202,6 +229,7 @@ class CommentsListViewModel(
     private fun addHeader(listAllComments: List<ViewItem>): List<ViewItem> {
         val headerItem = commentDataMapper.toStoryHeaderViewItem(
             story = story,
+            urlClickedCallback = ::urlClicked,
             storyViewerCallback = ::articleViewerCallback
         )
 

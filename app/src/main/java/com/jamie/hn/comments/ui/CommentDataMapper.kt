@@ -6,6 +6,7 @@ import com.jamie.hn.comments.ui.extensions.italiciseQuotes
 import com.jamie.hn.comments.ui.extensions.removeAppendedNewLines
 import com.jamie.hn.comments.ui.repository.model.CommentCurrentState
 import com.jamie.hn.comments.ui.repository.model.CurrentState.HEADER
+import com.jamie.hn.core.StoryType
 import com.jamie.hn.core.ui.CoreDataMapper
 import com.jamie.hn.stories.domain.model.Story
 import com.jamie.hn.stories.ui.StoryResourceProvider
@@ -39,6 +40,7 @@ class CommentDataMapper(
 
     fun toStoryHeaderViewItem(
         story: Story,
+        urlClickedCallback: (String) -> Unit,
         storyViewerCallback: () -> Unit
     ) = HeaderViewItem(
         id = story.id,
@@ -50,6 +52,9 @@ class CommentDataMapper(
         scoreText = scoreText(story.score),
         title = story.title,
         url = story.domain,
+        text = processText(story.text, urlClickedCallback),
+        showAskText = story.storyType == StoryType.ASK,
+        showNavigateToArticle = story.storyType != StoryType.ASK,
         storyViewerCallback = storyViewerCallback
     )
 

@@ -1,6 +1,10 @@
 package com.jamie.hn.stories.domain.model
 
 import com.jamie.hn.comments.domain.model.Comment
+import com.jamie.hn.core.ASK_PREFIX
+import com.jamie.hn.core.StoryType
+import com.jamie.hn.core.StoryType.ASK
+import com.jamie.hn.core.StoryType.STANDARD
 import org.joda.time.DateTime
 
 data class Story(
@@ -14,5 +18,13 @@ data class Story(
     val time: DateTime,
     val title: String = "",
     val url: String = "",
+    val text: String = "",
     val retrievedComments: Boolean = false
-)
+) {
+    val storyType: StoryType
+        get() = if (title.startsWith(ASK_PREFIX)) {
+            ASK
+        } else {
+            STANDARD
+        }
+}

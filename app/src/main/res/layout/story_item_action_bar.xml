@@ -17,7 +17,7 @@
         app:layout_constraintEnd_toStartOf="@id/commentsButton"
         app:layout_constraintStart_toStartOf="parent"
         android:textColor="?attr/secondary_text"
-        android:text="Article"
+        android:text="@string/story_article"
         tools:text="Article" />
 
     <Button
@@ -32,7 +32,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/articleButton"
         android:textColor="?attr/secondary_text"
-        android:text="Comments"
+        android:text="@string/story_comments"
         tools:text="Comments" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

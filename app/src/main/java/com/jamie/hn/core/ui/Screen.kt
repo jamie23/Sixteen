@@ -1,7 +1,8 @@
 package com.jamie.hn.core.ui
 
 import android.os.Parcelable
-import com.jamie.hn.core.StoriesType
+import com.jamie.hn.core.StoriesListType
+import com.jamie.hn.core.StoryType
 import kotlinx.android.parcel.Parcelize
 
 sealed class Screen : Parcelable
@@ -22,7 +23,11 @@ object New : Screen()
 object Show : Screen()
 
 @Parcelize
-data class Comments(val storyId: Int, val storyType: StoriesType) : Screen()
+data class Comments(
+    val storyId: Int,
+    val storiesListType: StoriesListType,
+    val storyType: StoryType
+) : Screen()
 
 @Parcelize
 data class Article(val url: String) : Screen()

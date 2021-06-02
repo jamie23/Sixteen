@@ -17,8 +17,11 @@
                 android:name="storyId"
                 app:argType="integer" />
             <argument
+                android:name="storiesListType"
+                app:argType="com.jamie.hn.core.StoriesListType" />
+            <argument
                 android:name="storyType"
-                app:argType="com.jamie.hn.core.StoriesType" />
+                app:argType="com.jamie.hn.core.StoryType" />
         </action>
         <action
             android:id="@+id/action_storiesList_to_articleViewer"
