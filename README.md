@@ -1,4 +1,4 @@
- # Sixteen
+# Sixteen
 
 Sixteen is a Hacker News client built for Android.
 
