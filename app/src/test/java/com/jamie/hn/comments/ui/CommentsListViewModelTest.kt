@@ -480,6 +480,7 @@ class CommentsListViewModelTest : BaseTest() {
             coEvery {
                 commentDataMapper.toCommentViewItem(
                     capture(commentsPassedToMapper),
+                    anyString(),
                     capture(longClickListenerCallback),
                     any()
                 )
@@ -511,6 +512,7 @@ class CommentsListViewModelTest : BaseTest() {
             coEvery {
                 commentDataMapper.toCommentViewItem(
                     capture(commentsPassedToMapper),
+                    anyString(),
                     capture(longClickListenerCallback),
                     any()
                 )
@@ -547,6 +549,7 @@ class CommentsListViewModelTest : BaseTest() {
             coEvery {
                 commentDataMapper.toCommentViewItem(
                     capture(commentsPassedToMapper),
+                    anyString(),
                     capture(longClickListenerCallback),
                     any()
                 )
@@ -587,6 +590,7 @@ class CommentsListViewModelTest : BaseTest() {
             coEvery {
                 commentDataMapper.toCommentViewItem(
                     capture(commentsPassedToMapper),
+                    anyString(),
                     capture(longClickListenerCallback),
                     any()
                 )
@@ -628,6 +632,7 @@ class CommentsListViewModelTest : BaseTest() {
             coEvery {
                 commentDataMapper.toCommentViewItem(
                     capture(commentsPassedToMapper),
+                    anyString(),
                     capture(longClickListenerCallback),
                     any()
                 )
@@ -729,6 +734,7 @@ class CommentsListViewModelTest : BaseTest() {
             coEvery {
                 commentDataMapper.toCommentViewItem(
                     capture(commentsPassedToMapper),
+                    anyString(),
                     any(),
                     any()
                 )
@@ -765,6 +771,7 @@ class CommentsListViewModelTest : BaseTest() {
             coEvery {
                 commentDataMapper.toCommentViewItem(
                     capture(commentsPassedToMapper),
+                    anyString(),
                     any(),
                     any()
                 )
@@ -801,6 +808,7 @@ class CommentsListViewModelTest : BaseTest() {
             coEvery {
                 commentDataMapper.toCommentViewItem(
                     capture(commentsPassedToMapper),
+                    anyString(),
                     any(),
                     any()
                 )
@@ -924,6 +932,7 @@ class CommentsListViewModelTest : BaseTest() {
         coEvery {
             commentDataMapper.toCommentViewItem(
                 any(),
+                anyString(),
                 any(),
                 capture(urlClickedCallback)
             )
@@ -959,6 +968,7 @@ class CommentsListViewModelTest : BaseTest() {
         coEvery {
             commentDataMapper.toCommentViewItem(
                 any(),
+                anyString(),
                 any(),
                 any()
             )
