@@ -9,16 +9,15 @@ import com.jamie.hn.comments.ui.repository.model.CurrentState.HEADER
 import com.jamie.hn.core.StoryType
 import com.jamie.hn.core.ui.CoreDataMapper
 import com.jamie.hn.stories.domain.model.Story
-import com.jamie.hn.stories.ui.StoryResourceProvider
 
 class CommentDataMapper(
-    private val commentsResourceProvider: CommentsResourceProvider,
-    private val coreDataMapper: CoreDataMapper,
-    private val resourceProvider: StoryResourceProvider
+    private val resourceProvider: CommentsResourceProvider,
+    private val coreDataMapper: CoreDataMapper
 ) {
 
     fun toCommentViewItem(
         wrapper: CommentCurrentState,
+        storyAuthor: String,
         collapseCallback: (Int) -> Unit,
         urlClickedCallback: (String) -> Unit
     ): CommentViewItem {
@@ -29,10 +28,14 @@ class CommentDataMapper(
             id = wrapper.comment.id,
             state = wrapper.state,
             author = comment.author,
+            isOP = storyAuthor == wrapper.comment.comment.author,
             time = coreDataMapper.time(comment.time),
             text = processText(comment.text, urlClickedCallback),
             depth = depth,
-            authorAndHiddenChildren = authorAndHiddenChildren(comment),
+            authorAndHiddenChildren = authorAndHiddenChildren(
+                comment,
+                storyAuthor == wrapper.comment.comment.author
+            ),
             showTopDivider = depth == 0,
             clickCommentListener = collapseCallback
         )
@@ -63,9 +66,18 @@ class CommentDataMapper(
             .italiciseQuotes()
             .removeAppendedNewLines()
 
-    private fun authorAndHiddenChildren(comment: Comment) =
-        "${comment.author} [${comment.commentCount + 1} ${commentsResourceProvider.hidden()}]"
+    private fun authorAndHiddenChildren(comment: Comment, isOP: Boolean) = if (isOP) {
+        authorAndHiddenChildrenOP(comment)
+    } else {
+        authorAndHiddenChildrenNotOP(comment)
+    }
 
-    private fun comments(numComments: Int) = resourceProvider.comments(numComments)
+    private fun authorAndHiddenChildrenOP(comment: Comment) =
+        "${comment.author} ${resourceProvider.op()} [${comment.commentCount + 1} ${resourceProvider.hidden()}]"
+
+    private fun authorAndHiddenChildrenNotOP(comment: Comment) =
+        "${comment.author} [${comment.commentCount + 1} ${resourceProvider.hidden()}]"
+
+    private fun comments(numComments: Int) = resourceProvider.numComments(numComments)
     private fun scoreText(score: Int) = resourceProvider.score(score)
 }

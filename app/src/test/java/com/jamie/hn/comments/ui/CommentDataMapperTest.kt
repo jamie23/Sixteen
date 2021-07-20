@@ -8,7 +8,6 @@ import com.jamie.hn.comments.ui.repository.model.CurrentState.HEADER
 import com.jamie.hn.core.BaseTest
 import com.jamie.hn.core.ui.CoreDataMapper
 import com.jamie.hn.stories.domain.model.Story
-import com.jamie.hn.stories.ui.StoryResourceProvider
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -34,10 +33,7 @@ class CommentDataMapperTest : BaseTest() {
     private lateinit var urlClickedCallback: (String) -> Unit
 
     @MockK
-    private lateinit var commentsResourceProvider: CommentsResourceProvider
-
-    @MockK
-    private lateinit var resourceProvider: StoryResourceProvider
+    private lateinit var resourceProvider: CommentsResourceProvider
 
     private lateinit var commentDataMapper: CommentDataMapper
 
@@ -45,14 +41,14 @@ class CommentDataMapperTest : BaseTest() {
     fun setup() {
         MockKAnnotations.init(this)
 
-        commentDataMapper =
-            spyk(CommentDataMapper(commentsResourceProvider, coreDataMapper, resourceProvider))
+        commentDataMapper = spyk(CommentDataMapper(resourceProvider, coreDataMapper))
 
         every { coreDataMapper.time(any()) } returns "1d"
-        every { commentsResourceProvider.hidden() } returns "hidden"
-        every { commentDataMapper.processText(any(), any()) } returns ""
-        every { resourceProvider.comments(any()) } returns "1 comment"
+        every { commentDataMapper.processText(any(), any()) } returns mockk()
+        every { resourceProvider.hidden() } returns "hidden"
+        every { resourceProvider.numComments(any()) } returns "1 comment"
         every { resourceProvider.score(any()) } returns "point"
+        every { resourceProvider.op() } returns "op"
     }
 
     @Nested
@@ -76,11 +72,13 @@ class CommentDataMapperTest : BaseTest() {
             val commentViewItem =
                 commentDataMapper.toCommentViewItem(
                     commentCurrentState,
+                    "author",
                     collapseCallback,
                     urlClickedCallback
                 )
 
             assertEquals("author", commentViewItem.author)
+            assertEquals(true, commentViewItem.isOP)
             assertEquals("1d", commentViewItem.time)
             assertEquals(2, commentViewItem.depth)
             assertEquals(collapseCallback, commentViewItem.clickCommentListener)
@@ -116,6 +114,7 @@ class CommentDataMapperTest : BaseTest() {
                 val commentViewItem =
                     commentDataMapper.toCommentViewItem(
                         commentWithDepth,
+                        "",
                         collapseCallback,
                         urlClickedCallback
                     )
@@ -146,6 +145,7 @@ class CommentDataMapperTest : BaseTest() {
                 val commentViewItem =
                     commentDataMapper.toCommentViewItem(
                         commentWithDepth,
+                        "",
                         collapseCallback,
                         urlClickedCallback
                     )
@@ -172,6 +172,7 @@ class CommentDataMapperTest : BaseTest() {
                 val commentViewItem =
                     commentDataMapper.toCommentViewItem(
                         commentWithDepth,
+                        "",
                         collapseCallback,
                         urlClickedCallback
                     )
@@ -202,6 +203,7 @@ class CommentDataMapperTest : BaseTest() {
                 val commentViewItem =
                     commentDataMapper.toCommentViewItem(
                         commentWithDepth,
+                        "author op",
                         collapseCallback,
                         urlClickedCallback
                     )
@@ -248,7 +250,6 @@ class CommentDataMapperTest : BaseTest() {
             assertEquals("point", headerViewItem.scoreText)
             assertEquals("title", headerViewItem.title)
             assertEquals("domain", headerViewItem.url)
-            assertEquals("", headerViewItem.text)
             assertEquals(false, headerViewItem.showAskText)
             assertEquals(true, headerViewItem.showNavigateToArticle)
             assertEquals(storyViewerCallback, headerViewItem.storyViewerCallback)
@@ -369,39 +370,36 @@ class CommentDataMapperTest : BaseTest() {
 
         @Test
         fun `when story is an askStory then showNavigateToArticle is false`() {
-            @Test
-            fun `when we map the text then we use the return value of processText`() {
-                every {
-                    commentDataMapper.processText(
-                        "text",
-                        urlClickedCallback
-                    )
-                } returns "returned chars"
+            every {
+                commentDataMapper.processText(
+                    "text",
+                    urlClickedCallback
+                )
+            } returns "returned chars"
 
-                val comments = listOf(Comment(time = DateTime.now(), commentCount = 0))
-                val story = Story(
-                    author = "Jamie",
-                    comments = comments,
-                    commentCount = 1,
-                    commentsUrl = "commentsUrl",
-                    domain = "domain",
-                    id = 2,
-                    score = 3,
-                    time = DateTime.now(),
-                    title = "Ask HN:",
-                    url = "url",
-                    text = "text"
+            val comments = listOf(Comment(time = DateTime.now(), commentCount = 0))
+            val story = Story(
+                author = "Jamie",
+                comments = comments,
+                commentCount = 1,
+                commentsUrl = "commentsUrl",
+                domain = "domain",
+                id = 2,
+                score = 3,
+                time = DateTime.now(),
+                title = "Ask HN:",
+                url = "url",
+                text = "text"
+            )
+
+            val headerViewItem =
+                commentDataMapper.toStoryHeaderViewItem(
+                    story,
+                    urlClickedCallback,
+                    mockk()
                 )
 
-                val headerViewItem =
-                    commentDataMapper.toStoryHeaderViewItem(
-                        story,
-                        urlClickedCallback,
-                        mockk()
-                    )
-
-                assertFalse(headerViewItem.showNavigateToArticle)
-            }
+            assertFalse(headerViewItem.showNavigateToArticle)
         }
 
         @Test
