@@ -250,7 +250,6 @@ class CommentDataMapperTest : BaseTest() {
             assertEquals("point", headerViewItem.scoreText)
             assertEquals("title", headerViewItem.title)
             assertEquals("domain", headerViewItem.url)
-            assertEquals("", headerViewItem.text)
             assertEquals(false, headerViewItem.showAskText)
             assertEquals(true, headerViewItem.showNavigateToArticle)
             assertEquals(storyViewerCallback, headerViewItem.storyViewerCallback)
