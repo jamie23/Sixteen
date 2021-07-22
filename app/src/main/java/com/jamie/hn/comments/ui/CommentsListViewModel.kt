@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.jamie.hn.comments.domain.CommentsUseCase
 import com.jamie.hn.comments.domain.model.CommentWithDepth
+import com.jamie.hn.comments.ui.CommentsListViewModel.RefreshType.AUTOMATIC
+import com.jamie.hn.comments.ui.CommentsListViewModel.RefreshType.USER
 import com.jamie.hn.comments.ui.CommentsListViewModel.ShareChoice.ARTICLE_COMMENTS
 import com.jamie.hn.comments.ui.CommentsListViewModel.ShareChoice.ARTICLE
 import com.jamie.hn.comments.ui.CommentsListViewModel.ShareChoice.COMMENTS
@@ -64,23 +66,33 @@ class CommentsListViewModel(
     private lateinit var storyListType: StoriesListType
     private lateinit var storyType: StoryType
 
+    // On first load we should always fetch
+    private var initiallyFetched = false
+
     fun userManuallyRefreshed() {
-        showLoadingUI()
-        refreshList(false)
+        refreshList(USER)
     }
 
     fun automaticallyRefreshed() {
-        showLoadingUI()
-        refreshList(true)
+        refreshList(AUTOMATIC)
     }
 
-    fun init(storyListType: StoriesListType, storyType: StoryType) {
+    fun initialise(storyListType: StoriesListType, storyType: StoryType) {
         this.storyListType = storyListType
         this.storyType = storyType
 
         commentsViewRepository = CommentsViewRepository(::viewStateUpdate)
+        automaticallyRefreshed()
+    }
 
+    private fun updateTitleWithArticleTitle() {
+        articleTitle.value = story.title
+    }
+
+    private fun refreshList(refreshType: RefreshType) {
         showLoadingUI()
+
+        val useCachedVersion = initiallyFetched && refreshType == AUTOMATIC
 
         val requireText = if (storyType == StoryType.ASK) {
             REQUIRED
@@ -91,22 +103,13 @@ class CommentsListViewModel(
         viewModelScope.launch {
             story = storiesUseCase.getStory(
                 id = storyId,
-                useCachedVersion = false,
+                useCachedVersion = useCachedVersion,
                 storiesListType = this@CommentsListViewModel.storyListType,
                 requireText = requireText
             ).story
 
             updateTitleWithArticleTitle()
-            refreshList(true)
-        }
-    }
 
-    private fun updateTitleWithArticleTitle() {
-        articleTitle.value = story.title
-    }
-
-    private fun refreshList(useCachedVersion: Boolean) {
-        viewModelScope.launch {
             commentsUseCase.retrieveComments(
                 storyId = storyId,
                 useCache = useCachedVersion,
@@ -114,6 +117,8 @@ class CommentsListViewModel(
                 requireComments = true,
                 storiesListType = storyListType
             )
+
+            initiallyFetched = true
         }
     }
 
@@ -325,6 +330,10 @@ class CommentsListViewModel(
 
     enum class ShareChoice {
         ARTICLE, COMMENTS, ARTICLE_COMMENTS
+    }
+
+    enum class RefreshType {
+        USER, AUTOMATIC
     }
 
     data class ListViewState(
