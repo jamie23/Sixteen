@@ -96,8 +96,8 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
             }
         }
 
-        viewModel.init(storyListType, storyType)
         initialiseLiveDataObservers(view)
+        viewModel.initialise(storyListType, storyType)
     }
 
     override fun onDestroyView() {

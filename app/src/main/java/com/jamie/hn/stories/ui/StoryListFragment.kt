@@ -76,12 +76,14 @@ class StoryListFragment : Fragment(R.layout.story_list_fragment) {
             sharedNavigationViewModel.navigationIconSelected()
         }
 
-        viewModel.storyListViewState().observe(viewLifecycleOwner, Observer {
-            binding?.progressBar?.visibleOrGone(it.refreshing)
-            binding?.storySwipeLayout?.isRefreshing = it.refreshing
-            binding?.storyList?.visibleOrGone(!it.refreshing)
-            binding?.storyListError?.visibleOrGone(it.showNoCachedStoryNetworkError)
-            storyListAdapter.data(it.stories)
+        viewModel.storyListViewState().observe(viewLifecycleOwner, Observer { item ->
+            binding?.let {
+                it.progressBar.visibleOrGone(item.refreshing)
+                it.storySwipeLayout.isRefreshing = item.refreshing
+                it.storyList.visibleOrGone(!item.refreshing)
+                it.storyListError.visibleOrGone(item.showNoCachedStoryNetworkError)
+            }
+            storyListAdapter.data(item.stories)
         })
 
         viewModel.navigateToComments().observe(viewLifecycleOwner, Observer {

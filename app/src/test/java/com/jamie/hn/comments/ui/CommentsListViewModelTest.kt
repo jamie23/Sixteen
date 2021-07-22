@@ -109,10 +109,10 @@ class CommentsListViewModelTest : BaseTest() {
     }
 
     @Nested
-    inner class Init {
+    inner class Initialise {
 
         @Test
-        fun `when init is called then we emit refreshing view state and retrieve the comments from the use case with the correct story id, use cache is true and correct storyListType, storyType`() {
+        fun `when we initialise the first time then update the view, retrieve the comments with the correct story id`() {
             coEvery {
                 commentsUseCase.retrieveComments(
                     any(),
@@ -125,13 +125,58 @@ class CommentsListViewModelTest : BaseTest() {
             val observer = spyk<Observer<ListViewState>>()
 
             commentsListViewModel.commentsViewState().observeForever(observer)
-            commentsListViewModel.init(storiesListType, storyType)
+            commentsListViewModel.initialise(storiesListType, storyType)
 
             coVerifySequence {
                 observer.onChanged(ListViewState(emptyList(), true))
                 storiesUseCase.getStory(
                     id = 1,
                     useCachedVersion = false,
+                    storiesListType = TOP,
+                    requireText = NOT_REQUIRED
+                )
+                commentsUseCase.retrieveComments(
+                    storyId = 1,
+                    useCache = false,
+                    onResult = any(),
+                    requireComments = true,
+                    storiesListType = TOP
+                )
+            }
+        }
+
+        @Test
+        fun `when we initialise a second time then retrieve the comments from the cache with the correct story id`() {
+            coEvery {
+                commentsUseCase.retrieveComments(
+                    any(),
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            } just Runs
+
+            commentsListViewModel.initialise(storiesListType, storyType)
+            commentsListViewModel.initialise(storiesListType, storyType)
+
+            coVerifySequence {
+                storiesUseCase.getStory(
+                    id = 1,
+                    useCachedVersion = false,
+                    storiesListType = TOP,
+                    requireText = NOT_REQUIRED
+                )
+                commentsUseCase.retrieveComments(
+                    storyId = 1,
+                    useCache = false,
+                    onResult = any(),
+                    requireComments = true,
+                    storiesListType = TOP
+                )
+                storiesUseCase.getStory(
+                    id = 1,
+                    useCachedVersion = true,
                     storiesListType = TOP,
                     requireText = NOT_REQUIRED
                 )
@@ -146,7 +191,7 @@ class CommentsListViewModelTest : BaseTest() {
         }
 
         @Test
-        fun `when init is called and the story is an Ask type then requireText is true`() {
+        fun `when initialise is called and the story is an Ask type then requireText is true`() {
             coEvery {
                 commentsUseCase.retrieveComments(
                     any(),
@@ -158,7 +203,7 @@ class CommentsListViewModelTest : BaseTest() {
             } just Runs
             storyType = StoryType.ASK
 
-            commentsListViewModel.init(storiesListType, storyType)
+            commentsListViewModel.initialise(storiesListType, storyType)
 
             coVerify {
                 storiesUseCase.getStory(
@@ -171,7 +216,7 @@ class CommentsListViewModelTest : BaseTest() {
         }
 
         @Test
-        fun `when the repository is populated from the use case then the callback modifies the commentsViewRepository with a CommentCurrentState with the id as index and state as full`() {
+        fun `when the repository is populated then update the commentsViewRepository with a CommentCurrentState with the id as index and state as full`() {
             val callback = slot<(List<CommentWithDepth>, Boolean, Boolean) -> Unit>()
             val commentsToMapper = mutableListOf<CommentCurrentState>()
             storiesListType = NEW
@@ -194,14 +239,14 @@ class CommentsListViewModelTest : BaseTest() {
                 )
             } returns mockk()
 
-            commentsListViewModel.init(storiesListType, storyType)
+            commentsListViewModel.initialise(storiesListType, storyType)
 
             callback.invoke(useCaseResponseWithoutChildren(), false, false)
 
             coVerify {
                 commentsUseCase.retrieveComments(
                     storyId = 1,
-                    useCache = true,
+                    useCache = false,
                     onResult = any(),
                     requireComments = true,
                     storiesListType = NEW
@@ -220,7 +265,7 @@ class CommentsListViewModelTest : BaseTest() {
         }
 
         @Test
-        fun `when the repository is populated from the use case, we map the comments from the repository, mapping via the mapper, adding the header and posting the value with refreshing false`() {
+        fun `when the repository is populated, map the comments from the repository, adding the header and posting the value with refreshing false`() {
             val callback = slot<(List<CommentWithDepth>, Boolean, Boolean) -> Unit>()
             val mockedCommentViewItem = mockk<CommentViewItem>()
             val observer = spyk<Observer<ListViewState>>()
@@ -239,7 +284,7 @@ class CommentsListViewModelTest : BaseTest() {
             } returns mockedCommentViewItem
 
             commentsListViewModel.commentsViewState().observeForever(observer)
-            commentsListViewModel.init(storiesListType, storyType)
+            commentsListViewModel.initialise(storiesListType, storyType)
 
             callback.invoke(useCaseResponseWithoutChildren(), false, false)
             verify {
@@ -256,7 +301,7 @@ class CommentsListViewModelTest : BaseTest() {
         }
 
         @Test
-        fun `when the repository is populated from the use case with network failure as true and no items then emit an event for network failure with no cache`() {
+        fun `when the repository is populated with network failure and no items then emit an event for network failure`() {
             val callback = slot<(List<CommentWithDepth>, Boolean, Boolean) -> Unit>()
             val observerErrorNoCacheResults = spyk<Observer<Event<Unit>>>()
             val observerErrorCachedResults = spyk<Observer<Event<Unit>>>()
@@ -285,26 +330,16 @@ class CommentsListViewModelTest : BaseTest() {
                 )
             } returns mockk()
 
-            commentsListViewModel.init(storiesListType, storyType)
+            commentsListViewModel.initialise(storiesListType, storyType)
 
             callback.invoke(emptyList(), true, false)
-
-            coVerify {
-                commentsUseCase.retrieveComments(
-                    storyId = 1,
-                    useCache = true,
-                    onResult = any(),
-                    requireComments = true,
-                    storiesListType = SHOW
-                )
-            }
 
             verify(exactly = 1) { observerErrorNoCacheResults.onChanged(any()) }
             verify(exactly = 0) { observerErrorCachedResults.onChanged(any()) }
         }
 
         @Test
-        fun `when the repository is populated from the use case with network failure as true but still has items and not using cache then emit an event for network failure with cached results and update view state`() {
+        fun `when the repository is populated with network failure as true but has items then emit an event for network failure with cached results and update view state`() {
             val callback = slot<(List<CommentWithDepth>, Boolean, Boolean) -> Unit>()
             val observerErrorNoCacheResults = spyk<Observer<Event<Unit>>>()
             val observerErrorCachedResults = spyk<Observer<Event<Unit>>>()
@@ -330,7 +365,7 @@ class CommentsListViewModelTest : BaseTest() {
                 commentDataMapper.toCommentViewItem(any(), any(), any(), any())
             } returns mockedCommentViewItem
 
-            commentsListViewModel.init(storiesListType, storyType)
+            commentsListViewModel.initialise(storiesListType, storyType)
 
             callback.invoke(useCaseResponseWithoutChildren(), true, false)
 
@@ -351,7 +386,7 @@ class CommentsListViewModelTest : BaseTest() {
         }
 
         @Test
-        fun `when the repository is populated from the use case with network failure as true but still has items and is using cache then do not emit an event for network failure with cached results but do update view state`() {
+        fun `when the repository is populated with network failure but has items and is using cache then do not emit a network failure event but do update view state`() {
             val callback = slot<(List<CommentWithDepth>, Boolean, Boolean) -> Unit>()
             val observerErrorNoCacheResults = spyk<Observer<Event<Unit>>>()
             val observerErrorCachedResults = spyk<Observer<Event<Unit>>>()
@@ -377,7 +412,7 @@ class CommentsListViewModelTest : BaseTest() {
                 commentDataMapper.toCommentViewItem(any(), any(), any(), any())
             } returns mockedCommentViewItem
 
-            commentsListViewModel.init(storiesListType, storyType)
+            commentsListViewModel.initialise(storiesListType, storyType)
 
             callback.invoke(useCaseResponseWithoutChildren(), false, false)
 
@@ -398,7 +433,7 @@ class CommentsListViewModelTest : BaseTest() {
         }
 
         @Test
-        fun `when headerItem article viewer callback is called then we get the story using cache and post the url to the correct live data`() {
+        fun `when headerItem article viewer callback is called then we get the story using cache and post the url`() {
             val callback = slot<(List<CommentWithDepth>, Boolean, Boolean) -> Unit>()
             val articleViewerCallback = slot<() -> Unit>()
             val mockedCommentViewItem = mockk<CommentViewItem>()
@@ -427,7 +462,7 @@ class CommentsListViewModelTest : BaseTest() {
             every { observer.onChanged(capture(urlEmitted)) } just Runs
 
             commentsListViewModel.navigateToArticle().observeForever(observer)
-            commentsListViewModel.init(storiesListType, storyType)
+            commentsListViewModel.initialise(storiesListType, storyType)
 
             callback.invoke(useCaseResponseWithoutChildren(), false, false)
 
@@ -438,7 +473,7 @@ class CommentsListViewModelTest : BaseTest() {
         }
 
         @Test
-        fun `when init is called then we post the title`() {
+        fun `when initialise is called then we post the title`() {
             coEvery {
                 commentsUseCase.retrieveComments(
                     any(),
@@ -451,7 +486,7 @@ class CommentsListViewModelTest : BaseTest() {
             val observer = spyk<Observer<String>>()
 
             commentsListViewModel.articleTitle().observeForever(observer)
-            commentsListViewModel.init(storiesListType, storyType)
+            commentsListViewModel.initialise(storiesListType, storyType)
 
             coVerify {
                 observer.onChanged("title")
@@ -486,7 +521,7 @@ class CommentsListViewModelTest : BaseTest() {
                 )
             } returns mockk()
 
-            commentsListViewModel.init(storiesListType, storyType)
+            commentsListViewModel.initialise(storiesListType, storyType)
 
             commentsUseCaseCallback.invoke(useCaseResponseWithoutChildren(), false, false)
             longClickListenerCallback.invoke(0)
@@ -518,7 +553,7 @@ class CommentsListViewModelTest : BaseTest() {
                 )
             } returns mockk()
 
-            commentsListViewModel.init(storiesListType, storyType)
+            commentsListViewModel.initialise(storiesListType, storyType)
 
             commentsUseCaseCallback.invoke(useCaseResponseWithoutChildren(), false, false)
             longClickListenerCallback.invoke(0)
@@ -555,7 +590,7 @@ class CommentsListViewModelTest : BaseTest() {
                 )
             } returns mockk()
 
-            commentsListViewModel.init(storiesListType, storyType)
+            commentsListViewModel.initialise(storiesListType, storyType)
 
             commentsUseCaseCallback.invoke(useCaseResponseWithChildren(), false, false)
 
@@ -596,7 +631,7 @@ class CommentsListViewModelTest : BaseTest() {
                 )
             } returns mockk()
 
-            commentsListViewModel.init(storiesListType, storyType)
+            commentsListViewModel.initialise(storiesListType, storyType)
 
             commentsUseCaseCallback.invoke(useCaseResponseWithChildren(), false, false)
 
@@ -638,7 +673,7 @@ class CommentsListViewModelTest : BaseTest() {
                 )
             } returns mockk()
 
-            commentsListViewModel.init(storiesListType, storyType)
+            commentsListViewModel.initialise(storiesListType, storyType)
 
             commentsUseCaseCallback.invoke(useCaseResponseWithChildren(), false, false)
 
@@ -671,7 +706,7 @@ class CommentsListViewModelTest : BaseTest() {
             } just Runs
 
             storiesListType = ASK
-            commentsListViewModel.init(storiesListType, storyType)
+            commentsListViewModel.initialise(storiesListType, storyType)
             commentsListViewModel.userManuallyRefreshed()
 
             coVerify {
@@ -699,7 +734,7 @@ class CommentsListViewModelTest : BaseTest() {
 
             storiesListType = JOBS
 
-            commentsListViewModel.init(storiesListType, storyType)
+            commentsListViewModel.initialise(storiesListType, storyType)
             commentsListViewModel.automaticallyRefreshed()
 
             coVerify {
@@ -740,7 +775,7 @@ class CommentsListViewModelTest : BaseTest() {
                 )
             } returns mockk()
 
-            commentsListViewModel.init(storiesListType, storyType)
+            commentsListViewModel.initialise(storiesListType, storyType)
             commentsListViewModel.updateSortState(0)
             commentsListViewModel.automaticallyRefreshed()
 
@@ -777,7 +812,7 @@ class CommentsListViewModelTest : BaseTest() {
                 )
             } returns mockk()
 
-            commentsListViewModel.init(storiesListType, storyType)
+            commentsListViewModel.initialise(storiesListType, storyType)
             commentsListViewModel.updateSortState(1)
             commentsListViewModel.automaticallyRefreshed()
 
@@ -814,7 +849,7 @@ class CommentsListViewModelTest : BaseTest() {
                 )
             } returns mockk()
 
-            commentsListViewModel.init(storiesListType, storyType)
+            commentsListViewModel.initialise(storiesListType, storyType)
             commentsListViewModel.updateSortState(2)
             commentsListViewModel.automaticallyRefreshed()
 
@@ -848,7 +883,7 @@ class CommentsListViewModelTest : BaseTest() {
             every { observer.onChanged(capture(shareText)) } just Runs
 
             commentsListViewModel.shareUrl().observeForever(observer)
-            commentsListViewModel.init(storiesListType, storyType)
+            commentsListViewModel.initialise(storiesListType, storyType)
             commentsListViewModel.share(0)
 
             assertEquals(
@@ -874,7 +909,7 @@ class CommentsListViewModelTest : BaseTest() {
             every { observer.onChanged(capture(shareText)) } just Runs
 
             commentsListViewModel.shareUrl().observeForever(observer)
-            commentsListViewModel.init(storiesListType, storyType)
+            commentsListViewModel.initialise(storiesListType, storyType)
             commentsListViewModel.share(1)
 
             assertEquals(
@@ -900,7 +935,7 @@ class CommentsListViewModelTest : BaseTest() {
             every { observer.onChanged(capture(shareText)) } just Runs
 
             commentsListViewModel.shareUrl().observeForever(observer)
-            commentsListViewModel.init(storiesListType, storyType)
+            commentsListViewModel.initialise(storiesListType, storyType)
             commentsListViewModel.share(2)
 
             assertEquals(
@@ -938,7 +973,7 @@ class CommentsListViewModelTest : BaseTest() {
             )
         } returns mockk()
 
-        commentsListViewModel.init(storiesListType, storyType)
+        commentsListViewModel.initialise(storiesListType, storyType)
 
         commentsUseCaseCallback.invoke(useCaseResponseWithoutChildren(), false, false)
         urlClickedCallback.invoke("url")
@@ -981,7 +1016,7 @@ class CommentsListViewModelTest : BaseTest() {
             )
         } returns mockk()
 
-        commentsListViewModel.init(storiesListType, storyType)
+        commentsListViewModel.initialise(storiesListType, storyType)
 
         commentsUseCaseCallback.invoke(useCaseResponseWithoutChildren(), false, false)
         urlClickedCallback.invoke("url")
@@ -999,7 +1034,7 @@ class CommentsListViewModelTest : BaseTest() {
         every { observer.onChanged(capture(urlEmitted)) } just Runs
         coEvery { commentsUseCase.retrieveComments(any(), any(), any(), any(), any()) } just Runs
 
-        commentsListViewModel.init(storiesListType, storyType)
+        commentsListViewModel.initialise(storiesListType, storyType)
         commentsListViewModel.navigateToArticle().observeForever(observer)
         commentsListViewModel.openArticle()
 
