@@ -2,7 +2,6 @@ package com.jamie.hn.stories.domain
 
 import com.jamie.hn.core.StoriesListType
 import com.jamie.hn.stories.repository.StoriesRepository
-import com.jamie.hn.stories.repository.StoriesRepository.RequireText
 
 class StoriesUseCase(
     private val storiesRepository: StoriesRepository
@@ -14,14 +13,12 @@ class StoriesUseCase(
     suspend fun getStory(
         id: Int,
         useCachedVersion: Boolean,
-        storiesListType: StoriesListType,
-        requireText: RequireText
+        storiesListType: StoriesListType
     ) =
         storiesRepository.story(
             id = id,
             useCachedVersion = useCachedVersion,
             requireComments = false,
-            storiesListType = storiesListType,
-            requireText = requireText
+            storiesListType = storiesListType
         )
 }

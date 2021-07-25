@@ -1,5 +1,6 @@
 package com.jamie.hn.hostactivity.ui
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MenuItem
@@ -9,7 +10,9 @@ import androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES
 import androidx.core.view.GravityCompat.START
 import androidx.lifecycle.Observer
 import com.jamie.hn.R
+import com.jamie.hn.core.StoriesListType.UNKNOWN
 import com.jamie.hn.core.ui.Ask
+import com.jamie.hn.core.ui.Comments
 import com.jamie.hn.core.ui.Jobs
 import com.jamie.hn.core.ui.New
 import com.jamie.hn.core.ui.SharedNavigationViewModel
@@ -33,6 +36,11 @@ class MainActivity : AppCompatActivity() {
         setupNavigationDrawer()
         initialiseTheme()
         initialiseLiveDataObservers()
+
+        if (intent.action == Intent.ACTION_VIEW) {
+            val storyId = intent.data?.getQueryParameter("id")?.toInt() ?: return
+            sharedNavigationViewModel.navigate(Comments(storyId, UNKNOWN))
+        }
     }
 
     private fun initialiseTheme() {

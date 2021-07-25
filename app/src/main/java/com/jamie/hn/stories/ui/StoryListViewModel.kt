@@ -15,7 +15,6 @@ import com.jamie.hn.core.ui.Screen
 import com.jamie.hn.core.ui.Show
 import com.jamie.hn.core.ui.Top
 import com.jamie.hn.stories.domain.model.Story
-import com.jamie.hn.stories.repository.StoriesRepository.RequireText.NOT_REQUIRED
 import com.jamie.hn.stories.ui.StoryListViewModel.SortChoice.OLDEST
 import com.jamie.hn.stories.ui.StoryListViewModel.SortChoice.NEWEST
 import com.jamie.hn.stories.ui.StoryListViewModel.SortChoice.STANDARD
@@ -121,8 +120,7 @@ class StoryListViewModel(
             val story = storiesUseCase.getStory(
                 id = id,
                 useCachedVersion = true,
-                storiesListType = storiesListType,
-                requireText = NOT_REQUIRED
+                storiesListType = storiesListType
             ).story
 
             navigateToComments.value = Event(
@@ -142,8 +140,7 @@ class StoryListViewModel(
                     storiesUseCase.getStory(
                         id = id,
                         useCachedVersion = true,
-                        storiesListType = getStoryTypeFromScreen(currentScreen),
-                        requireText = NOT_REQUIRED
+                        storiesListType = getStoryTypeFromScreen(currentScreen)
                     ).story.url
                 )
         }

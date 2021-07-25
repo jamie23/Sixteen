@@ -1,18 +1,18 @@
 package com.jamie.hn.stories.repository
 
 import com.jamie.hn.core.StoriesListType
-import com.jamie.hn.core.StoriesListType.TOP
 import com.jamie.hn.core.StoriesListType.ASK
 import com.jamie.hn.core.StoriesListType.JOBS
 import com.jamie.hn.core.StoriesListType.NEW
 import com.jamie.hn.core.StoriesListType.SHOW
+import com.jamie.hn.core.StoriesListType.TOP
+import com.jamie.hn.core.StoriesListType.UNKNOWN
+import com.jamie.hn.core.StoryType
 import com.jamie.hn.core.net.NetworkUtils
 import com.jamie.hn.stories.repository.local.LocalStorage
 import com.jamie.hn.core.net.hex.Hex
 import com.jamie.hn.core.net.official.OfficialClient
 import com.jamie.hn.stories.domain.model.Story
-import com.jamie.hn.stories.repository.StoriesRepository.RequireText.NOT_REQUIRED
-import com.jamie.hn.stories.repository.StoriesRepository.RequireText.REQUIRED
 import com.jamie.hn.stories.repository.model.StoryResult
 import com.jamie.hn.stories.repository.model.StoriesResult
 import com.jamie.hn.stories.repository.web.getWebPath
@@ -59,17 +59,16 @@ class StoriesRepository(
         id: Int,
         useCachedVersion: Boolean,
         requireComments: Boolean,
-        storiesListType: StoriesListType,
-        requireText: RequireText
+        storiesListType: StoriesListType
     ): StoryResult {
+        if (storiesListType == UNKNOWN) return StoryResult(fetchStory(id))
+
         val localStoriesList = getLocalStoriesListByType(storiesListType)
 
         if (!networkUtils.isNetworkAvailable()) {
             val localCopy = localStoriesList.first { it.id == id }
 
-            if (commentsRequiredAndRetrieved(requireComments, localCopy) &&
-                textRequiredAndRetrieved(requireText, localCopy)
-            ) {
+            if (commentsRequiredAndRetrieved(requireComments, localCopy)) {
                 return StoryResult(
                     story = localCopy,
                     networkFailure = true
@@ -85,9 +84,7 @@ class StoriesRepository(
         if (useCachedVersion) {
             val localCopy = localStoriesList.first { it.id == id }
 
-            if (commentsRequiredAndRetrieved(requireComments, localCopy) &&
-                textRequiredAndRetrieved(requireText, localCopy)
-            ) {
+            if (commentsRequiredAndRetrieved(requireComments, localCopy)) {
                 return StoryResult(
                     story = localCopy,
                     networkFailure = false
@@ -95,17 +92,10 @@ class StoriesRepository(
             }
         }
 
-        var text = ""
-        if (requireText == REQUIRED) {
-            text = officialClient.getStory(id).text
-        }
+        val domainMappedCopy = fetchStory(id)
 
-        val newCopy = webStorage.story(id)
         val newList = localStoriesList.toMutableList()
-        val index = newList.indexOfFirst { it.id == newCopy.id }
-
-        val domainMappedCopy =
-            mapper.toStoryDomainModel(newCopy, true, text)
+        val index = newList.indexOfFirst { it.id == domainMappedCopy.id }
 
         newList[index] = domainMappedCopy
 
@@ -113,11 +103,21 @@ class StoriesRepository(
         return StoryResult(domainMappedCopy)
     }
 
+    private suspend fun fetchAskText(id: Int) = officialClient.getStory(id).text
+
+    private suspend fun fetchStory(id: Int): Story {
+        val newCopy = webStorage.story(id)
+
+        var text = ""
+        if (StoryType.ASK == newCopy.storyType) {
+            text = fetchAskText(id)
+        }
+
+        return mapper.toStoryDomainModel(newCopy, true, text)
+    }
+
     private fun commentsRequiredAndRetrieved(requireComments: Boolean, localCopy: Story) =
         !requireComments || localCopy.retrievedComments
-
-    private fun textRequiredAndRetrieved(requireText: RequireText, localCopy: Story) =
-        requireText == NOT_REQUIRED || localCopy.text != ""
 
     private fun getLocalStoriesListByType(storiesListType: StoriesListType): List<Story> =
         when (storiesListType) {
@@ -126,18 +126,17 @@ class StoriesRepository(
             JOBS -> localStorage.jobsStoryList
             NEW -> localStorage.newStoryList
             SHOW -> localStorage.showStoryList
+            UNKNOWN -> throw IllegalArgumentException("Should not update Unknown story type")
         }
 
-    private fun updateLocalStoriesListByType(storiesListType: StoriesListType, list: List<Story>) =
+    private fun updateLocalStoriesListByType(storiesListType: StoriesListType, list: List<Story>) {
         when (storiesListType) {
             TOP -> localStorage.topStoryList = list
             ASK -> localStorage.askStoryList = list
             JOBS -> localStorage.jobsStoryList = list
             NEW -> localStorage.newStoryList = list
             SHOW -> localStorage.showStoryList = list
+            UNKNOWN -> throw IllegalArgumentException("Should not update Unknown story type")
         }
-
-    enum class RequireText {
-        REQUIRED, NOT_REQUIRED
     }
 }
