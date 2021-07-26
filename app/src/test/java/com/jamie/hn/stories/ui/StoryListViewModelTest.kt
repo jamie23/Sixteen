@@ -18,7 +18,6 @@ import com.jamie.hn.core.ui.Show
 import com.jamie.hn.core.ui.Top
 import com.jamie.hn.stories.domain.StoriesUseCase
 import com.jamie.hn.stories.domain.model.Story
-import com.jamie.hn.stories.repository.StoriesRepository.RequireText.NOT_REQUIRED
 import com.jamie.hn.stories.repository.model.StoryResult
 import com.jamie.hn.stories.repository.model.StoriesResult
 import com.jamie.hn.stories.ui.StoryListViewModel.StoryListViewState
@@ -79,7 +78,7 @@ class StoryListViewModelTest : BaseTest() {
         every { storyResourceProvider.showTitle() } returns "Show stories"
 
         coEvery { storiesUseCase.getStories(any(), any()) } returns StoriesResult(stories)
-        coEvery { storiesUseCase.getStory(1, true, any(), any()) } returns storyResults
+        coEvery { storiesUseCase.getStory(1, true, any()) } returns storyResults
         every { storyDataMapper.toStoryViewItem(story, any(), any()) } returns storyViewItem
         every {
             storyDataMapper.toStoryViewItem(
@@ -492,7 +491,7 @@ class StoryListViewModelTest : BaseTest() {
                 )
             } returns storyViewItem
             every { observer.onChanged(capture(storyData)) } just Runs
-            coEvery { storiesUseCase.getStory(1, true, any(), any()) } returns storyResults
+            coEvery { storiesUseCase.getStory(1, true, any()) } returns storyResults
 
             storyListViewModel.navigateToComments().observeForever(observer)
             storyListViewModel.automaticallyRefreshed()
@@ -500,7 +499,7 @@ class StoryListViewModelTest : BaseTest() {
             commentsCallback.captured.invoke(1)
 
             val resultStoryData = storyData.captured.getContentIfNotHandled()!!
-            coVerify { storiesUseCase.getStory(1, true, TOP, NOT_REQUIRED) }
+            coVerify { storiesUseCase.getStory(1, true, TOP) }
             assertEquals(0, resultStoryData.storyId)
             assertEquals(TOP, resultStoryData.storiesListType)
         }
@@ -520,7 +519,7 @@ class StoryListViewModelTest : BaseTest() {
                 )
             } returns storyViewItem
             every { observer.onChanged(capture(storyData)) } just Runs
-            coEvery { storiesUseCase.getStory(1, true, any(), any()) } returns storyResults
+            coEvery { storiesUseCase.getStory(1, true, any()) } returns storyResults
 
             storyListViewModel.navigateToComments().observeForever(observer)
             storyListViewModel.automaticallyRefreshed()
@@ -546,7 +545,7 @@ class StoryListViewModelTest : BaseTest() {
                 )
             } returns storyViewItem
             every { observer.onChanged(capture(storyData)) } just Runs
-            coEvery { storiesUseCase.getStory(1, true, any(), any()) } returns storyResults
+            coEvery { storiesUseCase.getStory(1, true, any()) } returns storyResults
 
             storyListViewModel.navigateToComments().observeForever(observer)
             storyListViewModel.automaticallyRefreshed()
@@ -578,7 +577,7 @@ class StoryListViewModelTest : BaseTest() {
 
         articleViewerCallback.captured.invoke(1)
 
-        coVerify { storiesUseCase.getStory(1, true, TOP, NOT_REQUIRED) }
+        coVerify { storiesUseCase.getStory(1, true, TOP) }
         assertEquals("url", urlEmitted.captured.getContentIfNotHandled())
     }
 

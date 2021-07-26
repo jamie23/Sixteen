@@ -9,8 +9,6 @@ import com.jamie.hn.core.net.NetworkUtils
 import com.jamie.hn.core.net.hex.Hex
 import com.jamie.hn.core.net.official.OfficialClient
 import com.jamie.hn.stories.domain.model.Story
-import com.jamie.hn.stories.repository.StoriesRepository.RequireText.NOT_REQUIRED
-import com.jamie.hn.stories.repository.StoriesRepository.RequireText.REQUIRED
 import com.jamie.hn.stories.repository.local.LocalStorage
 import com.jamie.hn.stories.repository.model.ApiAskText
 import com.jamie.hn.stories.repository.model.ApiStory
@@ -225,6 +223,32 @@ class StoriesRepositoryTest {
     inner class GetStory {
 
         @Nested
+        inner class UnknownStoryType {
+
+            @Test
+            fun `when storyType is unknown then fetch from web`() {
+                lateinit var storyResult: StoryResult
+
+                runBlocking {
+                    storyResult = storiesRepository.story(
+                        id = 1,
+                        useCachedVersion = false,
+                        requireComments = false,
+                        storiesListType = SHOW
+                    )
+                }
+
+                verify(exactly = 0) { localStorage.showStoryList = any() }
+                verify(exactly = 0) { localStorage.topStoryList }
+                verify(exactly = 0) { localStorage.askStoryList }
+                verify(exactly = 0) { localStorage.jobsStoryList }
+                verify(exactly = 0) { localStorage.newStoryList }
+                assertEquals(storedStory, storyResult.story)
+                assertEquals(true, storyResult.networkFailure)
+            }
+        }
+
+        @Nested
         inner class NetworkUnavailable {
 
             @Nested
@@ -248,8 +272,7 @@ class StoriesRepositoryTest {
                             id = 1,
                             useCachedVersion = false,
                             requireComments = false,
-                            storiesListType = SHOW,
-                            requireText = NOT_REQUIRED
+                            storiesListType = SHOW
                         )
                     }
 
@@ -280,8 +303,7 @@ class StoriesRepositoryTest {
                             id = 1,
                             useCachedVersion = false,
                             requireComments = true,
-                            storiesListType = TOP,
-                            requireText = NOT_REQUIRED
+                            storiesListType = TOP
                         )
                     }
 
@@ -312,8 +334,7 @@ class StoriesRepositoryTest {
                             id = 1,
                             useCachedVersion = false,
                             requireComments = true,
-                            storiesListType = TOP,
-                            requireText = NOT_REQUIRED
+                            storiesListType = TOP
                         )
                     }
 
@@ -345,8 +366,7 @@ class StoriesRepositoryTest {
                             id = 1,
                             useCachedVersion = false,
                             requireComments = true,
-                            storiesListType = SHOW,
-                            requireText = NOT_REQUIRED
+                            storiesListType = SHOW
                         )
                     }
 
@@ -379,8 +399,7 @@ class StoriesRepositoryTest {
                             id = 1,
                             useCachedVersion = false,
                             requireComments = true,
-                            storiesListType = TOP,
-                            requireText = REQUIRED
+                            storiesListType = TOP
                         )
                     }
 
@@ -413,8 +432,7 @@ class StoriesRepositoryTest {
                             id = 1,
                             useCachedVersion = false,
                             requireComments = true,
-                            storiesListType = TOP,
-                            requireText = REQUIRED
+                            storiesListType = TOP
                         )
                     }
 
@@ -441,8 +459,7 @@ class StoriesRepositoryTest {
                         id = 1,
                         useCachedVersion = true,
                         requireComments = false,
-                        storiesListType = TOP,
-                        requireText = NOT_REQUIRED
+                        storiesListType = TOP
                     )
                 }
 
@@ -479,8 +496,7 @@ class StoriesRepositoryTest {
                         id = 1,
                         useCachedVersion = true,
                         requireComments = true,
-                        storiesListType = ASK,
-                        requireText = NOT_REQUIRED
+                        storiesListType = ASK
                     )
                 }
 
@@ -514,8 +530,7 @@ class StoriesRepositoryTest {
                         id = 1,
                         useCachedVersion = true,
                         requireComments = true,
-                        storiesListType = JOBS,
-                        requireText = NOT_REQUIRED
+                        storiesListType = JOBS
                     )
                 }
 
@@ -562,8 +577,7 @@ class StoriesRepositoryTest {
                         id = 1,
                         useCachedVersion = true,
                         requireComments = true,
-                        storiesListType = ASK,
-                        requireText = REQUIRED
+                        storiesListType = ASK
                     )
                 }
 
@@ -599,8 +613,7 @@ class StoriesRepositoryTest {
                         id = 1,
                         useCachedVersion = true,
                         requireComments = true,
-                        storiesListType = JOBS,
-                        requireText = REQUIRED
+                        storiesListType = JOBS
                     )
                 }
 
@@ -635,8 +648,7 @@ class StoriesRepositoryTest {
                         id = 1,
                         useCachedVersion = false,
                         requireComments = false,
-                        storiesListType = NEW,
-                        requireText = NOT_REQUIRED
+                        storiesListType = NEW
                     )
                 }
 
