@@ -389,7 +389,7 @@ class StoriesRepositoryTest {
             }
 
             @Test
-            fun `when requesting a story from ASK, local storage has PARTIAL and requireCompleteStory is true then get the story from web storage and replace the local story`() {
+            fun `when requesting a story from ASK, local storage has PARTIAL and requireCompleteStory is true then get the story and associated text from web storage and replace the local story`() {
                 val storedStory = Story(
                     id = 1,
                     time = DateTime.now(),
@@ -405,7 +405,13 @@ class StoriesRepositoryTest {
                 lateinit var story: StoryResult
 
                 every { localStorage.askStoryList } returns storedList
-                every { apiToDomainMapper.toStoryDomainModel(any(), any(), any()) } returns newStoredStory
+                every {
+                    apiToDomainMapper.toStoryDomainModel(
+                        any(),
+                        any(),
+                        any()
+                    )
+                } returns newStoredStory
                 coEvery { webStorage.story(1) } returns apiStory
                 coEvery { officialClient.getStory(1) } returns ApiAskText("Ask text")
 
@@ -499,7 +505,43 @@ class StoriesRepositoryTest {
                 verify(exactly = 0) { localStorage.askStoryList = any() }
                 verify(exactly = 0) { localStorage.jobsStoryList = any() }
                 verify(exactly = 0) { localStorage.showStoryList = any() }
+                coVerify(exactly = 0) { officialClient.getStory(any()) }
+                assertEquals(storedStory, story.story)
+            }
 
+            @Test
+            fun `when requesting a story from ASK then get the story and associated text from web storage, update the local storage and return web copy`() {
+
+                lateinit var story: StoryResult
+                val apiStory = ApiStory(id = 1, time = DateTime.now().toString(), title = "Ask HN:")
+                val storedStory = Story(id = 1, time = DateTime.now())
+                val storedList = listOf(storedStory)
+
+                every { apiToDomainMapper.toStoryDomainModel(any(), any(), any()) } returns storedStory
+                coEvery { webStorage.story(1) } returns apiStory
+                every { localStorage.newStoryList } returns storedList
+                coEvery { officialClient.getStory(1) } returns ApiAskText("Ask text")
+
+                runBlocking {
+                    story = storiesRepository.story(
+                        id = 1,
+                        useCachedVersion = false,
+                        requireCompleteStory = false,
+                        storiesListType = NEW
+                    )
+                }
+
+                coVerifyOrder {
+                    localStorage.newStoryList
+                    webStorage.story(1)
+                    officialClient.getStory(1)
+                    apiToDomainMapper.toStoryDomainModel(apiStory, COMPLETE, "Ask text")
+                    localStorage.newStoryList = listOf(storedStory)
+                }
+                verify(exactly = 0) { localStorage.topStoryList = any() }
+                verify(exactly = 0) { localStorage.askStoryList = any() }
+                verify(exactly = 0) { localStorage.jobsStoryList = any() }
+                verify(exactly = 0) { localStorage.showStoryList = any() }
                 assertEquals(storedStory, story.story)
             }
         }
