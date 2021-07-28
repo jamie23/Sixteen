@@ -4,7 +4,6 @@ import com.jamie.hn.comments.domain.model.Comment
 import com.jamie.hn.comments.domain.model.CommentWithDepth
 import com.jamie.hn.core.StoriesListType
 import com.jamie.hn.stories.repository.StoriesRepository
-import com.jamie.hn.stories.repository.StoriesRepository.RequireText
 
 class CommentsUseCase(
     private val repository: StoriesRepository
@@ -13,15 +12,14 @@ class CommentsUseCase(
         storyId: Int,
         useCache: Boolean,
         onResult: (List<CommentWithDepth>, Boolean, Boolean) -> Unit,
-        requireComments: Boolean,
+        requireCompleteStory: Boolean,
         storiesListType: StoriesListType
     ) {
         val storyResults = repository.story(
             storyId,
             useCache,
-            requireComments,
-            storiesListType,
-            RequireText.NOT_REQUIRED
+            requireCompleteStory,
+            storiesListType
         )
         val listAllComments = mutableListOf<CommentWithDepth>()
 

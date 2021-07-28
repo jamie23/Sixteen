@@ -22,11 +22,8 @@ import com.jamie.hn.comments.ui.repository.model.CurrentState.FULL
 import com.jamie.hn.comments.ui.repository.model.CurrentState.HIDDEN
 import com.jamie.hn.core.Event
 import com.jamie.hn.core.StoriesListType
-import com.jamie.hn.core.StoryType
 import com.jamie.hn.stories.domain.StoriesUseCase
 import com.jamie.hn.stories.domain.model.Story
-import com.jamie.hn.stories.repository.StoriesRepository.RequireText.NOT_REQUIRED
-import com.jamie.hn.stories.repository.StoriesRepository.RequireText.REQUIRED
 import kotlinx.coroutines.launch
 
 class CommentsListViewModel(
@@ -64,7 +61,6 @@ class CommentsListViewModel(
     private lateinit var commentsViewRepository: CommentsViewRepository
     private lateinit var story: Story
     private lateinit var storyListType: StoriesListType
-    private lateinit var storyType: StoryType
 
     // On first load we should always fetch
     private var initiallyFetched = false
@@ -77,9 +73,8 @@ class CommentsListViewModel(
         refreshList(AUTOMATIC)
     }
 
-    fun initialise(storyListType: StoriesListType, storyType: StoryType) {
+    fun initialise(storyListType: StoriesListType) {
         this.storyListType = storyListType
-        this.storyType = storyType
 
         commentsViewRepository = CommentsViewRepository(::viewStateUpdate)
         automaticallyRefreshed()
@@ -94,18 +89,11 @@ class CommentsListViewModel(
 
         val useCachedVersion = initiallyFetched && refreshType == AUTOMATIC
 
-        val requireText = if (storyType == StoryType.ASK) {
-            REQUIRED
-        } else {
-            NOT_REQUIRED
-        }
-
         viewModelScope.launch {
             story = storiesUseCase.getStory(
                 id = storyId,
                 useCachedVersion = useCachedVersion,
-                storiesListType = this@CommentsListViewModel.storyListType,
-                requireText = requireText
+                storiesListType = this@CommentsListViewModel.storyListType
             ).story
 
             updateTitleWithArticleTitle()
@@ -114,7 +102,7 @@ class CommentsListViewModel(
                 storyId = storyId,
                 useCache = useCachedVersion,
                 onResult = ::populateUiCommentRepository,
-                requireComments = true,
+                requireCompleteStory = true,
                 storiesListType = storyListType
             )
 

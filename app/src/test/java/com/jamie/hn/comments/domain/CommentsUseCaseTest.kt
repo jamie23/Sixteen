@@ -9,7 +9,6 @@ import com.jamie.hn.core.StoriesListType.SHOW
 import com.jamie.hn.core.StoriesListType.TOP
 import com.jamie.hn.stories.domain.model.Story
 import com.jamie.hn.stories.repository.StoriesRepository
-import com.jamie.hn.stories.repository.StoriesRepository.RequireText.NOT_REQUIRED
 import com.jamie.hn.stories.repository.model.StoryResult
 import io.mockk.MockKAnnotations
 import io.mockk.coEvery
@@ -49,7 +48,7 @@ class CommentsUseCaseTest : BaseTest() {
     fun setup() {
         MockKAnnotations.init(this)
 
-        coEvery { repository.story(any(), any(), any(), any(), any()) } returns storyResult
+        coEvery { repository.story(any(), any(), any(), any()) } returns storyResult
         every { storyResult.story } returns story
         every { storyResult.networkFailure } returns false
 
@@ -67,7 +66,7 @@ class CommentsUseCaseTest : BaseTest() {
                 storyId = 1,
                 useCache = true,
                 onResult = onResult,
-                requireComments = true,
+                requireCompleteStory = true,
                 storiesListType = TOP
             )
         }
@@ -76,9 +75,8 @@ class CommentsUseCaseTest : BaseTest() {
             repository.story(
                 id = 1,
                 useCachedVersion = true,
-                requireComments = true,
-                storiesListType = TOP,
-                requireText = NOT_REQUIRED
+                requireCompleteStory = true,
+                storiesListType = TOP
             )
         }
         verify { onResult.invoke(any(), eq(false), eq(true)) }
@@ -94,7 +92,7 @@ class CommentsUseCaseTest : BaseTest() {
                 storyId = 1,
                 useCache = false,
                 onResult = onResult,
-                requireComments = true,
+                requireCompleteStory = true,
                 storiesListType = ASK
             )
         }
@@ -103,9 +101,8 @@ class CommentsUseCaseTest : BaseTest() {
             repository.story(
                 id = 1,
                 useCachedVersion = false,
-                requireComments = true,
-                storiesListType = ASK,
-                requireText = NOT_REQUIRED
+                requireCompleteStory = true,
+                storiesListType = ASK
             )
         }
         verify { onResult.invoke(any(), eq(false), eq(false)) }
@@ -119,7 +116,7 @@ class CommentsUseCaseTest : BaseTest() {
             val returnedComments = slot<List<CommentWithDepth>>()
 
             every { onResult.invoke(any(), any(), any()) } returns Unit
-            coEvery { repository.story(any(), any(), any(), any(), any()) } returns StoryResult(
+            coEvery { repository.story(any(), any(), any(), any()) } returns StoryResult(
                 story(
                     singleComment()
                 )
@@ -130,12 +127,12 @@ class CommentsUseCaseTest : BaseTest() {
                     storyId = 1,
                     useCache = false,
                     onResult = onResult,
-                    requireComments = true,
+                    requireCompleteStory = true,
                     storiesListType = JOBS
                 )
             }
 
-            coVerify { repository.story(any(), any(), any(), eq(JOBS), eq(NOT_REQUIRED)) }
+            coVerify { repository.story(any(), any(), any(), eq(JOBS)) }
             verify { onResult.invoke(capture(returnedComments), any(), any()) }
 
             assertEquals(1, returnedComments.captured.size)
@@ -148,7 +145,7 @@ class CommentsUseCaseTest : BaseTest() {
             val returnedComments = slot<List<CommentWithDepth>>()
 
             every { onResult.invoke(any(), any(), any()) } returns Unit
-            coEvery { repository.story(any(), any(), any(), any(), eq(NOT_REQUIRED)) } returns StoryResult(story(
+            coEvery { repository.story(any(), any(), any(), any()) } returns StoryResult(story(
                 singleCommentNestedComment()
             ))
 
@@ -157,12 +154,12 @@ class CommentsUseCaseTest : BaseTest() {
                     storyId = 1,
                     useCache = false,
                     onResult = onResult,
-                    requireComments = true,
+                    requireCompleteStory = true,
                     storiesListType = SHOW
                 )
             }
 
-            coVerify { repository.story(any(), any(), any(), eq(SHOW), eq(NOT_REQUIRED)) }
+            coVerify { repository.story(any(), any(), any(), eq(SHOW)) }
             verify { onResult.invoke(capture(returnedComments), any(), any()) }
 
             // We remove the nested child comments but keep the commentCount

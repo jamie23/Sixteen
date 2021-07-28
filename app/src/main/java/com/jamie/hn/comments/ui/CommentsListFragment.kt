@@ -18,7 +18,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.jamie.hn.R
 import com.jamie.hn.core.StoriesListType
-import com.jamie.hn.core.StoryType
 import com.jamie.hn.core.extensions.visibleOrGone
 import com.jamie.hn.core.ui.Article
 import com.jamie.hn.core.ui.Ask
@@ -44,9 +43,6 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
 
     private val storyListType: StoriesListType
         get() = arguments?.get("storiesListType") as StoriesListType
-
-    private val storyType: StoryType
-        get() = arguments?.get("storyType") as StoryType
 
     private var binding: CommentListFragmentBinding? = null
     private lateinit var commentsListAdapter: CommentsListAdapter
@@ -97,7 +93,7 @@ class CommentsListFragment : Fragment(R.layout.comment_list_fragment) {
         }
 
         initialiseLiveDataObservers(view)
-        viewModel.initialise(storyListType, storyType)
+        viewModel.initialise(storyListType)
     }
 
     override fun onDestroyView() {

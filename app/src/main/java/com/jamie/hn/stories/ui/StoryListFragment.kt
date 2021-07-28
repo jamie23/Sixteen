@@ -91,8 +91,7 @@ class StoryListFragment : Fragment(R.layout.story_list_fragment) {
                 sharedNavigationViewModel.navigate(
                     Comments(
                         storyData.storyId,
-                        storyData.storiesListType,
-                        storyData.storyType
+                        storyData.storiesListType
                     )
                 )
             }
@@ -125,7 +124,7 @@ class StoryListFragment : Fragment(R.layout.story_list_fragment) {
                     when (nextScreen) {
                         is Comments ->
                             StoryListFragmentDirections.actionStoriesListToCommentsList(
-                                nextScreen.storyId, nextScreen.storiesListType, nextScreen.storyType
+                                nextScreen.storyId, nextScreen.storiesListType
                             )
                         is Article ->
                             StoryListFragmentDirections.actionStoriesListToArticleViewer(nextScreen.url)

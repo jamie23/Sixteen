@@ -1,11 +1,12 @@
 package com.jamie.hn.stories.repository.web
 
 import com.jamie.hn.core.StoriesListType
-import com.jamie.hn.core.StoriesListType.SHOW
-import com.jamie.hn.core.StoriesListType.NEW
-import com.jamie.hn.core.StoriesListType.JOBS
 import com.jamie.hn.core.StoriesListType.ASK
+import com.jamie.hn.core.StoriesListType.JOBS
+import com.jamie.hn.core.StoriesListType.NEW
+import com.jamie.hn.core.StoriesListType.SHOW
 import com.jamie.hn.core.StoriesListType.TOP
+import com.jamie.hn.core.StoriesListType.UNKNOWN
 
 fun getWebPath(storiesListType: StoriesListType) =
     when (storiesListType) {
@@ -14,4 +15,5 @@ fun getWebPath(storiesListType: StoriesListType) =
         JOBS -> "jobs"
         NEW -> "new"
         SHOW -> "show"
+        UNKNOWN -> "unknown"
     }
