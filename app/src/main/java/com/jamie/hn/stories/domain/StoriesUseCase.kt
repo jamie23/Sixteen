@@ -18,7 +18,7 @@ class StoriesUseCase(
         storiesRepository.story(
             id = id,
             useCachedVersion = useCachedVersion,
-            requireComments = false,
+            requireCompleteStory = false,
             storiesListType = storiesListType
         )
 }

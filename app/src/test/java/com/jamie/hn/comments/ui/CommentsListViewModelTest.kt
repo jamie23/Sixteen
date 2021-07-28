@@ -17,8 +17,6 @@ import com.jamie.hn.core.StoriesListType.JOBS
 import com.jamie.hn.core.StoriesListType.NEW
 import com.jamie.hn.core.StoriesListType.SHOW
 import com.jamie.hn.core.StoriesListType.TOP
-import com.jamie.hn.core.StoryType
-import com.jamie.hn.core.StoryType.STANDARD
 import com.jamie.hn.stories.domain.StoriesUseCase
 import com.jamie.hn.stories.domain.model.Story
 import com.jamie.hn.stories.repository.model.StoryResult
@@ -134,7 +132,7 @@ class CommentsListViewModelTest : BaseTest() {
                     storyId = 1,
                     useCache = false,
                     onResult = any(),
-                    requireComments = true,
+                    requireCompleteStory = true,
                     storiesListType = TOP
                 )
             }
@@ -165,7 +163,7 @@ class CommentsListViewModelTest : BaseTest() {
                     storyId = 1,
                     useCache = false,
                     onResult = any(),
-                    requireComments = true,
+                    requireCompleteStory = true,
                     storiesListType = TOP
                 )
                 storiesUseCase.getStory(
@@ -177,30 +175,7 @@ class CommentsListViewModelTest : BaseTest() {
                     storyId = 1,
                     useCache = true,
                     onResult = any(),
-                    requireComments = true,
-                    storiesListType = TOP
-                )
-            }
-        }
-
-        @Test
-        fun `when initialise is called and the story is an Ask type then requireText is true`() {
-            coEvery {
-                commentsUseCase.retrieveComments(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                    any()
-                )
-            } just Runs
-
-            commentsListViewModel.initialise(storiesListType)
-
-            coVerify {
-                storiesUseCase.getStory(
-                    id = 1,
-                    useCachedVersion = false,
+                    requireCompleteStory = true,
                     storiesListType = TOP
                 )
             }
@@ -239,7 +214,7 @@ class CommentsListViewModelTest : BaseTest() {
                     storyId = 1,
                     useCache = false,
                     onResult = any(),
-                    requireComments = true,
+                    requireCompleteStory = true,
                     storiesListType = NEW
                 )
             }
@@ -705,7 +680,7 @@ class CommentsListViewModelTest : BaseTest() {
                     storyId = 1,
                     useCache = false,
                     onResult = any(),
-                    requireComments = true,
+                    requireCompleteStory = true,
                     storiesListType = ASK
                 )
             }
@@ -733,7 +708,7 @@ class CommentsListViewModelTest : BaseTest() {
                     storyId = 1,
                     useCache = true,
                     onResult = any(),
-                    requireComments = true,
+                    requireCompleteStory = true,
                     storiesListType = JOBS
                 )
             }

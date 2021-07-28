@@ -12,13 +12,13 @@ class CommentsUseCase(
         storyId: Int,
         useCache: Boolean,
         onResult: (List<CommentWithDepth>, Boolean, Boolean) -> Unit,
-        requireComments: Boolean,
+        requireCompleteStory: Boolean,
         storiesListType: StoriesListType
     ) {
         val storyResults = repository.story(
             storyId,
             useCache,
-            requireComments,
+            requireCompleteStory,
             storiesListType
         )
         val listAllComments = mutableListOf<CommentWithDepth>()

@@ -66,7 +66,7 @@ class CommentsUseCaseTest : BaseTest() {
                 storyId = 1,
                 useCache = true,
                 onResult = onResult,
-                requireComments = true,
+                requireCompleteStory = true,
                 storiesListType = TOP
             )
         }
@@ -75,7 +75,7 @@ class CommentsUseCaseTest : BaseTest() {
             repository.story(
                 id = 1,
                 useCachedVersion = true,
-                requireComments = true,
+                requireCompleteStory = true,
                 storiesListType = TOP
             )
         }
@@ -92,7 +92,7 @@ class CommentsUseCaseTest : BaseTest() {
                 storyId = 1,
                 useCache = false,
                 onResult = onResult,
-                requireComments = true,
+                requireCompleteStory = true,
                 storiesListType = ASK
             )
         }
@@ -101,7 +101,7 @@ class CommentsUseCaseTest : BaseTest() {
             repository.story(
                 id = 1,
                 useCachedVersion = false,
-                requireComments = true,
+                requireCompleteStory = true,
                 storiesListType = ASK
             )
         }
@@ -127,7 +127,7 @@ class CommentsUseCaseTest : BaseTest() {
                     storyId = 1,
                     useCache = false,
                     onResult = onResult,
-                    requireComments = true,
+                    requireCompleteStory = true,
                     storiesListType = JOBS
                 )
             }
@@ -154,7 +154,7 @@ class CommentsUseCaseTest : BaseTest() {
                     storyId = 1,
                     useCache = false,
                     onResult = onResult,
-                    requireComments = true,
+                    requireCompleteStory = true,
                     storiesListType = SHOW
                 )
             }

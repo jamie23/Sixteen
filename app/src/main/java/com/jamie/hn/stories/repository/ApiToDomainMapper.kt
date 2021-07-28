@@ -1,6 +1,8 @@
 package com.jamie.hn.stories.repository
 
 import com.jamie.hn.comments.domain.model.Comment
+import com.jamie.hn.stories.domain.model.DownloadedStatus
+import com.jamie.hn.stories.domain.model.DownloadedStatus.PARTIAL
 import com.jamie.hn.stories.domain.model.Story
 import com.jamie.hn.stories.repository.model.ApiComment
 import com.jamie.hn.stories.repository.model.ApiStory
@@ -10,7 +12,7 @@ class ApiToDomainMapper {
 
     fun toStoryDomainModel(
         apiStory: ApiStory,
-        retrievedComments: Boolean = false,
+        downloadedStatus: DownloadedStatus = PARTIAL,
         text: String = ""
     ): Story {
         return Story(
@@ -25,7 +27,7 @@ class ApiToDomainMapper {
             apiStory.title,
             apiStory.url,
             text,
-            retrievedComments
+            downloadedStatus
         )
     }
 

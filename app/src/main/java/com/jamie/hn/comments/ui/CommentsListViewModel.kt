@@ -102,7 +102,7 @@ class CommentsListViewModel(
                 storyId = storyId,
                 useCache = useCachedVersion,
                 onResult = ::populateUiCommentRepository,
-                requireComments = true,
+                requireCompleteStory = true,
                 storiesListType = storyListType
             )
 

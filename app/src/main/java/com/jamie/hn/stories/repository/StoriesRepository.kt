@@ -12,6 +12,8 @@ import com.jamie.hn.core.net.NetworkUtils
 import com.jamie.hn.stories.repository.local.LocalStorage
 import com.jamie.hn.core.net.hex.Hex
 import com.jamie.hn.core.net.official.OfficialClient
+import com.jamie.hn.stories.domain.model.DownloadedStatus.COMPLETE
+import com.jamie.hn.stories.domain.model.DownloadedStatus.PARTIAL
 import com.jamie.hn.stories.domain.model.Story
 import com.jamie.hn.stories.repository.model.StoryResult
 import com.jamie.hn.stories.repository.model.StoriesResult
@@ -48,7 +50,7 @@ class StoriesRepository(
         }
 
         val newCopy = webStorage.stories(getWebPath(storiesListType)).map { story ->
-            mapper.toStoryDomainModel(story, false)
+            mapper.toStoryDomainModel(story, PARTIAL)
         }
 
         updateLocalStoriesListByType(storiesListType, newCopy)
@@ -58,7 +60,7 @@ class StoriesRepository(
     override suspend fun story(
         id: Int,
         useCachedVersion: Boolean,
-        requireComments: Boolean,
+        requireCompleteStory: Boolean,
         storiesListType: StoriesListType
     ): StoryResult {
         if (storiesListType == UNKNOWN) return StoryResult(fetchStory(id))
@@ -68,7 +70,7 @@ class StoriesRepository(
         if (!networkUtils.isNetworkAvailable()) {
             val localCopy = localStoriesList.first { it.id == id }
 
-            if (commentsRequiredAndRetrieved(requireComments, localCopy)) {
+            if (completeStoryRequiredAndRetrieved(requireCompleteStory, localCopy)) {
                 return StoryResult(
                     story = localCopy,
                     networkFailure = true
@@ -84,7 +86,7 @@ class StoriesRepository(
         if (useCachedVersion) {
             val localCopy = localStoriesList.first { it.id == id }
 
-            if (commentsRequiredAndRetrieved(requireComments, localCopy)) {
+            if (completeStoryRequiredAndRetrieved(requireCompleteStory, localCopy)) {
                 return StoryResult(
                     story = localCopy,
                     networkFailure = false
@@ -113,11 +115,11 @@ class StoriesRepository(
             text = fetchAskText(id)
         }
 
-        return mapper.toStoryDomainModel(newCopy, true, text)
+        return mapper.toStoryDomainModel(newCopy, COMPLETE, text)
     }
 
-    private fun commentsRequiredAndRetrieved(requireComments: Boolean, localCopy: Story) =
-        !requireComments || localCopy.retrievedComments
+    private fun completeStoryRequiredAndRetrieved(requireCompleteStory: Boolean, localCopy: Story) =
+        !requireCompleteStory || localCopy.downloadedStatus == COMPLETE
 
     private fun getLocalStoriesListByType(storiesListType: StoriesListType): List<Story> =
         when (storiesListType) {

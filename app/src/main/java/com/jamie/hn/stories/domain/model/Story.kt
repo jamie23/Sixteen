@@ -5,6 +5,7 @@ import com.jamie.hn.core.ASK_PREFIX
 import com.jamie.hn.core.StoryType
 import com.jamie.hn.core.StoryType.ASK
 import com.jamie.hn.core.StoryType.STANDARD
+import com.jamie.hn.stories.domain.model.DownloadedStatus.PARTIAL
 import org.joda.time.DateTime
 
 data class Story(
@@ -19,7 +20,7 @@ data class Story(
     val title: String = "",
     val url: String = "",
     val text: String = "",
-    val retrievedComments: Boolean = false
+    val downloadedStatus: DownloadedStatus = PARTIAL
 ) {
     val storyType: StoryType
         get() = if (title.startsWith(ASK_PREFIX)) {
@@ -27,4 +28,8 @@ data class Story(
         } else {
             STANDARD
         }
+}
+
+enum class DownloadedStatus {
+    COMPLETE, PARTIAL
 }

@@ -9,7 +9,7 @@ interface Repository {
     suspend fun story(
         id: Int,
         useCachedVersion: Boolean,
-        requireComments: Boolean,
+        requireCompleteStory: Boolean,
         storiesListType: StoriesListType
     ): StoryResult
 }

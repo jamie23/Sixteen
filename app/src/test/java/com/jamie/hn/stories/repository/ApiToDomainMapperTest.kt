@@ -2,6 +2,8 @@ package com.jamie.hn.stories.repository
 
 import com.jamie.hn.comments.domain.model.Comment
 import com.jamie.hn.core.BaseTest
+import com.jamie.hn.stories.domain.model.DownloadedStatus.COMPLETE
+import com.jamie.hn.stories.domain.model.DownloadedStatus.PARTIAL
 import com.jamie.hn.stories.repository.model.ApiComment
 import com.jamie.hn.stories.repository.model.ApiStory
 import org.joda.time.DateTime
@@ -20,7 +22,7 @@ class ApiToDomainMapperTest : BaseTest() {
     }
 
     @Test
-    fun `when toStoryDomainModel is called with retrievedComments as true then retrievedComments is true on the Story`() {
+    fun `when toStoryDomainModel is called then correctly map basic fields `() {
         val apiStory = ApiStory(
             author = "jamie",
             comments = null,
@@ -33,13 +35,23 @@ class ApiToDomainMapperTest : BaseTest() {
             url = "url"
         )
 
-        val story = apiToDomainMapper.toStoryDomainModel(apiStory, true)
+        val story = apiToDomainMapper.toStoryDomainModel(apiStory, PARTIAL, "text")
 
-        assertEquals(true, story.retrievedComments)
+        assertEquals("jamie", story.author)
+        assertEquals(emptyList<Comment>(), story.comments)
+        assertEquals("url", story.url)
+        assertEquals("domain", story.domain)
+        assertEquals(1, story.id)
+        assertEquals(2, story.score)
+        assertEquals(DateTime.parse(time), story.time)
+        assertEquals("title", story.title)
+        assertEquals("url", story.url)
+        assertEquals("text", story.text)
+        assertEquals(PARTIAL, story.downloadedStatus)
     }
 
     @Test
-    fun `when toStoryDomainModel is called with retrievedComments as false then retrievedComments is false on the Story`() {
+    fun `when toStoryDomainModel is called with COMPLETE download status then correctly map field`() {
         val apiStory = ApiStory(
             author = "jamie",
             comments = null,
@@ -52,13 +64,13 @@ class ApiToDomainMapperTest : BaseTest() {
             url = "url"
         )
 
-        val story = apiToDomainMapper.toStoryDomainModel(apiStory, false)
+        val story = apiToDomainMapper.toStoryDomainModel(apiStory, COMPLETE)
 
-        assertEquals(false, story.retrievedComments)
+        assertEquals(COMPLETE, story.downloadedStatus)
     }
 
     @Test
-    fun `when toStoryDomainModel is called with a story with no comments then correctly return a Story with no comments`() {
+    fun `when toStoryDomainModel is called with a story with null comments then return a Story with an emptyList comments`() {
         val apiStory = ApiStory(
             author = "jamie",
             comments = null,
@@ -82,7 +94,7 @@ class ApiToDomainMapperTest : BaseTest() {
         assertEquals(DateTime.parse(time), story.time)
         assertEquals("title", story.title)
         assertEquals("url", story.url)
-        assertEquals(false, story.retrievedComments)
+        assertEquals(PARTIAL, story.downloadedStatus)
     }
 
     @Test
@@ -148,24 +160,5 @@ class ApiToDomainMapperTest : BaseTest() {
         assertEquals(emptyList<Comment>(), resultNestedCommentList[0].comments)
         assertEquals("text", resultNestedCommentList[0].text)
         assertEquals(DateTime.parse(time), resultNestedCommentList[0].time)
-    }
-
-    @Test
-    fun `when toStoryDomainModel is called with text then text is set on the story`() {
-        val apiStory = ApiStory(
-            author = "jamie",
-            comments = null,
-            commentsUrl = "url",
-            domain = "domain",
-            id = 1,
-            score = 2,
-            time = time,
-            title = "title",
-            url = "url"
-        )
-
-        val story = apiToDomainMapper.toStoryDomainModel(apiStory, false, "Text")
-
-        assertEquals("Text", story.text)
     }
 }

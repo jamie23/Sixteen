@@ -5,9 +5,12 @@ import com.jamie.hn.core.StoriesListType.JOBS
 import com.jamie.hn.core.StoriesListType.NEW
 import com.jamie.hn.core.StoriesListType.SHOW
 import com.jamie.hn.core.StoriesListType.TOP
+import com.jamie.hn.core.StoriesListType.UNKNOWN
 import com.jamie.hn.core.net.NetworkUtils
 import com.jamie.hn.core.net.hex.Hex
 import com.jamie.hn.core.net.official.OfficialClient
+import com.jamie.hn.stories.domain.model.DownloadedStatus.COMPLETE
+import com.jamie.hn.stories.domain.model.DownloadedStatus.PARTIAL
 import com.jamie.hn.stories.domain.model.Story
 import com.jamie.hn.stories.repository.local.LocalStorage
 import com.jamie.hn.stories.repository.model.ApiAskText
@@ -82,13 +85,14 @@ class StoriesRepositoryTest {
                 topStories = storiesRepository.stories(false, TOP)
             }
 
-            assertEquals(storedList, topStories.stories)
-            assertEquals(true, topStories.networkFailure)
             verify(exactly = 0) { localStorage.topStoryList = any() }
             verify(exactly = 0) { localStorage.askStoryList }
             verify(exactly = 0) { localStorage.jobsStoryList }
             verify(exactly = 0) { localStorage.newStoryList }
             verify(exactly = 0) { localStorage.showStoryList }
+
+            assertEquals(storedList, topStories.stories)
+            assertEquals(true, topStories.networkFailure)
         }
 
         @Test
@@ -102,13 +106,14 @@ class StoriesRepositoryTest {
                 askStories = storiesRepository.stories(true, ASK)
             }
 
-            assertEquals(storedList, askStories.stories)
-            assertFalse(askStories.networkFailure)
             verify(exactly = 0) { localStorage.askStoryList = any() }
             verify(exactly = 0) { localStorage.topStoryList }
             verify(exactly = 0) { localStorage.jobsStoryList }
             verify(exactly = 0) { localStorage.newStoryList }
             verify(exactly = 0) { localStorage.showStoryList }
+
+            assertEquals(storedList, askStories.stories)
+            assertFalse(askStories.networkFailure)
         }
 
         @Test
@@ -137,6 +142,7 @@ class StoriesRepositoryTest {
             verify(exactly = 0) { localStorage.askStoryList = any() }
             verify(exactly = 0) { localStorage.newStoryList = any() }
             verify(exactly = 0) { localStorage.showStoryList = any() }
+
             assertFalse(jobsStories.networkFailure)
             assertEquals(listOf(Story(time = date)), jobsStories.stories)
         }
@@ -162,13 +168,14 @@ class StoriesRepositoryTest {
                 newStories = storiesRepository.stories(false, NEW)
             }
 
-            verify(exactly = 0) { localStorage.newStoryList }
             verify { localStorage.newStoryList = listOf(Story(time = date)) }
-            verify { apiToDomainMapper.toStoryDomainModel(any(), false) }
+            verify { apiToDomainMapper.toStoryDomainModel(any(), PARTIAL) }
+            verify(exactly = 0) { localStorage.newStoryList }
             verify(exactly = 0) { localStorage.topStoryList = any() }
             verify(exactly = 0) { localStorage.askStoryList = any() }
             verify(exactly = 0) { localStorage.jobsStoryList = any() }
             verify(exactly = 0) { localStorage.showStoryList = any() }
+
             assertFalse(newStories.networkFailure)
             assertEquals(listOf(Story(time = date)), newStories.stories)
         }
@@ -199,23 +206,24 @@ class StoriesRepositoryTest {
             }
 
             verifyOrder {
-                apiToDomainMapper.toStoryDomainModel(apiStory1, false)
-                apiToDomainMapper.toStoryDomainModel(apiStory2, false)
+                apiToDomainMapper.toStoryDomainModel(apiStory1, PARTIAL)
+                apiToDomainMapper.toStoryDomainModel(apiStory2, PARTIAL)
                 localStorage.showStoryList = listOf(
                     Story(time = date),
                     Story(time = date)
                 )
             }
+            verify(exactly = 0) { localStorage.topStoryList = any() }
+            verify(exactly = 0) { localStorage.askStoryList = any() }
+            verify(exactly = 0) { localStorage.jobsStoryList = any() }
+            verify(exactly = 0) { localStorage.newStoryList = any() }
+
             assertEquals(
                 listOf(
                     Story(time = date),
                     Story(time = date)
                 ), showStories.stories
             )
-            verify(exactly = 0) { localStorage.topStoryList = any() }
-            verify(exactly = 0) { localStorage.askStoryList = any() }
-            verify(exactly = 0) { localStorage.jobsStoryList = any() }
-            verify(exactly = 0) { localStorage.newStoryList = any() }
         }
     }
 
@@ -226,14 +234,56 @@ class StoriesRepositoryTest {
         inner class UnknownStoryType {
 
             @Test
-            fun `when storyType is unknown then fetch from web`() {
+            fun `when storyType is unknown then fetch from always web`() {
                 lateinit var storyResult: StoryResult
+                val apiStory = ApiStory(id = 1, time = DateTime.now().toString())
+                val storedStory = Story(id = 1, time = DateTime.now())
+
+                coEvery { webStorage.story(1) } returns apiStory
+                every { apiToDomainMapper.toStoryDomainModel(any(), COMPLETE) } returns storedStory
 
                 runBlocking {
                     storyResult = storiesRepository.story(
                         id = 1,
                         useCachedVersion = false,
-                        requireComments = false,
+                        requireCompleteStory = false,
+                        storiesListType = UNKNOWN
+                    )
+                }
+
+                coVerify(exactly = 1) { webStorage.story(1) }
+                verify(exactly = 0) { localStorage.showStoryList = any() }
+                verify(exactly = 0) { localStorage.topStoryList }
+                verify(exactly = 0) { localStorage.askStoryList }
+                verify(exactly = 0) { localStorage.jobsStoryList }
+                verify(exactly = 0) { localStorage.newStoryList }
+
+                assertEquals(storedStory, storyResult.story)
+                assertEquals(false, storyResult.networkFailure)
+            }
+        }
+
+        @Nested
+        inner class NetworkUnavailable {
+
+            @Test
+            fun `when requesting a story from SHOW, the story is cached and not requiring complete then use local version with network failure as true`() {
+                lateinit var storyResult: StoryResult
+                val storedStory = Story(
+                    id = 1,
+                    time = DateTime.now(),
+                    downloadedStatus = COMPLETE
+                )
+                val storedList = listOf(storedStory)
+
+                every { localStorage.showStoryList } returns storedList
+                every { networkUtils.isNetworkAvailable() } returns false
+
+                runBlocking {
+                    storyResult = storiesRepository.story(
+                        id = 1,
+                        useCachedVersion = false,
+                        requireCompleteStory = false,
                         storiesListType = SHOW
                     )
                 }
@@ -243,211 +293,77 @@ class StoriesRepositoryTest {
                 verify(exactly = 0) { localStorage.askStoryList }
                 verify(exactly = 0) { localStorage.jobsStoryList }
                 verify(exactly = 0) { localStorage.newStoryList }
+
                 assertEquals(storedStory, storyResult.story)
+                assertEquals(true, storyResult.networkFailure)
+            }
+
+            @Test
+            fun `when requesting a TOP story, the complete story is cached and requiring complete then use local version with network failure as true`() {
+                lateinit var storyResult: StoryResult
+                val storedStory = Story(
+                    id = 1,
+                    time = DateTime.now(),
+                    downloadedStatus = COMPLETE
+                )
+                val storedList = listOf(storedStory)
+
+                every { localStorage.topStoryList } returns storedList
+                every { networkUtils.isNetworkAvailable() } returns false
+
+                runBlocking {
+                    storyResult = storiesRepository.story(
+                        id = 1,
+                        useCachedVersion = false,
+                        requireCompleteStory = true,
+                        storiesListType = TOP
+                    )
+                }
+
+                verify(exactly = 0) { localStorage.topStoryList = any() }
+                verify(exactly = 0) { localStorage.askStoryList }
+                verify(exactly = 0) { localStorage.jobsStoryList }
+                verify(exactly = 0) { localStorage.newStoryList }
+                verify(exactly = 0) { localStorage.showStoryList }
+
+                assertEquals(storedStory, storyResult.story)
+                assertEquals(true, storyResult.networkFailure)
+            }
+
+            @Test
+            fun `when requesting a complete TOP story, the story is cached but is partial then return story with id as -1 and network failure as true`() {
+                lateinit var storyResult: StoryResult
+                val storedStory = Story(
+                    id = 1,
+                    time = DateTime.now(),
+                    downloadedStatus = PARTIAL
+                )
+                val storedList = listOf(storedStory)
+
+                every { localStorage.topStoryList } returns storedList
+                every { networkUtils.isNetworkAvailable() } returns false
+
+                runBlocking {
+                    storyResult = storiesRepository.story(
+                        id = 1,
+                        useCachedVersion = false,
+                        requireCompleteStory = true,
+                        storiesListType = TOP
+                    )
+                }
+
+                verify(exactly = 0) { localStorage.topStoryList = any() }
+
+                assertEquals(-1, storyResult.story.id)
                 assertEquals(true, storyResult.networkFailure)
             }
         }
 
         @Nested
-        inner class NetworkUnavailable {
-
-            @Nested
-            inner class CommentsRequiredAndRetrieved {
-
-                @Test
-                fun `when requesting a story from SHOW, the story is cached and not requiring comments then use local version with network failure as true`() {
-                    lateinit var storyResult: StoryResult
-                    val storedStory = Story(
-                        id = 1,
-                        time = DateTime.now(),
-                        retrievedComments = false
-                    )
-                    val storedList = listOf(storedStory)
-
-                    every { localStorage.showStoryList } returns storedList
-                    every { networkUtils.isNetworkAvailable() } returns false
-
-                    runBlocking {
-                        storyResult = storiesRepository.story(
-                            id = 1,
-                            useCachedVersion = false,
-                            requireComments = false,
-                            storiesListType = SHOW
-                        )
-                    }
-
-                    verify(exactly = 0) { localStorage.showStoryList = any() }
-                    verify(exactly = 0) { localStorage.topStoryList }
-                    verify(exactly = 0) { localStorage.askStoryList }
-                    verify(exactly = 0) { localStorage.jobsStoryList }
-                    verify(exactly = 0) { localStorage.newStoryList }
-                    assertEquals(storedStory, storyResult.story)
-                    assertEquals(true, storyResult.networkFailure)
-                }
-
-                @Test
-                fun `when requesting a TOP story, the story is cached and is requiring comments and stored story has comments then use local version with network failure as true`() {
-                    lateinit var storyResult: StoryResult
-                    val storedStory = Story(
-                        id = 1,
-                        time = DateTime.now(),
-                        retrievedComments = true
-                    )
-                    val storedList = listOf(storedStory)
-
-                    every { localStorage.topStoryList } returns storedList
-                    every { networkUtils.isNetworkAvailable() } returns false
-
-                    runBlocking {
-                        storyResult = storiesRepository.story(
-                            id = 1,
-                            useCachedVersion = false,
-                            requireComments = true,
-                            storiesListType = TOP
-                        )
-                    }
-
-                    verify(exactly = 0) { localStorage.topStoryList = any() }
-                    verify(exactly = 0) { localStorage.askStoryList }
-                    verify(exactly = 0) { localStorage.jobsStoryList }
-                    verify(exactly = 0) { localStorage.newStoryList }
-                    verify(exactly = 0) { localStorage.showStoryList }
-                    assertEquals(storedStory, storyResult.story)
-                    assertEquals(true, storyResult.networkFailure)
-                }
-
-                @Test
-                fun `when requesting a TOP story, the story is cached but does not have comments when required then return story with id as -1 and network failure as true`() {
-                    lateinit var storyResult: StoryResult
-                    val storedStory = Story(
-                        id = 1,
-                        time = DateTime.now(),
-                        retrievedComments = false
-                    )
-                    val storedList = listOf(storedStory)
-
-                    every { localStorage.topStoryList } returns storedList
-                    every { networkUtils.isNetworkAvailable() } returns false
-
-                    runBlocking {
-                        storyResult = storiesRepository.story(
-                            id = 1,
-                            useCachedVersion = false,
-                            requireComments = true,
-                            storiesListType = TOP
-                        )
-                    }
-
-                    verify(exactly = 0) { localStorage.topStoryList = any() }
-                    assertEquals(-1, storyResult.story.id)
-                    assertEquals(true, storyResult.networkFailure)
-                }
-            }
-
-            @Nested
-            inner class TextRequiredAndRetrieved {
-
-                @Test
-                fun `when requesting a story from SHOW, the story is cached and not requiring text then use local version with network failure as true`() {
-                    lateinit var storyResult: StoryResult
-                    val storedStory = Story(
-                        id = 1,
-                        time = DateTime.now(),
-                        retrievedComments = true,
-                        text = ""
-                    )
-                    val storedList = listOf(storedStory)
-
-                    every { localStorage.showStoryList } returns storedList
-                    every { networkUtils.isNetworkAvailable() } returns false
-
-                    runBlocking {
-                        storyResult = storiesRepository.story(
-                            id = 1,
-                            useCachedVersion = false,
-                            requireComments = true,
-                            storiesListType = SHOW
-                        )
-                    }
-
-                    verify(exactly = 0) { localStorage.showStoryList = any() }
-                    coVerify(exactly = 0) { officialClient.getStory(any()) }
-                    verify(exactly = 0) { localStorage.topStoryList }
-                    verify(exactly = 0) { localStorage.askStoryList }
-                    verify(exactly = 0) { localStorage.jobsStoryList }
-                    verify(exactly = 0) { localStorage.newStoryList }
-                    assertEquals(storedStory, storyResult.story)
-                    assertEquals(true, storyResult.networkFailure)
-                }
-
-                @Test
-                fun `when requesting a TOP story, the story is cached and is requiring text and stored story has text then use local version with network failure as true`() {
-                    lateinit var storyResult: StoryResult
-                    val storedStory = Story(
-                        id = 1,
-                        time = DateTime.now(),
-                        retrievedComments = true,
-                        text = "Text"
-                    )
-                    val storedList = listOf(storedStory)
-
-                    every { localStorage.topStoryList } returns storedList
-                    every { networkUtils.isNetworkAvailable() } returns false
-
-                    runBlocking {
-                        storyResult = storiesRepository.story(
-                            id = 1,
-                            useCachedVersion = false,
-                            requireComments = true,
-                            storiesListType = TOP
-                        )
-                    }
-
-                    verify(exactly = 0) { localStorage.topStoryList = any() }
-                    coVerify(exactly = 0) { officialClient.getStory(any()) }
-                    verify(exactly = 0) { localStorage.askStoryList }
-                    verify(exactly = 0) { localStorage.jobsStoryList }
-                    verify(exactly = 0) { localStorage.newStoryList }
-                    verify(exactly = 0) { localStorage.showStoryList }
-                    assertEquals(storedStory, storyResult.story)
-                    assertEquals(true, storyResult.networkFailure)
-                }
-
-                @Test
-                fun `when requesting a TOP story, the story is cached but does not have text when required then return story with id as -1 and network failure as true`() {
-                    lateinit var storyResult: StoryResult
-                    val storedStory = Story(
-                        id = 1,
-                        time = DateTime.now(),
-                        retrievedComments = true,
-                        text = ""
-                    )
-                    val storedList = listOf(storedStory)
-
-                    every { localStorage.topStoryList } returns storedList
-                    every { networkUtils.isNetworkAvailable() } returns false
-
-                    runBlocking {
-                        storyResult = storiesRepository.story(
-                            id = 1,
-                            useCachedVersion = false,
-                            requireComments = true,
-                            storiesListType = TOP
-                        )
-                    }
-
-                    verify(exactly = 0) { localStorage.topStoryList = any() }
-                    coVerify(exactly = 0) { officialClient.getStory(any()) }
-                    assertEquals(-1, storyResult.story.id)
-                    assertEquals(true, storyResult.networkFailure)
-                }
-            }
-        }
-
-        @Nested
         inner class UseCachedVersionTrue {
+
             @Test
-            fun `when requesting a story from TOP, local storage is not null and requireComments is false then get story from local storage`() {
+            fun `when requesting a story from TOP, local storage has PARTIAL story and requireCompleteStory is false then get story from local storage`() {
                 val storedStory = Story(id = 1, time = DateTime.now())
                 val storedList = listOf(storedStory)
                 lateinit var story: StoryResult
@@ -458,7 +374,7 @@ class StoriesRepositoryTest {
                     story = storiesRepository.story(
                         id = 1,
                         useCachedVersion = true,
-                        requireComments = false,
+                        requireCompleteStory = false,
                         storiesListType = TOP
                     )
                 }
@@ -468,34 +384,36 @@ class StoriesRepositoryTest {
                 verify(exactly = 0) { localStorage.jobsStoryList }
                 verify(exactly = 0) { localStorage.newStoryList }
                 verify(exactly = 0) { localStorage.showStoryList }
+
                 assertEquals(storedStory, story.story)
             }
 
             @Test
-            fun `when requesting a story from ASK, requireComments is true and localCopy has not retrieved comments then get the story from web storage and replace the local story`() {
+            fun `when requesting a story from ASK, local storage has PARTIAL and requireCompleteStory is true then get the story from web storage and replace the local story`() {
                 val storedStory = Story(
                     id = 1,
                     time = DateTime.now(),
-                    retrievedComments = false
+                    downloadedStatus = PARTIAL
                 )
                 val newStoredStory = Story(
                     id = 1,
                     time = DateTime.now(),
-                    retrievedComments = true
+                    downloadedStatus = PARTIAL
                 )
                 val storedList = listOf(storedStory)
-                val apiStory = ApiStory(id = 1, time = DateTime.now().toString())
+                val apiStory = ApiStory(id = 1, time = DateTime.now().toString(), title = "Ask HN:")
                 lateinit var story: StoryResult
 
                 every { localStorage.askStoryList } returns storedList
-                every { apiToDomainMapper.toStoryDomainModel(any(), true) } returns newStoredStory
+                every { apiToDomainMapper.toStoryDomainModel(any(), any(), any()) } returns newStoredStory
                 coEvery { webStorage.story(1) } returns apiStory
+                coEvery { officialClient.getStory(1) } returns ApiAskText("Ask text")
 
                 runBlocking {
                     story = storiesRepository.story(
                         id = 1,
                         useCachedVersion = true,
-                        requireComments = true,
+                        requireCompleteStory = true,
                         storiesListType = ASK
                     )
                 }
@@ -503,106 +421,25 @@ class StoriesRepositoryTest {
                 coVerifyOrder {
                     localStorage.askStoryList
                     webStorage.story(1)
-                    apiToDomainMapper.toStoryDomainModel(apiStory, true)
-                    localStorage.askStoryList = listOf(newStoredStory)
-                }
-                assertEquals(newStoredStory, story.story)
-                verify(exactly = 0) { localStorage.topStoryList }
-                verify(exactly = 0) { localStorage.jobsStoryList }
-                verify(exactly = 0) { localStorage.newStoryList }
-                verify(exactly = 0) { localStorage.showStoryList }
-            }
-
-            @Test
-            fun `when requesting a story from JOBS, requireComments is true and localCopy has retrieved comments then get the story from local storage`() {
-                lateinit var story: StoryResult
-                val storedStory = Story(
-                    id = 1,
-                    time = DateTime.now(),
-                    retrievedComments = true
-                )
-                val storedList = listOf(storedStory)
-
-                every { localStorage.jobsStoryList } returns storedList
-
-                runBlocking {
-                    story = storiesRepository.story(
-                        id = 1,
-                        useCachedVersion = true,
-                        requireComments = true,
-                        storiesListType = JOBS
-                    )
-                }
-
-                verify(exactly = 0) { localStorage.jobsStoryList = any() }
-                verify(exactly = 0) { apiToDomainMapper.toStoryDomainModel(any(), any()) }
-                verify(exactly = 0) { localStorage.topStoryList }
-                verify(exactly = 0) { localStorage.askStoryList }
-                verify(exactly = 0) { localStorage.newStoryList }
-                verify(exactly = 0) { localStorage.showStoryList }
-                assertEquals(storedStory, story.story)
-            }
-
-            @Test
-            fun `when requesting a story from ASK, requireText is true and localCopy has not retrieved text then get the story from web storage and replace the local story`() {
-                lateinit var story: StoryResult
-                val storedStory = Story(
-                    id = 1,
-                    time = DateTime.now(),
-                    retrievedComments = true
-                )
-                val newStoredStory = Story(
-                    id = 1,
-                    time = DateTime.now(),
-                    retrievedComments = true,
-                    text = "Text"
-                )
-                val storedList = listOf(storedStory)
-                val apiAskText = ApiAskText("Text")
-                val apiStory = ApiStory(id = 1, time = DateTime.now().toString())
-
-                every { localStorage.askStoryList } returns storedList
-                coEvery { officialClient.getStory(1) } returns apiAskText
-                coEvery { webStorage.story(1) } returns apiStory
-                every {
-                    apiToDomainMapper.toStoryDomainModel(
-                        any(),
-                        true,
-                        "Text"
-                    )
-                } returns newStoredStory
-
-                runBlocking {
-                    story = storiesRepository.story(
-                        id = 1,
-                        useCachedVersion = true,
-                        requireComments = true,
-                        storiesListType = ASK
-                    )
-                }
-
-                coVerifyOrder {
-                    localStorage.askStoryList
                     officialClient.getStory(1)
-                    webStorage.story(1)
-                    apiToDomainMapper.toStoryDomainModel(apiStory, true, "Text")
+                    apiToDomainMapper.toStoryDomainModel(apiStory, COMPLETE, "Ask text")
                     localStorage.askStoryList = listOf(newStoredStory)
                 }
-                assertEquals(newStoredStory, story.story)
                 verify(exactly = 0) { localStorage.topStoryList }
                 verify(exactly = 0) { localStorage.jobsStoryList }
                 verify(exactly = 0) { localStorage.newStoryList }
                 verify(exactly = 0) { localStorage.showStoryList }
+
+                assertEquals(newStoredStory, story.story)
             }
 
             @Test
-            fun `when requesting a story from JOBS, requireText is true and localCopy has retrieved text then get the story from local storage`() {
+            fun `when requesting a story from JOBS, local storage has COMPLETE amd requireCompleteStory is true then get the story from local storage`() {
                 lateinit var story: StoryResult
                 val storedStory = Story(
                     id = 1,
                     time = DateTime.now(),
-                    retrievedComments = true,
-                    text = "Retrieved text"
+                    downloadedStatus = COMPLETE
                 )
                 val storedList = listOf(storedStory)
 
@@ -612,18 +449,18 @@ class StoriesRepositoryTest {
                     story = storiesRepository.story(
                         id = 1,
                         useCachedVersion = true,
-                        requireComments = true,
+                        requireCompleteStory = true,
                         storiesListType = JOBS
                     )
                 }
 
                 verify(exactly = 0) { localStorage.jobsStoryList = any() }
-                coVerify(exactly = 0) { officialClient.getStory(any()) }
                 verify(exactly = 0) { apiToDomainMapper.toStoryDomainModel(any(), any()) }
                 verify(exactly = 0) { localStorage.topStoryList }
                 verify(exactly = 0) { localStorage.askStoryList }
                 verify(exactly = 0) { localStorage.newStoryList }
                 verify(exactly = 0) { localStorage.showStoryList }
+
                 assertEquals(storedStory, story.story)
             }
         }
@@ -639,7 +476,7 @@ class StoriesRepositoryTest {
                 val storedStory = Story(id = 1, time = DateTime.now())
                 val storedList = listOf(storedStory)
 
-                every { apiToDomainMapper.toStoryDomainModel(any(), true) } returns storedStory
+                every { apiToDomainMapper.toStoryDomainModel(any(), any()) } returns storedStory
                 coEvery { webStorage.story(1) } returns apiStory
                 every { localStorage.newStoryList } returns storedList
 
@@ -647,7 +484,7 @@ class StoriesRepositoryTest {
                     story = storiesRepository.story(
                         id = 1,
                         useCachedVersion = false,
-                        requireComments = false,
+                        requireCompleteStory = false,
                         storiesListType = NEW
                     )
                 }
@@ -655,13 +492,14 @@ class StoriesRepositoryTest {
                 coVerifyOrder {
                     localStorage.newStoryList
                     webStorage.story(1)
-                    apiToDomainMapper.toStoryDomainModel(apiStory, true)
+                    apiToDomainMapper.toStoryDomainModel(apiStory, COMPLETE)
                     localStorage.newStoryList = listOf(storedStory)
                 }
                 verify(exactly = 0) { localStorage.topStoryList = any() }
                 verify(exactly = 0) { localStorage.askStoryList = any() }
                 verify(exactly = 0) { localStorage.jobsStoryList = any() }
                 verify(exactly = 0) { localStorage.showStoryList = any() }
+
                 assertEquals(storedStory, story.story)
             }
         }
