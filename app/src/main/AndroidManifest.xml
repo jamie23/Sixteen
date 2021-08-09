@@ -16,6 +16,10 @@
         android:usesCleartextTraffic="true">
         <activity android:name="com.jamie.hn.hostactivity.ui.MainActivity">
             <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -27,8 +31,6 @@
                     android:host="news.ycombinator.com"
                     android:pathPrefix="/item"
                     android:scheme="https" />
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
     </application>
