@@ -3,6 +3,7 @@ package com.jamie.hn.stories.ui
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.jamie.hn.core.extensions.visibleOrInvisible
 import com.jamie.hn.databinding.StoryItemCompleteBinding
 
 class StoryListAdapter : RecyclerView.Adapter<StoryListAdapter.ArticleListHolder>() {
@@ -34,6 +35,7 @@ class StoryListAdapter : RecyclerView.Adapter<StoryListAdapter.ArticleListHolder
             time.text = data[position].time
             title.text = data[position].title
             url.text = data[position].url
+            actionBar.articleButton.visibleOrInvisible(data[position].showNavigateToArticle)
             storyItemMain.setOnClickListener {
                 data[position].storyViewerCallback(data[position].id)
             }

@@ -10,6 +10,7 @@ import com.jamie.hn.core.StoriesListType.NEW
 import com.jamie.hn.core.StoriesListType.SHOW
 import com.jamie.hn.core.StoriesListType.TOP
 import com.jamie.hn.core.StoryType
+import com.jamie.hn.core.StoryType.STANDARD
 import com.jamie.hn.core.ui.Article
 import com.jamie.hn.core.ui.Ask
 import com.jamie.hn.core.ui.Jobs
@@ -527,7 +528,7 @@ class StoryListViewModelTest : BaseTest() {
             commentsCallback.captured.invoke(1)
 
             val resultStoryData = storyData.captured.getContentIfNotHandled()!!
-            assertEquals(StoryType.STANDARD, resultStoryData.storyType)
+            assertEquals(STANDARD, resultStoryData.storyType)
         }
 
         @Test
@@ -535,7 +536,7 @@ class StoryListViewModelTest : BaseTest() {
             val observer = spyk<Observer<Event<StoryData>>>()
             val commentsCallback = slot<(id: Int) -> Unit>()
             val storyData = slot<Event<StoryData>>()
-            val storyResults = StoryResult(generateStory(0, "23/08/2020 09:00:00", title = "Ask HN: Hello"))
+            val storyResults = StoryResult(generateStory(0, "23/08/2020 09:00:00", title = "Ask HN: Hello", storyType = StoryType.ASK))
 
             every {
                 storyDataMapper.toStoryViewItem(
@@ -594,13 +595,14 @@ class StoryListViewModelTest : BaseTest() {
         }
     }
 
-    private fun generateStory(id: Int, time: String, title: String = "") = Story(
+    private fun generateStory(id: Int, time: String, title: String = "", storyType: StoryType = STANDARD) = Story(
         id = id,
         time = DateTime.parse(
             time,
             DateTimeFormat.forPattern("dd/MM/yyyy HH:mm:ss")
         ),
         title = title,
+        type = storyType,
         url = "url"
     )
 
@@ -614,6 +616,7 @@ class StoryListViewModelTest : BaseTest() {
             time = "3",
             title = "title",
             url = "url",
+            showNavigateToArticle = false,
             commentsCallback = { },
             storyViewerCallback = { }
         )

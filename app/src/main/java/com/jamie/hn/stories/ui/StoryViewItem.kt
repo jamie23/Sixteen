@@ -9,6 +9,7 @@ data class StoryViewItem(
     val time: String,
     val title: String,
     val url: String,
+    val showNavigateToArticle: Boolean,
     val commentsCallback: (Int) -> Unit,
     val storyViewerCallback: (Int) -> Unit
 )

@@ -2,6 +2,7 @@ package com.jamie.hn.stories.repository.model
 
 import com.jamie.hn.core.ASK_PREFIX
 import com.jamie.hn.core.StoryType
+import com.jamie.hn.core.TELL_PREFIX
 
 data class ApiStory(
     val author: String = "",
@@ -16,7 +17,7 @@ data class ApiStory(
     val url: String = ""
 ) {
     val storyType: StoryType
-        get() = if (title.startsWith(ASK_PREFIX)) {
+        get() = if (title.startsWith(ASK_PREFIX) || title.startsWith(TELL_PREFIX)) {
             StoryType.ASK
         } else {
             StoryType.STANDARD

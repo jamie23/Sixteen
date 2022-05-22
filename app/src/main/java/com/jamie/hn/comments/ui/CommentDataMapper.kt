@@ -56,8 +56,8 @@ class CommentDataMapper(
         title = story.title,
         url = story.domain,
         text = processText(story.text, urlClickedCallback),
-        showAskText = story.storyType == StoryType.ASK,
-        showNavigateToArticle = story.storyType != StoryType.ASK,
+        showAskText = story.type == StoryType.ASK,
+        showNavigateToArticle = story.type != StoryType.ASK,
         storyViewerCallback = storyViewerCallback
     )
 

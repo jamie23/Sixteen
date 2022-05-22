@@ -16,18 +16,19 @@ class ApiToDomainMapper {
         text: String = ""
     ): Story {
         return Story(
-            apiStory.author,
-            apiStory.comments?.map { toCommentDomainModel(it) } ?: emptyList(),
-            apiStory.commentCount,
-            apiStory.commentsUrl,
-            apiStory.domain,
-            apiStory.id,
-            apiStory.score,
-            DateTime.parse(apiStory.time),
-            apiStory.title,
-            apiStory.url,
-            text,
-            downloadedStatus
+            author = apiStory.author,
+            comments = apiStory.comments?.map { toCommentDomainModel(it) } ?: emptyList(),
+            commentCount = apiStory.commentCount,
+            commentsUrl = apiStory.commentsUrl,
+            domain = apiStory.domain,
+            downloadedStatus = downloadedStatus,
+            id = apiStory.id,
+            score = apiStory.score,
+            text = text,
+            time = DateTime.parse(apiStory.time),
+            title = apiStory.title,
+            type = apiStory.storyType,
+            url = apiStory.url
         )
     }
 
