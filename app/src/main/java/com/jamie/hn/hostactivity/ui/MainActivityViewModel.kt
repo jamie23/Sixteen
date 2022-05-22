@@ -3,6 +3,7 @@ package com.jamie.hn.hostactivity.ui
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.jamie.hn.BuildConfig
 import com.jamie.hn.hostactivity.repository.local.PreferencesRepository
 import com.jamie.hn.hostactivity.repository.local.PreferencesRepository.Theme.DARK
 import com.jamie.hn.hostactivity.repository.local.PreferencesRepository.Theme.LIGHT
@@ -12,8 +13,15 @@ class MainActivityViewModel(
     private val preferencesRepository: PreferencesRepository
 ) : ViewModel() {
 
+    private val appVersion = MutableLiveData<String>()
+    fun appVersion(): LiveData<String> = appVersion
+
     private val themeIconsUpdate = MutableLiveData<ThemeChange>()
     fun themeIconsUpdate(): LiveData<ThemeChange> = themeIconsUpdate
+
+    init {
+        appVersion.value = "v${BuildConfig.VERSION_NAME}"
+    }
 
     fun lightThemeSet() {
         preferencesRepository.setTheme(LIGHT)

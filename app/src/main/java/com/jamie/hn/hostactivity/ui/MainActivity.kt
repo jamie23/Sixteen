@@ -86,6 +86,10 @@ class MainActivity : AppCompatActivity() {
             binding.drawerLayout.openDrawer(START)
         })
 
+        viewModel.appVersion().observe(this, Observer {
+            binding.version.text = it
+        })
+
         viewModel.themeIconsUpdate().observe(this, Observer {
             binding.drawerLayout.closeDrawer(START)
             binding.lightThemeButton.setImageResource(it.lightThemeIcon)
