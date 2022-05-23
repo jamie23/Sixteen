@@ -7,7 +7,7 @@ import com.jamie.hn.core.StoriesListType.NEW
 import com.jamie.hn.core.StoriesListType.SHOW
 import com.jamie.hn.core.StoriesListType.TOP
 import com.jamie.hn.core.StoriesListType.UNKNOWN
-import com.jamie.hn.core.StoryType
+import com.jamie.hn.core.StoryType.TEXT
 import com.jamie.hn.core.net.NetworkUtils
 import com.jamie.hn.stories.repository.local.LocalStorage
 import com.jamie.hn.core.net.hex.Hex
@@ -144,5 +144,5 @@ class StoriesRepository(
         }
     }
 
-    private fun ApiStory.requiresText() = StoryType.ASK == this.storyType
+    private fun ApiStory.requiresText() = TEXT == this.storyType
 }

@@ -1,6 +1,6 @@
 package com.jamie.hn.stories.ui
 
-import com.jamie.hn.core.StoryType
+import com.jamie.hn.core.StoryType.TEXT
 import com.jamie.hn.stories.domain.model.Story
 import com.jamie.hn.core.ui.CoreDataMapper
 
@@ -23,7 +23,7 @@ class StoryDataMapper(
             time = coreDataMapper.time(story.time),
             title = story.title,
             url = story.domain,
-            showNavigateToArticle = story.type != StoryType.ASK,
+            showNavigateToArticle = story.type != TEXT,
             commentsCallback = commentsCallback,
             storyViewerCallback = storyViewerCallback
         )

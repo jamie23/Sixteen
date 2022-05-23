@@ -506,11 +506,11 @@ class StoryListViewModelTest : BaseTest() {
         }
 
         @Test
-        fun `when comments callback is called and story type is not Ask then post the StoryData with storyType set to STANDARD`() {
+        fun `when comments callback is called and story type is not TEXT then post the StoryData with storyType set to STANDARD`() {
             val observer = spyk<Observer<Event<StoryData>>>()
             val commentsCallback = slot<(id: Int) -> Unit>()
             val storyData = slot<Event<StoryData>>()
-            val storyResults = StoryResult(generateStory(0, "23/08/2020 09:00:00", title = "Non Ask story"))
+            val storyResults = StoryResult(generateStory(0, "23/08/2020 09:00:00", title = "Non Text story"))
 
             every {
                 storyDataMapper.toStoryViewItem(
@@ -532,11 +532,11 @@ class StoryListViewModelTest : BaseTest() {
         }
 
         @Test
-        fun `when comments callback is called and story type is Ask then post the StoryData with storyType set to ASK`() {
+        fun `when comments callback is called and story type is Text then post the StoryData with storyType set to TEXT`() {
             val observer = spyk<Observer<Event<StoryData>>>()
             val commentsCallback = slot<(id: Int) -> Unit>()
             val storyData = slot<Event<StoryData>>()
-            val storyResults = StoryResult(generateStory(0, "23/08/2020 09:00:00", title = "Ask HN: Hello", storyType = StoryType.ASK))
+            val storyResults = StoryResult(generateStory(0, "23/08/2020 09:00:00", storyType = StoryType.TEXT))
 
             every {
                 storyDataMapper.toStoryViewItem(
@@ -554,7 +554,7 @@ class StoryListViewModelTest : BaseTest() {
             commentsCallback.captured.invoke(1)
 
             val resultStoryData = storyData.captured.getContentIfNotHandled()!!
-            assertEquals(StoryType.ASK, resultStoryData.storyType)
+            assertEquals(StoryType.TEXT, resultStoryData.storyType)
         }
     }
 

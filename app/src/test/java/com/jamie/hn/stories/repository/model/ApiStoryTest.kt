@@ -11,32 +11,26 @@ import junit.framework.TestCase.assertEquals
 class ApiStoryTest : BaseTest() {
 
     @Test
-    fun `when storyType starts with Ask HN then return ASK`() {
-        val apiStory = generateApiStory(title = "Ask HN: Hello")
-        assertEquals(StoryType.ASK, apiStory.storyType)
+    fun `when comments url matches article url then return TEXT`() {
+        val apiStory = generateApiStory(title = "Ask HN: Hello", url = "comments-url", commentsUrl = "comments-url")
+        assertEquals(StoryType.TEXT, apiStory.storyType)
     }
 
     @Test
-    fun `when storyType starts with Tell HN then return ASK`() {
-        val apiStory = generateApiStory(title = "Tell HN: Hello")
-        assertEquals(StoryType.ASK, apiStory.storyType)
-    }
-
-    @Test
-    fun `when storyType starts with anything else then return STANDARD`() {
-        val apiStory = generateApiStory(title = "Non ask story")
+    fun `when url does not match comments url then return STANDARD`() {
+        val apiStory = generateApiStory(title = "Non text story", url = "url", commentsUrl = "comments-url")
         assertEquals(StoryType.STANDARD, apiStory.storyType)
     }
 
-    private fun generateApiStory(title: String) = ApiStory(
+    private fun generateApiStory(title: String, commentsUrl: String = "", url: String = "") = ApiStory(
         author = "jamie",
         comments = null,
-        commentsUrl = "url",
+        commentsUrl = commentsUrl,
         domain = "domain",
         id = 1,
         score = 2,
         time = "2016-01-14T21:33:17.000Z",
         title = title,
-        url = "url"
+        url = url
     )
 }

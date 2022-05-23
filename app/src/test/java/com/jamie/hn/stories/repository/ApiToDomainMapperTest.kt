@@ -27,7 +27,7 @@ class ApiToDomainMapperTest : BaseTest() {
         val apiStory = ApiStory(
             author = "jamie",
             comments = null,
-            commentsUrl = "url",
+            commentsUrl = "comments-url",
             domain = "domain",
             id = 1,
             score = 2,

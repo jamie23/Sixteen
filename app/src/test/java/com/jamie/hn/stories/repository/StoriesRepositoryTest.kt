@@ -236,7 +236,12 @@ class StoriesRepositoryTest {
             @Test
             fun `when storyType is unknown then fetch from always web`() {
                 lateinit var storyResult: StoryResult
-                val apiStory = ApiStory(id = 1, time = DateTime.now().toString())
+                val apiStory = ApiStory(
+                    id = 1,
+                    time = DateTime.now().toString(),
+                    commentsUrl = "comments-url",
+                    url = "url"
+                )
                 val storedStory = Story(id = 1, time = DateTime.now())
 
                 coEvery { webStorage.story(1) } returns apiStory
@@ -478,7 +483,11 @@ class StoriesRepositoryTest {
             fun `when requesting a story from NEW then get the story from web storage, update the local storage and return web copy`() {
 
                 lateinit var story: StoryResult
-                val apiStory = ApiStory(id = 1, time = DateTime.now().toString())
+                val apiStory = ApiStory(
+                    id = 1,
+                    time = DateTime.now().toString(),
+                    commentsUrl = "comments-url",
+                    url = "url")
                 val storedStory = Story(id = 1, time = DateTime.now())
                 val storedList = listOf(storedStory)
 
@@ -517,7 +526,13 @@ class StoriesRepositoryTest {
                 val storedStory = Story(id = 1, time = DateTime.now())
                 val storedList = listOf(storedStory)
 
-                every { apiToDomainMapper.toStoryDomainModel(any(), any(), any()) } returns storedStory
+                every {
+                    apiToDomainMapper.toStoryDomainModel(
+                        any(),
+                        any(),
+                        any()
+                    )
+                } returns storedStory
                 coEvery { webStorage.story(1) } returns apiStory
                 every { localStorage.askStoryList } returns storedList
                 coEvery { officialClient.getStory(1) } returns ApiAskText("Ask text")
@@ -549,11 +564,18 @@ class StoriesRepositoryTest {
             fun `when requesting a story from TOP and story is Tell HN then get the story and associated text from web storage, update the local storage and return web copy`() {
 
                 lateinit var story: StoryResult
-                val apiStory = ApiStory(id = 1, time = DateTime.now().toString(), title = "Tell HN:")
+                val apiStory =
+                    ApiStory(id = 1, time = DateTime.now().toString(), title = "Tell HN:")
                 val storedStory = Story(id = 1, time = DateTime.now())
                 val storedList = listOf(storedStory)
 
-                every { apiToDomainMapper.toStoryDomainModel(any(), any(), any()) } returns storedStory
+                every {
+                    apiToDomainMapper.toStoryDomainModel(
+                        any(),
+                        any(),
+                        any()
+                    )
+                } returns storedStory
                 coEvery { webStorage.story(1) } returns apiStory
                 every { localStorage.topStoryList } returns storedList
                 coEvery { officialClient.getStory(1) } returns ApiAskText("Tell text")
