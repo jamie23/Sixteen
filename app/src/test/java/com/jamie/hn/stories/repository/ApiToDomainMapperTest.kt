@@ -2,6 +2,7 @@ package com.jamie.hn.stories.repository
 
 import com.jamie.hn.comments.domain.model.Comment
 import com.jamie.hn.core.BaseTest
+import com.jamie.hn.core.StoryType
 import com.jamie.hn.stories.domain.model.DownloadedStatus.COMPLETE
 import com.jamie.hn.stories.domain.model.DownloadedStatus.PARTIAL
 import com.jamie.hn.stories.repository.model.ApiComment
@@ -26,7 +27,7 @@ class ApiToDomainMapperTest : BaseTest() {
         val apiStory = ApiStory(
             author = "jamie",
             comments = null,
-            commentsUrl = "url",
+            commentsUrl = "comments-url",
             domain = "domain",
             id = 1,
             score = 2,
@@ -47,6 +48,7 @@ class ApiToDomainMapperTest : BaseTest() {
         assertEquals("title", story.title)
         assertEquals("url", story.url)
         assertEquals("text", story.text)
+        assertEquals(StoryType.STANDARD, story.type)
         assertEquals(PARTIAL, story.downloadedStatus)
     }
 

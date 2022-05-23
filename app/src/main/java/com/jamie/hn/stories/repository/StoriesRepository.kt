@@ -7,7 +7,7 @@ import com.jamie.hn.core.StoriesListType.NEW
 import com.jamie.hn.core.StoriesListType.SHOW
 import com.jamie.hn.core.StoriesListType.TOP
 import com.jamie.hn.core.StoriesListType.UNKNOWN
-import com.jamie.hn.core.StoryType
+import com.jamie.hn.core.StoryType.TEXT
 import com.jamie.hn.core.net.NetworkUtils
 import com.jamie.hn.stories.repository.local.LocalStorage
 import com.jamie.hn.core.net.hex.Hex
@@ -15,6 +15,7 @@ import com.jamie.hn.core.net.official.OfficialClient
 import com.jamie.hn.stories.domain.model.DownloadedStatus.COMPLETE
 import com.jamie.hn.stories.domain.model.DownloadedStatus.PARTIAL
 import com.jamie.hn.stories.domain.model.Story
+import com.jamie.hn.stories.repository.model.ApiStory
 import com.jamie.hn.stories.repository.model.StoryResult
 import com.jamie.hn.stories.repository.model.StoriesResult
 import com.jamie.hn.stories.repository.web.getWebPath
@@ -105,14 +106,15 @@ class StoriesRepository(
         return StoryResult(domainMappedCopy)
     }
 
-    private suspend fun fetchAskText(id: Int) = officialClient.getStory(id).text
+    private suspend fun fetchText(id: Int) = officialClient.getStory(id).text
 
     private suspend fun fetchStory(id: Int): Story {
         val newCopy = webStorage.story(id)
 
-        var text = ""
-        if (StoryType.ASK == newCopy.storyType) {
-            text = fetchAskText(id)
+        val text = if (newCopy.requiresText()) {
+            fetchText(id)
+        } else {
+            ""
         }
 
         return mapper.toStoryDomainModel(newCopy, COMPLETE, text)
@@ -141,4 +143,6 @@ class StoriesRepository(
             UNKNOWN -> throw IllegalArgumentException("Should not update Unknown story type")
         }
     }
+
+    private fun ApiStory.requiresText() = TEXT == this.storyType
 }

@@ -24,7 +24,7 @@ data class HeaderViewItem(
     val title: String,
     val url: String,
     val text: CharSequence,
-    val showAskText: Boolean,
+    val showText: Boolean,
     val showNavigateToArticle: Boolean,
     val storyViewerCallback: () -> Unit
 ) : ViewItem

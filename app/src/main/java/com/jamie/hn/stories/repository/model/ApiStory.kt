@@ -1,7 +1,8 @@
 package com.jamie.hn.stories.repository.model
 
-import com.jamie.hn.core.ASK_PREFIX
 import com.jamie.hn.core.StoryType
+import com.jamie.hn.core.StoryType.STANDARD
+import com.jamie.hn.core.StoryType.TEXT
 
 data class ApiStory(
     val author: String = "",
@@ -16,9 +17,9 @@ data class ApiStory(
     val url: String = ""
 ) {
     val storyType: StoryType
-        get() = if (title.startsWith(ASK_PREFIX)) {
-            StoryType.ASK
+        get() = if (commentsUrl == url) {
+            TEXT
         } else {
-            StoryType.STANDARD
+            STANDARD
         }
 }

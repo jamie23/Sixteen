@@ -153,7 +153,7 @@ class CommentsListAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             title.text = item.title
             url.text = item.url
             askText.text = item.text
-            askText.visibleOrGone(item.showAskText)
+            askText.visibleOrGone(item.showText)
             actionBar.commentsButton.visibleOrGone(false)
             actionBar.articleButton.visibleOrGone(item.showNavigateToArticle)
             actionBar.articleButton.setOnClickListener {

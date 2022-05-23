@@ -127,7 +127,7 @@ class StoryListViewModel(
                 StoryData(
                     storyId = story.id,
                     storiesListType = storiesListType,
-                    storyType = story.storyType
+                    storyType = story.type
                 )
             )
         }

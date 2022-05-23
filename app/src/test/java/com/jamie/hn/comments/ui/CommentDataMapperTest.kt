@@ -6,6 +6,7 @@ import com.jamie.hn.comments.ui.repository.model.CommentCurrentState
 import com.jamie.hn.comments.ui.repository.model.CurrentState.FULL
 import com.jamie.hn.comments.ui.repository.model.CurrentState.HEADER
 import com.jamie.hn.core.BaseTest
+import com.jamie.hn.core.StoryType.TEXT
 import com.jamie.hn.core.ui.CoreDataMapper
 import com.jamie.hn.stories.domain.model.Story
 import io.mockk.MockKAnnotations
@@ -250,7 +251,7 @@ class CommentDataMapperTest : BaseTest() {
             assertEquals("point", headerViewItem.scoreText)
             assertEquals("title", headerViewItem.title)
             assertEquals("domain", headerViewItem.url)
-            assertEquals(false, headerViewItem.showAskText)
+            assertEquals(false, headerViewItem.showText)
             assertEquals(true, headerViewItem.showNavigateToArticle)
             assertEquals(storyViewerCallback, headerViewItem.storyViewerCallback)
         }
@@ -293,10 +294,10 @@ class CommentDataMapperTest : BaseTest() {
         }
 
         @Nested
-        inner class ShowAskText {
+        inner class ShowText {
 
             @Test
-            fun `when story is an askStory then showAskText is true`() {
+            fun `when story is a text story then showText is true`() {
                 every {
                     commentDataMapper.processText(
                         "text",
@@ -315,6 +316,7 @@ class CommentDataMapperTest : BaseTest() {
                     score = 3,
                     time = DateTime.now(),
                     title = "Ask HN:",
+                    type = TEXT,
                     url = "url",
                     text = "text"
                 )
@@ -326,12 +328,12 @@ class CommentDataMapperTest : BaseTest() {
                         mockk()
                     )
 
-                assertTrue(headerViewItem.showAskText)
+                assertTrue(headerViewItem.showText)
             }
         }
 
         @Test
-        fun `when story is not an askStory then showAskText is false`() {
+        fun `when story is not a text story then showText is false`() {
             every {
                 commentDataMapper.processText(
                     "text",
@@ -361,7 +363,7 @@ class CommentDataMapperTest : BaseTest() {
                     mockk()
                 )
 
-            assertFalse(headerViewItem.showAskText)
+            assertFalse(headerViewItem.showText)
         }
     }
 
@@ -369,7 +371,7 @@ class CommentDataMapperTest : BaseTest() {
     inner class ShowNavigateToArticle {
 
         @Test
-        fun `when story is an askStory then showNavigateToArticle is false`() {
+        fun `when story is a text story then showNavigateToArticle is false`() {
             every {
                 commentDataMapper.processText(
                     "text",
@@ -388,6 +390,7 @@ class CommentDataMapperTest : BaseTest() {
                 score = 3,
                 time = DateTime.now(),
                 title = "Ask HN:",
+                type = TEXT,
                 url = "url",
                 text = "text"
             )
@@ -403,7 +406,7 @@ class CommentDataMapperTest : BaseTest() {
         }
 
         @Test
-        fun `when story is not an askStory then showNavigateToArticle is true`() {
+        fun `when story is not an text story then showNavigateToArticle is true`() {
             every {
                 commentDataMapper.processText(
                     "text",
