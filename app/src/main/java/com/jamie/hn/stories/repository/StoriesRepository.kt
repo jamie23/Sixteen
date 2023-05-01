@@ -8,6 +8,7 @@ import com.jamie.hn.core.StoriesListType.SHOW
 import com.jamie.hn.core.StoriesListType.TOP
 import com.jamie.hn.core.StoriesListType.UNKNOWN
 import com.jamie.hn.core.StoryType.TEXT
+import com.jamie.hn.core.net.APIStatus
 import com.jamie.hn.core.net.NetworkUtils
 import com.jamie.hn.stories.repository.local.LocalStorage
 import com.jamie.hn.core.net.hex.Hex
@@ -15,6 +16,7 @@ import com.jamie.hn.core.net.official.OfficialClient
 import com.jamie.hn.stories.domain.model.DownloadedStatus.COMPLETE
 import com.jamie.hn.stories.domain.model.DownloadedStatus.PARTIAL
 import com.jamie.hn.stories.domain.model.Story
+import com.jamie.hn.stories.repository.local.fake.FakeLocalStorage
 import com.jamie.hn.stories.repository.model.ApiStory
 import com.jamie.hn.stories.repository.model.StoryResult
 import com.jamie.hn.stories.repository.model.StoriesResult
@@ -25,14 +27,19 @@ class StoriesRepository(
     private val webStorage: Hex,
     private val officialClient: OfficialClient,
     private val localStorage: LocalStorage,
+    private val fakeLocalStorage: FakeLocalStorage,
     private val mapper: ApiToDomainMapper,
-    private val networkUtils: NetworkUtils
+    private val networkUtils: NetworkUtils,
+    private val apiStatus: APIStatus
 ) : Repository {
 
     override suspend fun stories(
         useCachedVersion: Boolean,
         storiesListType: StoriesListType
     ): StoriesResult {
+
+        if (!apiStatus.isAPILive) return StoriesResult(fakeLocalStorage.topStoryList, false)
+
         if (!networkUtils.isNetworkAvailable()) {
             return StoriesResult(
                 getLocalStoriesListByType(storiesListType),
@@ -65,6 +72,13 @@ class StoriesRepository(
         storiesListType: StoriesListType
     ): StoryResult {
         if (storiesListType == UNKNOWN) return StoryResult(fetchStory(id))
+
+        if (!apiStatus.isAPILive) {
+            return StoryResult(
+                story = fakeLocalStorage.topStoryList.first { it.id == id },
+                networkFailure = false
+            )
+        }
 
         val localStoriesList = getLocalStoriesListByType(storiesListType)
 

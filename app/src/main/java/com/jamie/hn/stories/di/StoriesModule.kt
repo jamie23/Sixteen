@@ -1,8 +1,10 @@
 package com.jamie.hn.stories.di
 
+import com.jamie.hn.core.net.APIStatus
 import com.jamie.hn.stories.domain.StoriesUseCase
 import com.jamie.hn.stories.repository.ApiToDomainMapper
 import com.jamie.hn.stories.repository.StoriesRepository
+import com.jamie.hn.stories.repository.local.fake.FakeLocalStorage
 import com.jamie.hn.stories.repository.local.LocalStorage
 import com.jamie.hn.stories.ui.StoryDataMapper
 import com.jamie.hn.stories.ui.StoryListViewModel
@@ -14,8 +16,20 @@ val storiesModule =
     module {
         single { ApiToDomainMapper() }
         single { LocalStorage() }
+        single { FakeLocalStorage() }
+        single { APIStatus() }
         viewModel { StoryListViewModel(get(), get(), get()) }
-        single { StoriesRepository(get(), get(), get(), get(), get()) }
+        single {
+            StoriesRepository(
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get(),
+                get()
+            )
+        }
         single { StoryDataMapper(get(), get()) }
         single { StoryResourceProvider(get()) }
         single { StoriesUseCase(get()) }
