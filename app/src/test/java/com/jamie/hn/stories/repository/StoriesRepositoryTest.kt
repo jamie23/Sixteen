@@ -6,6 +6,7 @@ import com.jamie.hn.core.StoriesListType.NEW
 import com.jamie.hn.core.StoriesListType.SHOW
 import com.jamie.hn.core.StoriesListType.TOP
 import com.jamie.hn.core.StoriesListType.UNKNOWN
+import com.jamie.hn.core.net.APIStatus
 import com.jamie.hn.core.net.NetworkUtils
 import com.jamie.hn.core.net.hex.Hex
 import com.jamie.hn.core.net.official.OfficialClient
@@ -13,6 +14,7 @@ import com.jamie.hn.stories.domain.model.DownloadedStatus.COMPLETE
 import com.jamie.hn.stories.domain.model.DownloadedStatus.PARTIAL
 import com.jamie.hn.stories.domain.model.Story
 import com.jamie.hn.stories.repository.local.LocalStorage
+import com.jamie.hn.stories.repository.local.fake.FakeLocalStorage
 import com.jamie.hn.stories.repository.model.ApiAskText
 import com.jamie.hn.stories.repository.model.ApiStory
 import com.jamie.hn.stories.repository.model.StoryResult
@@ -50,7 +52,13 @@ class StoriesRepositoryTest {
     private lateinit var localStorage: LocalStorage
 
     @MockK
+    private lateinit var fakeLocalStorage: FakeLocalStorage
+
+    @MockK
     private lateinit var officialClient: OfficialClient
+
+    @MockK
+    private lateinit var apiStatus: APIStatus
 
     private lateinit var storiesRepository: StoriesRepository
 
@@ -59,14 +67,17 @@ class StoriesRepositoryTest {
         MockKAnnotations.init(this)
 
         every { networkUtils.isNetworkAvailable() } returns true
+        every { apiStatus.isAPILive } returns true
 
         storiesRepository =
             StoriesRepository(
                 webStorage,
                 officialClient,
                 localStorage,
+                fakeLocalStorage,
                 apiToDomainMapper,
-                networkUtils
+                networkUtils,
+                apiStatus
             )
     }
 
